@@ -4,7 +4,6 @@ import multiprocessing as mp
 import mss
 import mss.tools
 
-
 class VideoRecorder(mp.Process):
 
     def __init__(self, monitor, region, duration, fps):
@@ -18,9 +17,9 @@ class VideoRecorder(mp.Process):
         print("Started video recording process ... ")
 
         container = av.open('AV-temp-video.mp4', mode='w')
-        video_stream = container.add_stream('libx264', rate=30)
-        video_stream.width = 1920
-        video_stream.height = 1080
+        video_stream = container.add_stream('libx264', rate=self.fps)
+        video_stream.width = self.region[2]
+        video_stream.height = self.region[3]
 
         with mss.mss() as sct:
 

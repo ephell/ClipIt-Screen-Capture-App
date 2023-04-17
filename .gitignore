@@ -3,4 +3,6 @@
 *.mp4
 *.mp3
 *.wav
+*.png
+*.jpg
 test.py
