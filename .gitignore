@@ -1,0 +1,6 @@
+/venv
+*.mp4
+*.mp3
+*.wav
+test.py
+
