@@ -1,13 +1,18 @@
 import numpy as np
 import av
 import multiprocessing as mp
-from PIL import ImageGrab
+import mss
+import mss.tools
+
 
 class VideoRecorder(mp.Process):
 
-    def __init__(self, record_duration):
+    def __init__(self, monitor, region, duration, fps):
         super().__init__()
-        self.record_duration = record_duration
+        self.monitor = monitor
+        self.region = region
+        self.duration = duration
+        self.fps = fps
 
     def run(self):
         print("Started video recording process ... ")
@@ -17,16 +22,27 @@ class VideoRecorder(mp.Process):
         video_stream.width = 1920
         video_stream.height = 1080
 
-        fps = 30
-        duration = self.record_duration
-        num_frames = fps * duration
+        with mss.mss() as sct:
 
-        for _ in range(num_frames):
-            screen = np.array(ImageGrab.grab(bbox=(0, 0, 1920, 1080)))
-            frame = av.VideoFrame.from_ndarray(screen, format='rgb24')
-            packet = video_stream.encode(frame)
-            if packet:
-                container.mux(packet)
+            if self.monitor == 2:
+                self.region[0] += sct.monitors[self.monitor]["left"]
+
+            monitor = {
+                "left": self.region[0],
+                "top": self.region[1],
+                "width": self.region[2],
+                "height": self.region[3],
+                "mon": self.monitor,
+            }
+
+            total_frames = self.fps * self.duration
+            for _ in range(total_frames):
+                screen = np.array(sct.grab(monitor))
+                screen = screen[..., :3]
+                frame = av.VideoFrame.from_ndarray(screen, format='bgr24')
+                packet = video_stream.encode(frame)
+                if packet:
+                    container.mux(packet)
 
         video_stream.encode(None)
         container.close()
