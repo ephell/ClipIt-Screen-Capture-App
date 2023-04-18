@@ -4,7 +4,7 @@ from encoder import Encoder
 
 def main():
 
-    RECORD_DURATION = 5
+    RECORD_DURATION = 10
 
     video_recorder = recorder_video.VideoRecorder(
         monitor=2, 
@@ -14,7 +14,6 @@ def main():
     )
     audio_recorder = recorder_audio.AudioRecorder(
         RECORD_DURATION, 
-        sample_rate=44100
     )
 
     video_recorder.start()

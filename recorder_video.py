@@ -53,7 +53,7 @@ class VideoRecorder(mp.Process):
                     is_base_time_set = True
                     base_time = time.time() - start_time
                     predicted_frame_count = math.floor(1 / base_time)
-                    print("Predicted frame count: ", predicted_frame_count)
+                    print("Predicted frame count:", predicted_frame_count)
                     video_stream.time_base = Fraction(1, predicted_frame_count)
                     video_stream.rate = Fraction(predicted_frame_count / 1)
 
@@ -62,5 +62,5 @@ class VideoRecorder(mp.Process):
                     container.mux(packet)
 
         container.close()
-        print("Encoded frame total: " + video_stream.encoded_frame_count)
+        print("Encoded frame total:", video_stream.encoded_frame_count)
         print("Finished recording video!")
