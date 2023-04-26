@@ -33,6 +33,7 @@ class VideoRecorder(mp.Process):
             frame_capture_times = []
             captured_frame_count = 0
             start_time = time.time()
+            fps = 30
             while time.time() - start_time <= self.duration:
 
                 frame_capture_start_time = time.time()
@@ -44,6 +45,10 @@ class VideoRecorder(mp.Process):
                 captured_frame_count += 1
                 frame_capture_end_time = time.time() - frame_capture_start_time
                 frame_capture_times.append(frame_capture_end_time)
+
+                sleep_time = (1.0 / fps) - frame_capture_end_time
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
 
         print("\n----------------------------------------")
         print("Total frames captured:", captured_frame_count)

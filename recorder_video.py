@@ -6,7 +6,6 @@ import mss.tools
 import time
 from fractions import Fraction
 import math
-import concurrent.futures
 
 class VideoRecorder(mp.Process):
 
@@ -45,6 +44,7 @@ class VideoRecorder(mp.Process):
             frame_capture_times = []
             frame_count = 0
             start_time = time.time()
+            fps = 30
             while time.time() - start_time <= self.duration:
 
                 frame_capture_start_time = time.time()
@@ -53,9 +53,13 @@ class VideoRecorder(mp.Process):
                 screen = screen[..., :3]
                 captured_frames.append(screen)
 
-                frame_count += 1
                 frame_capture_end_time = time.time() - frame_capture_start_time
                 frame_capture_times.append(frame_capture_end_time)
+                frame_count += 1
+
+                sleep_time = (1.0 / fps) - frame_capture_end_time
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
 
             print("\n----------------------------------------")
             print("-------Finished capturing frames!-------")
@@ -65,7 +69,7 @@ class VideoRecorder(mp.Process):
             print("Average FPS:", frame_count / self.duration)
 
             _fps = math.floor(frame_count / self.duration)
-            video_stream.time_base = Fraction(1, _fps)
+            video_stream.time_base = Fraction(_fps, 1)
             video_stream.rate = Fraction(_fps, 1)
 
             print("Video stream time base:", video_stream.time_base)
