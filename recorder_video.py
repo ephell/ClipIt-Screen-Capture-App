@@ -6,15 +6,15 @@ import mss.tools
 import time
 from fractions import Fraction
 import math
+import concurrent.futures
 
 class VideoRecorder(mp.Process):
 
-    def __init__(self, monitor, region, duration, fps):
+    def __init__(self, monitor, region, duration):
         super().__init__()
         self.monitor = monitor
         self.region = region
         self.duration = duration
-        self.fps = fps
 
     def run(self):
         print("Started video recording process ... ")
@@ -39,28 +39,50 @@ class VideoRecorder(mp.Process):
                 "mon": self.monitor,
             }
 
-            start_time = time.time()
-            base_time = 0
-            is_base_time_set = False
+            print("Starting to capture frames ...")
 
+            captured_frames = []
+            frame_capture_times = []
+            frame_count = 0
+            start_time = time.time()
             while time.time() - start_time <= self.duration:
+
+                frame_capture_start_time = time.time()
 
                 screen = np.array(sct.grab(monitor))
                 screen = screen[..., :3]
-                frame = av.VideoFrame.from_ndarray(screen, format='bgr24')
+                captured_frames.append(screen)
 
-                if not is_base_time_set:
-                    is_base_time_set = True
-                    base_time = time.time() - start_time
-                    predicted_frame_count = math.floor(1 / base_time)
-                    print("Predicted frame count:", predicted_frame_count)
-                    video_stream.time_base = Fraction(1, predicted_frame_count)
-                    video_stream.rate = Fraction(predicted_frame_count / 1)
+                frame_count += 1
+                frame_capture_end_time = time.time() - frame_capture_start_time
+                frame_capture_times.append(frame_capture_end_time)
 
-                packet = video_stream.encode(frame)
+            print("\n----------------------------------------")
+            print("-------Finished capturing frames!-------")
+            print("----------------------------------------")
+            print("Total frames captured:", frame_count)
+            print("Average frame capture time:", np.mean(frame_capture_times))
+            print("Average FPS:", frame_count / self.duration)
+
+            _fps = math.floor(frame_count / self.duration)
+            video_stream.time_base = Fraction(1, _fps)
+            video_stream.rate = Fraction(_fps, 1)
+
+            print("Video stream time base:", video_stream.time_base)
+            print("Video stream rate:", video_stream.rate)
+            print("----------------------------------------\n")
+
+            print("Encoding frames ...")
+            for frame in captured_frames:
+                video_frame = av.VideoFrame.from_ndarray(frame, format='bgr24')
+                packet = video_stream.encode(video_frame)
                 if packet:
                     container.mux(packet)
+            print("Finished encoding frames!")
 
+        # Flushing the output and closing the container.
+        packet = video_stream.encode(None)
+        container.mux(packet)
         container.close()
-        print("Encoded frame total:", video_stream.encoded_frame_count)
+        print("Encoded frames total:", video_stream.encoded_frame_count)
         print("Finished recording video!")
