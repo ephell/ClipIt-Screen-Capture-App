@@ -59,6 +59,6 @@ class VideoRecorder(mp.Process):
         _fps = captured_frame_count / self.duration
 
         clip = ImageSequenceClip(captured_frames, fps=_fps)
-        clip.write_videofile("AV-temp-video.mp4")
+        clip.write_videofile("AV-temp-video.mp4", preset="ultrafast")
 
         print("Finished recording video!")
