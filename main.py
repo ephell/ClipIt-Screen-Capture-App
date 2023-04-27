@@ -1,20 +1,25 @@
 import recorder_audio
 import recorder_video
 from encoder import Encoder
+import recorder_video
 
 def main():
 
-    RECORD_DURATION = 5
+    MONITOR = 2
+    REGION = [0, 0, 1920, 1080]
+    # REGION = [60, 216, 1150, 650]
+    DURATION = 10
+    FPS = 30
 
     video_recorder = recorder_video.VideoRecorder(
-        monitor=2, 
-        region=[0, 0, 1920, 1080],
-        duration=RECORD_DURATION,
-        fps=30
+        monitor=MONITOR, 
+        region=REGION,
+        duration=DURATION,
+        fps=FPS
     )
+
     audio_recorder = recorder_audio.AudioRecorder(
-        RECORD_DURATION, 
-        sample_rate=44100
+        DURATION
     )
 
     video_recorder.start()
@@ -23,15 +28,13 @@ def main():
     video_recorder.join()
     audio_recorder.join()
 
-    Encoder.transcode_audio()
-    Encoder.add_audio_to_video(
+    Encoder.merge_video_and_audio_moviePy(
         'AV-temp-video.mp4', 
-        'AV-temp-audio-transcoded.mp4', 
+        'AV-temp-audio.wav', 
         'AV-FINAL.mp4'
     )
 
     print("All done!")
-
 
 if __name__ == '__main__':
     main()
