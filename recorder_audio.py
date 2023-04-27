@@ -16,59 +16,61 @@ class AudioRecorder(mp.Process):
         print("Started audio recording process ... ")
 
         with pyaudio.PyAudio() as p:
-            """
-            Create PyAudio instance via context manager.
-            Spinner is a helper class, for `pretty` output
-            """
+            """Create PyAudio instance via context manager."""
             try:
                 # Get default WASAPI info
                 wasapi_info = p.get_host_api_info_by_type(pyaudio.paWASAPI)
             except OSError:
-                print("Looks like WASAPI is not available on the system. Exiting...")
+                print("WASAPI is not available on the system. Exiting...")
                 exit()
             
             # Get default WASAPI speakers
-            default_speakers = p.get_device_info_by_index(wasapi_info["defaultOutputDevice"])
+            default_speakers = p.get_device_info_by_index(
+                wasapi_info["defaultOutputDevice"]
+            )
 
             if not default_speakers["isLoopbackDevice"]:
                 for loopback in p.get_loopback_device_info_generator():
                     """
-                    Try to find loopback device with same name(and [Loopback suffix]).
-                    Unfortunately, this is the most adequate way at the moment.
+                    Try to find loopback device with same name
+                    (and [Loopback suffix]).
                     """
                     if default_speakers["name"] in loopback["name"]:
                         default_speakers = loopback
                         break
                 else:
-                    print("Default loopback output device not found.\nRun this to check available devices.\nExiting...\n")
+                    print("Default loopback output device not found.\n")
+                    print("Run this to check available devices.\n")
+                    print("Exiting...\n")
                     exit()
             
-            waveFile = wave.open(self.filename, 'wb')
-            waveFile.setnchannels(default_speakers["maxInputChannels"])
-            waveFile.setsampwidth(pyaudio.get_sample_size(pyaudio.paInt16))
-            waveFile.setframerate(int(default_speakers["defaultSampleRate"]))
+            FORMAT = pyaudio.paInt16
+            CHANNELS = default_speakers["maxInputChannels"]
+            RATE = int(default_speakers["defaultSampleRate"])
+            CHUNK_SIZE = pyaudio.get_sample_size(pyaudio.paInt16)
 
-            def callback(in_data, frame_count, time_info, status):
-                """Write frames and return PA flag"""
-                waveFile.writeframes(in_data)
-                return (in_data, pyaudio.paContinue)
-            
+            waveFile = wave.open(self.filename, 'wb')
+            waveFile.setnchannels(CHANNELS)
+            waveFile.setframerate(RATE)
+            waveFile.setsampwidth(CHUNK_SIZE)
+
+            # Open stream.
             with p.open(
-                format=pyaudio.paInt16,
-                channels=default_speakers["maxInputChannels"],
-                rate=int(default_speakers["defaultSampleRate"]),
-                frames_per_buffer=pyaudio.get_sample_size(pyaudio.paInt16),
+                format=FORMAT,
+                channels=CHANNELS,
+                rate=RATE,
+                frames_per_buffer=CHUNK_SIZE,
                 input=True,
                 input_device_index=default_speakers["index"],
-                stream_callback=callback
             ) as stream:
-                """
-                Opena PA stream via context manager.
-                After leaving the context, everything will
-                be correctly closed(Stream, PyAudio manager)            
-                """
-                time.sleep(self.duration) # Blocking execution while playing
-            
+                start_time = time.time()
+                while time.time() - start_time <= self.duration:
+                    in_data = stream.read(
+                        stream.get_read_available(), 
+                        exception_on_overflow=False
+                    )
+                    waveFile.writeframes(in_data)
+                    
             waveFile.close()
 
         print("Finished audio recording process!")
