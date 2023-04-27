@@ -2,12 +2,13 @@ import recorder_audio
 import recorder_video
 from encoder import Encoder
 import recorder_video
+from silence_player import SilencePlayer
 
 def main():
 
     MONITOR = 2
-    REGION = [0, 0, 1920, 1080]
-    # REGION = [60, 216, 1150, 650]
+    # REGION = [0, 0, 1920, 1080]
+    REGION = [60, 216, 1150, 650]
     DURATION = 10
     FPS = 30
 
@@ -22,7 +23,10 @@ def main():
         DURATION
     )
 
+    silence_player = SilencePlayer(duration=DURATION)
+
     video_recorder.start()
+    silence_player.start()
     audio_recorder.start()
 
     video_recorder.join()
