@@ -3,6 +3,7 @@ import pyaudiowpatch as pyaudio
 import numpy as np
 import time
 import wave
+import audioop
 
 class AudioRecorder(mp.Process):
     
@@ -47,19 +48,19 @@ class AudioRecorder(mp.Process):
             FORMAT = pyaudio.paInt16
             CHANNELS = default_speakers["maxInputChannels"]
             RATE = int(default_speakers["defaultSampleRate"])
-            CHUNK_SIZE = pyaudio.get_sample_size(pyaudio.paInt16)
+            SAMPLE_SIZE = pyaudio.get_sample_size(pyaudio.paInt16)
 
             waveFile = wave.open(self.filename, 'wb')
             waveFile.setnchannels(CHANNELS)
             waveFile.setframerate(RATE)
-            waveFile.setsampwidth(CHUNK_SIZE)
+            waveFile.setsampwidth(SAMPLE_SIZE)
 
-            # Open stream.
+            # Open stream, capture data and write to file.
             with p.open(
                 format=FORMAT,
                 channels=CHANNELS,
                 rate=RATE,
-                frames_per_buffer=CHUNK_SIZE,
+                frames_per_buffer=SAMPLE_SIZE,
                 input=True,
                 input_device_index=default_speakers["index"],
             ) as stream:
