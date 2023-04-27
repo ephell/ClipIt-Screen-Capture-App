@@ -1,7 +1,4 @@
-import av
-from fractions import Fraction
-import math
-from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip, ImageSequenceClip
+from moviepy.editor import VideoFileClip, AudioFileClip
 
 class Encoder:
 
