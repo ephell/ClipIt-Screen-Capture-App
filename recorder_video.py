@@ -1,29 +1,21 @@
 import numpy as np
-import av
 import multiprocessing as mp
 import mss
 import mss.tools
 import time
-from fractions import Fraction
-import math
+from moviepy.editor import ImageSequenceClip
 
 class VideoRecorder(mp.Process):
 
-    def __init__(self, monitor, region, duration):
+    def __init__(self, monitor, region, duration, fps):
         super().__init__()
         self.monitor = monitor
         self.region = region
         self.duration = duration
+        self.fps = fps
 
     def run(self):
         print("Started video recording process ... ")
-
-        container = av.open('AV-temp-video.mp4', mode='w')
-        video_stream = container.add_stream('mpeg4')
-        video_stream.width = self.region[2]
-        video_stream.height = self.region[3]
-        video_stream.bit_rate = 6000 * 1000
-        video_stream.bit_rate_tolerance = 6000 * 1000
 
         with mss.mss() as sct:
 
@@ -38,55 +30,41 @@ class VideoRecorder(mp.Process):
                 "mon": self.monitor,
             }
 
-            print("Starting to capture frames ...")
-
             captured_frames = []
             frame_capture_times = []
-            frame_count = 0
+            captured_frame_count = 0
             start_time = time.time()
-            fps = 30
+            fps = self.fps
             while time.time() - start_time <= self.duration:
 
                 frame_capture_start_time = time.time()
 
                 screen = np.array(sct.grab(monitor))
-                screen = screen[..., :3]
+                screen = np.flip(screen[..., :3], axis=-1)
                 captured_frames.append(screen)
-
+                captured_frame_count += 1
+                
                 frame_capture_end_time = time.time() - frame_capture_start_time
                 frame_capture_times.append(frame_capture_end_time)
-                frame_count += 1
 
                 sleep_time = (1.0 / fps) - frame_capture_end_time
                 if sleep_time > 0:
                     time.sleep(sleep_time)
 
-            print("\n----------------------------------------")
-            print("-------Finished capturing frames!-------")
-            print("----------------------------------------")
-            print("Total frames captured:", frame_count)
-            print("Average frame capture time:", np.mean(frame_capture_times))
-            print("Average FPS:", frame_count / self.duration)
+        print("\n----------------------------------------")
+        print("Total frames captured:", captured_frame_count)
+        print("Average frame capture time:", np.mean(frame_capture_times))
+        print("Average FPS:", captured_frame_count / self.duration)
+        print("----------------------------------------\n")
 
-            _fps = math.floor(frame_count / self.duration)
-            video_stream.time_base = Fraction(_fps, 1)
-            video_stream.rate = Fraction(_fps, 1)
+        print("Writing captured frames to video file ... ")
+        precise_fps = captured_frame_count / self.duration
+        clip = ImageSequenceClip(captured_frames, fps=precise_fps)
+        clip.write_videofile(
+            "AV-temp-video.mp4", 
+            preset="ultrafast", 
+            logger=None
+        )
+        print("Finished writing frames!")
 
-            print("Video stream time base:", video_stream.time_base)
-            print("Video stream rate:", video_stream.rate)
-            print("----------------------------------------\n")
-
-            print("Encoding frames ...")
-            for frame in captured_frames:
-                video_frame = av.VideoFrame.from_ndarray(frame, format='bgr24')
-                packet = video_stream.encode(video_frame)
-                if packet:
-                    container.mux(packet)
-            print("Finished encoding frames!")
-
-        # Flushing the output and closing the container.
-        packet = video_stream.encode(None)
-        container.mux(packet)
-        container.close()
-        print("Encoded frames total:", video_stream.encoded_frame_count)
-        print("Finished recording video!")
+        print("Finished video recording process!")

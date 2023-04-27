@@ -67,7 +67,8 @@ class AudioRecorder(mp.Process):
                 After leaving the context, everything will
                 be correctly closed(Stream, PyAudio manager)            
                 """
-                print(f"The next {self.duration} seconds will be written to {self.filename}")
                 time.sleep(self.duration) # Blocking execution while playing
             
             waveFile.close()
+
+        print("Finished audio recording process!")
