@@ -2,49 +2,42 @@ import multiprocessing as mp
 import pyaudiowpatch as pyaudio
 import time
 import wave
+from utils_audio import AudioUtils
 
-class MicrophoneRecorder(mp.Process):
+class MicrophoneRecorder(mp.Process, AudioUtils):
     
+    microphone = None
+    channels = None
+    rate = None
+    sample_size = None
+    device_index = None
+
     def __init__(self, duration):
         super().__init__()
         self.duration = duration
 
-    def get_default_microphone(self):
-        with pyaudio.PyAudio() as p:
-            try:
-                info = p.get_host_api_info_by_type(pyaudio.paWASAPI)
-            except OSError:
-                print("WASAPI not available on your system.")
-
-            try:
-                return p.get_device_info_by_index(info["defaultInputDevice"])
-            except OSError:
-                print("Default microphone not found.")
+        microphone = self.get_default_microphone()
+        if microphone is not None:
+            self.microphone = microphone
+            self.channels = microphone["maxInputChannels"]
+            self.rate = int(microphone["defaultSampleRate"])
+            self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16) 
+            self.device_index = microphone["index"]
 
     def record_microphone(self):
-        microphone = self.get_default_microphone()
-        if not microphone:
-            print("No microphone found, can't record.")
-            return
         with pyaudio.PyAudio() as p:
-            
-            FORMAT = pyaudio.paInt16
-            CHANNELS = microphone["maxInputChannels"]
-            RATE = int(microphone["defaultSampleRate"])
-            SAMPLE_SIZE = pyaudio.get_sample_size(pyaudio.paInt16)
-
-            waveFile = wave.open("AV-temp-mic-audio.wav", 'wb')
-            waveFile.setnchannels(CHANNELS)
-            waveFile.setframerate(RATE)
-            waveFile.setsampwidth(SAMPLE_SIZE)
+            output_file = wave.open("AV-temp-mic-audio.wav", 'wb')
+            output_file.setnchannels(self.channels)
+            output_file.setframerate(self.rate)
+            output_file.setsampwidth(self.sample_size)
 
             with p.open(
-                format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                frames_per_buffer=SAMPLE_SIZE,
+                format=pyaudio.paInt16,
+                channels=self.channels,
+                rate=self.rate,
+                frames_per_buffer=self.sample_size,
                 input=True,
-                input_device_index=microphone["index"],
+                input_device_index=self.device_index,
             ) as stream:
                 start_time = time.time()
                 while time.time() - start_time <= self.duration:
@@ -52,9 +45,9 @@ class MicrophoneRecorder(mp.Process):
                         stream.get_read_available(), 
                         exception_on_overflow=False
                     )
-                    waveFile.writeframes(data)
+                    output_file.writeframes(data)
 
-            waveFile.close()
+            output_file.close()
 
     def run(self):
         print("Started microphone recording process ... ")
