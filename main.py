@@ -1,40 +1,41 @@
-import recorder_audio
-import recorder_video
+import recorder_video as rv
+import recorder_audio as ra
 from encoder import Encoder
-import recorder_video
-from silence_player import SilencePlayer
 
 def main():
 
     MONITOR = 2
     # REGION = [0, 0, 1920, 1080]
     REGION = [60, 216, 1150, 650]
-    DURATION = 10
+    DURATION = 3
     FPS = 30
 
-    video_recorder = recorder_video.VideoRecorder(
+    video_recorder = rv.VideoRecorder(
         monitor=MONITOR, 
         region=REGION,
         duration=DURATION,
         fps=FPS
     )
 
-    audio_recorder = recorder_audio.AudioRecorder(
-        DURATION
+    audio_recorder = ra.AudioRecorder(
+        duration=DURATION,
+        loopback=True,
+        microphone=False
     )
 
-    silence_player = SilencePlayer(duration=DURATION)
-
     video_recorder.start()
-    silence_player.start()
-    audio_recorder.start()
+    audio_recorder.record()
 
     video_recorder.join()
-    audio_recorder.join()
+
+    Encoder.merge_audio_clips(
+        "AV-temp-audio.wav",
+        "AV-temp-mic-audio.wav"
+    )
 
     Encoder.merge_video_and_audio_moviePy(
         'AV-temp-video.mp4', 
-        'AV-temp-audio.wav', 
+        'AV-temp-merged.wav', 
         'AV-FINAL.mp4'
     )
 

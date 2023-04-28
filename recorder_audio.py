@@ -1,8 +1,10 @@
 from recorder_loopback import LoopbackRecorder
 from recorder_microphone import MicrophoneRecorder
 
+
 class AudioRecorder:
-    
+    """Starts an appropriate recorder process."""
+
     def __init__(self, duration, loopback=True, microphone=True):
         self.duration = duration
         self.loopback = loopback

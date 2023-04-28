@@ -6,8 +6,10 @@ from utils_audio import AudioUtils
 from pydub import AudioSegment
 from pydub.playback import play
 
+
 class LoopbackRecorder(mp.Process, AudioUtils):
-    
+    """Records audio from the default loopback device."""
+
     loopback_device = None
     channels = None
     rate = None
@@ -60,6 +62,7 @@ class LoopbackRecorder(mp.Process, AudioUtils):
         silence_player.terminate()
         silence_player.join()
         print("Finished loopback recording process!")
+
 
 class _SilencePlayer(mp.Process):
     """Plays silence in the background."""

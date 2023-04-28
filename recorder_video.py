@@ -5,7 +5,9 @@ import mss.tools
 import time
 from moviepy.editor import ImageSequenceClip
 
+
 class VideoRecorder(mp.Process):
+    """Records a video from a specified region/monitor."""
 
     def __init__(self, monitor, region, duration, fps):
         super().__init__()

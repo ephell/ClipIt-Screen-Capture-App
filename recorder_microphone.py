@@ -4,8 +4,10 @@ import time
 import wave
 from utils_audio import AudioUtils
 
+
 class MicrophoneRecorder(mp.Process, AudioUtils):
-    
+    """Records audio from the default microphone."""
+
     microphone = None
     channels = None
     rate = None
