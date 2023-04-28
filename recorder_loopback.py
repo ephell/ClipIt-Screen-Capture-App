@@ -3,6 +3,8 @@ import pyaudiowpatch as pyaudio
 import time
 import wave
 from utils_audio import AudioUtils
+from pydub import AudioSegment
+from pydub.playback import play
 
 class LoopbackRecorder(mp.Process, AudioUtils):
     
@@ -51,5 +53,25 @@ class LoopbackRecorder(mp.Process, AudioUtils):
 
     def run(self):
         print("Started loopback recording process ... ")
-        self.record_loopback()
+        silence_player = _SilencePlayer(self.duration)
+        silence_player.start()
+        if silence_player.is_alive():
+            self.record_loopback()
+        silence_player.terminate()
+        silence_player.join()
         print("Finished loopback recording process!")
+
+class _SilencePlayer(mp.Process):
+    """Plays silence in the background."""
+
+    def __init__(self, duration):
+        super().__init__()
+        self.duration = duration + 5
+
+    def run(self):
+        print(f"Playing silence in the background ...")
+        silence = AudioSegment.silent(
+            duration=self.duration*1000,
+            frame_rate=44100,
+        )
+        play(silence)
