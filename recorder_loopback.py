@@ -2,62 +2,42 @@ import multiprocessing as mp
 import pyaudiowpatch as pyaudio
 import time
 import wave
+from utils_audio import AudioUtils
 
-class LoopbackRecorder(mp.Process):
+class LoopbackRecorder(mp.Process, AudioUtils):
     
+    loopback_device = None
+    channels = None
+    rate = None
+    sample_size = None
+    device_index = None
+
     def __init__(self, duration):
         super().__init__()
         self.duration = duration
 
+        loopback_device = self.get_default_loopback_device()
+        if loopback_device is not None:
+            self.loopback_device = loopback_device
+            self.channels = loopback_device["maxInputChannels"]
+            self.rate = int(loopback_device["defaultSampleRate"])
+            self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16) 
+            self.device_index = loopback_device["index"]
+
     def record_loopback(self):
-        """Record loopback audio and write to a file."""
         with pyaudio.PyAudio() as p:
-            """Create PyAudio instance via context manager."""
-            try:
-                # Get default WASAPI info
-                wasapi_info = p.get_host_api_info_by_type(pyaudio.paWASAPI)
-            except OSError:
-                print("WASAPI is not available on the system. Exiting...")
-                exit()
-            
-            # Get default WASAPI speakers
-            default_speakers = p.get_device_info_by_index(
-                wasapi_info["defaultOutputDevice"]
-            )
+            output_file = wave.open("AV-temp-audio.wav", 'wb')
+            output_file.setnchannels(self.channels)
+            output_file.setframerate(self.rate)
+            output_file.setsampwidth(self.sample_size)
 
-            if not default_speakers["isLoopbackDevice"]:
-                for loopback in p.get_loopback_device_info_generator():
-                    """
-                    Try to find loopback device with same name
-                    (and [Loopback suffix]).
-                    """
-                    if default_speakers["name"] in loopback["name"]:
-                        default_speakers = loopback
-                        break
-                else:
-                    print("Default loopback output device not found.\n")
-                    print("Run this to check available devices.\n")
-                    print("Exiting...\n")
-                    exit()
-            
-            FORMAT = pyaudio.paInt16
-            CHANNELS = default_speakers["maxInputChannels"]
-            RATE = int(default_speakers["defaultSampleRate"])
-            SAMPLE_SIZE = pyaudio.get_sample_size(pyaudio.paInt16)
-
-            waveFile = wave.open("AV-temp-audio.wav", 'wb')
-            waveFile.setnchannels(CHANNELS)
-            waveFile.setframerate(RATE)
-            waveFile.setsampwidth(SAMPLE_SIZE)
-
-            # Open stream, capture data and write to file.
             with p.open(
-                format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                frames_per_buffer=SAMPLE_SIZE,
+                format=pyaudio.paInt16,
+                channels=self.channels,
+                rate=self.rate,
+                frames_per_buffer=self.sample_size,
                 input=True,
-                input_device_index=default_speakers["index"],
+                input_device_index=self.device_index,
             ) as stream:
                 start_time = time.time()
                 while time.time() - start_time <= self.duration:
@@ -65,11 +45,11 @@ class LoopbackRecorder(mp.Process):
                         stream.get_read_available(), 
                         exception_on_overflow=False
                     )
-                    waveFile.writeframes(data)
+                    output_file.writeframes(data)
                     
-            waveFile.close()
+            output_file.close()
 
     def run(self):
-        print("Started audio recording process ... ")
+        print("Started loopback recording process ... ")
         self.record_loopback()
-        print("Finished audio recording process!")
+        print("Finished loopback recording process!")
