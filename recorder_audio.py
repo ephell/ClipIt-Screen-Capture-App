@@ -5,7 +5,7 @@ from recorder_microphone import MicrophoneRecorder
 class AudioRecorder:
     """Starts an appropriate recorder process."""
 
-    def __init__(self, duration, loopback=True, microphone=True):
+    def __init__(self, duration, loopback, microphone):
         self.duration = duration
         self.loopback = loopback
         self.microphone = microphone
