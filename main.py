@@ -1,45 +1,21 @@
-import recorder_video as rv
-import recorder_audio as ra
-from encoder import Encoder
+import os
+from recorder import Recorder
+
+def __create_directories():
+    """Creates directories for temporary files and final output."""
+    if not os.path.exists("temp"):
+        os.makedirs("temp")
+    if not os.path.exists("recordings"):
+        os.makedirs("recordings")
 
 def main():
-
-    MONITOR = 2
-    # REGION = [0, 0, 1920, 1080]
-    REGION = [60, 216, 1150, 650]
-    DURATION = 3
-    FPS = 30
-
-    video_recorder = rv.VideoRecorder(
-        monitor=MONITOR, 
-        region=REGION,
-        duration=DURATION,
-        fps=FPS
+    __create_directories()
+    recorder = Recorder(
+        duration=5,
+        record_loopback=True,
+        record_microphone=True
     )
-
-    audio_recorder = ra.AudioRecorder(
-        duration=DURATION,
-        loopback=True,
-        microphone=False
-    )
-
-    video_recorder.start()
-    audio_recorder.record()
-
-    video_recorder.join()
-
-    Encoder.merge_audio_clips(
-        "AV-temp-audio.wav",
-        "AV-temp-mic-audio.wav"
-    )
-
-    Encoder.merge_video_and_audio_moviePy(
-        'AV-temp-video.mp4', 
-        'AV-temp-merged.wav', 
-        'AV-FINAL.mp4'
-    )
-
-    print("All done!")
-
+    recorder.record()
+    
 if __name__ == '__main__':
     main()
