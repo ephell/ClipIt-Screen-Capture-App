@@ -28,7 +28,7 @@ class MicrophoneRecorder(mp.Process, AudioUtils):
 
     def record_microphone(self):
         with pyaudio.PyAudio() as p:
-            output_file = wave.open("AV-temp-mic-audio.wav", 'wb')
+            output_file = wave.open("temp/TEMP-microphone.wav", 'wb')
             output_file.setnchannels(self.channels)
             output_file.setframerate(self.rate)
             output_file.setsampwidth(self.sample_size)
