@@ -3,9 +3,13 @@ import pyaudiowpatch as pyaudio
 import time
 import wave
 from utils_audio import AudioUtils
+from pydub import AudioSegment
+from pydub.playback import play
+
 
 class LoopbackRecorder(mp.Process, AudioUtils):
-    
+    """Records audio from the default loopback device."""
+
     loopback_device = None
     channels = None
     rate = None
@@ -26,7 +30,7 @@ class LoopbackRecorder(mp.Process, AudioUtils):
 
     def record_loopback(self):
         with pyaudio.PyAudio() as p:
-            output_file = wave.open("AV-temp-audio.wav", 'wb')
+            output_file = wave.open("temp/TEMP-loopback.wav", 'wb')
             output_file.setnchannels(self.channels)
             output_file.setframerate(self.rate)
             output_file.setsampwidth(self.sample_size)
@@ -51,5 +55,36 @@ class LoopbackRecorder(mp.Process, AudioUtils):
 
     def run(self):
         print("Started loopback recording process ... ")
-        self.record_loopback()
+        silence_player = _SilencePlayer(self.duration)
+        silence_player.start()
+        if silence_player.is_alive():
+            self.record_loopback()
+        silence_player.terminate()
+        silence_player.join()
         print("Finished loopback recording process!")
+
+
+class _SilencePlayer(mp.Process):
+    """
+    Plays silence in the background. 
+    
+    WASAPI loopback recording requires some kind of data to be coming in 
+    for it to start capturing. If silence is not played then only parts 
+    of audio that are actually heard by the user would be recorded. In 
+    most cases this would generate an audio file that is shorter than 
+    the duration specified, because the user might not be playing audio
+    for the whole duration. This would also make it very hard to 
+    properly sync the audio with the video.
+
+    """
+
+    def __init__(self, duration):
+        super().__init__()
+        self.duration = duration + 5
+
+    def run(self):
+        silence = AudioSegment.silent(
+            duration=self.duration*1000,
+            frame_rate=44100,
+        )
+        play(silence)

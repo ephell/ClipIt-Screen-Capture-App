@@ -1,6 +1,8 @@
 import pyaudiowpatch as pyaudio
 
+
 class AudioUtils:
+    """Utility class for audio related methods."""
 
     @classmethod
     def get_default_speakers(cls):

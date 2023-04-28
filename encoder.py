@@ -1,16 +1,27 @@
-from moviepy.editor import VideoFileClip, AudioFileClip
+from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
+
 
 class Encoder:
+    """Holds methods for encoding audio and video files."""
 
     @staticmethod
-    def merge_video_and_audio_moviePy(video_path, audio_path, output_path):
-        print("Merging video and audio ... ")
+    def merge_video_with_audio(video_path, audio_path):
         video_clip = VideoFileClip(video_path)
         audio_clip = AudioFileClip(audio_path)
         final_clip = video_clip.set_audio(audio_clip)
         final_clip.write_videofile(
-            output_path, 
+            filename="temp/TEMP-Final.mp4",
             preset="ultrafast",
             logger=None
         )
-        print("Merging done!")
+
+    @staticmethod
+    def merge_audio(first_clip, second_clip, output_path):
+        clip1 = AudioFileClip(first_clip)
+        clip2 = AudioFileClip(second_clip)
+        merged_audio = CompositeAudioClip([clip1, clip2])
+        merged_audio.write_audiofile(
+            filename=output_path,
+            fps=44100,
+            logger=None
+        )

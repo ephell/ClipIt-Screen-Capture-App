@@ -5,7 +5,9 @@ import mss.tools
 import time
 from moviepy.editor import ImageSequenceClip
 
+
 class VideoRecorder(mp.Process):
+    """Records a video from a specified region/monitor."""
 
     def __init__(self, monitor, region, duration, fps):
         super().__init__()
@@ -61,8 +63,8 @@ class VideoRecorder(mp.Process):
         precise_fps = captured_frame_count / self.duration
         clip = ImageSequenceClip(captured_frames, fps=precise_fps)
         clip.write_videofile(
-            "AV-temp-video.mp4", 
-            preset="ultrafast", 
+            filename="temp/TEMP-video.mp4",
+            preset="ultrafast",
             logger=None
         )
         print("Finished writing frames!")
