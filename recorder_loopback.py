@@ -30,7 +30,7 @@ class LoopbackRecorder(mp.Process, AudioUtils):
 
     def record_loopback(self):
         with pyaudio.PyAudio() as p:
-            output_file = wave.open("AV-temp-audio.wav", 'wb')
+            output_file = wave.open("temp/TEMP-loopback.wav", 'wb')
             output_file.setnchannels(self.channels)
             output_file.setframerate(self.rate)
             output_file.setsampwidth(self.sample_size)
@@ -65,14 +65,24 @@ class LoopbackRecorder(mp.Process, AudioUtils):
 
 
 class _SilencePlayer(mp.Process):
-    """Plays silence in the background."""
+    """
+    Plays silence in the background. 
+    
+    WASAPI loopback recording requires some kind of data to be coming in 
+    for it to start capturing. If silence is not played then only parts 
+    of audio that are actually heard by the user would be recorded. In 
+    most cases this would generate an audio file that is shorter than 
+    the duration specified, because the user might not be playing audio
+    for the whole duration. This would also make it very hard to 
+    properly sync the audio with the video.
+
+    """
 
     def __init__(self, duration):
         super().__init__()
         self.duration = duration + 5
 
     def run(self):
-        print(f"Playing silence in the background ...")
         silence = AudioSegment.silent(
             duration=self.duration*1000,
             frame_rate=44100,
