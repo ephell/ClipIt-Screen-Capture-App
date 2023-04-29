@@ -3,6 +3,7 @@ import os
 import recorder_video as rv
 import recorder_audio as ra
 from encoder import Encoder
+import multiprocessing as mp
 
 class Recorder:
     """Recording controller."""
@@ -16,22 +17,26 @@ class Recorder:
         self.record_microphone = record_microphone
 
         MONITOR = 2
-        # REGION = [0, 0, 1920, 1080]
-        REGION = [60, 216, 1150, 650]
+        REGION = [0, 0, 1920, 1080]
+        # REGION = [60, 216, 1150, 650]
         FPS = 30
+
+        barrier = mp.Barrier(3)
 
         self.video_recorder = rv.VideoRecorder(
             monitor=MONITOR, 
             region=REGION,
             duration=self.duration,
-            fps=FPS
+            fps=FPS,
+            barrier=barrier
         )
 
         if self.record_loopback or self.record_microphone:
             self.audio_recorder = ra.AudioRecorder(
                 duration=self.duration,
                 loopback=self.record_loopback,
-                microphone=self.record_microphone
+                microphone=self.record_microphone,
+                barrier=barrier
             )
 
     def record(self):

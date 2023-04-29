@@ -3,6 +3,7 @@ import pyaudiowpatch as pyaudio
 import time
 import wave
 from utils_audio import AudioUtils
+import datetime
 
 
 class MicrophoneRecorder(mp.Process, AudioUtils):
@@ -14,9 +15,10 @@ class MicrophoneRecorder(mp.Process, AudioUtils):
     sample_size = None
     device_index = None
 
-    def __init__(self, duration):
+    def __init__(self, duration, barrier):
         super().__init__()
         self.duration = duration
+        self.barrier = barrier
 
         microphone = self.get_default_microphone()
         if microphone is not None:
@@ -41,8 +43,17 @@ class MicrophoneRecorder(mp.Process, AudioUtils):
                 input=True,
                 input_device_index=self.device_index,
             ) as stream:
+                
+                print("Waiting to pass barrier in microphone recording ...")
+                self.barrier.wait()
+                print("Passed barrier in microphone recording process!")
+
+                now = datetime.datetime.now()
+                current_time = now.strftime("%H:%M:%S.%f")
+                print("Started recording microphone: " + current_time)
+
                 start_time = time.time()
-                while time.time() - start_time <= self.duration:
+                while time.time() - start_time < self.duration:
                     data = stream.read(
                         stream.get_read_available(), 
                         exception_on_overflow=False

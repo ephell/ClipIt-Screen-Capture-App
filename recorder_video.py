@@ -4,17 +4,19 @@ import mss
 import mss.tools
 import time
 from moviepy.editor import ImageSequenceClip
+import datetime
 
 
 class VideoRecorder(mp.Process):
     """Records a video from a specified region/monitor."""
 
-    def __init__(self, monitor, region, duration, fps):
+    def __init__(self, monitor, region, duration, fps, barrier):
         super().__init__()
         self.monitor = monitor
         self.region = region
         self.duration = duration
         self.fps = fps
+        self.barrier = barrier
 
     def run(self):
         print("Started video recording process ... ")
@@ -35,9 +37,19 @@ class VideoRecorder(mp.Process):
             captured_frames = []
             frame_capture_times = []
             captured_frame_count = 0
-            start_time = time.time()
             fps = self.fps
-            while time.time() - start_time <= self.duration:
+
+            print("Waiting to pass barrier in video capture ... ")
+            self.barrier.wait()
+            print("Passed barrier in video capture process!")
+
+            now = datetime.datetime.now()
+            current_time = now.strftime("%H:%M:%S.%f")
+            print("Started capturing video: " + current_time)
+
+            
+            start_time = time.time()
+            while time.time() - start_time < self.duration:
 
                 frame_capture_start_time = time.time()
 
