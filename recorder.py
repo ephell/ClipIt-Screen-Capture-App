@@ -2,46 +2,60 @@ import datetime
 import os
 import recorder_video as rv
 import recorder_audio as ra
-from encoder import Encoder
 import multiprocessing as mp
+from encoder import Encoder
+from utils_audio import AudioUtils
+
 
 class Recorder:
     """Recording controller."""
 
-    video_recorder = None
-    audio_recorder = None
-
-    def __init__(self, duration, record_loopback, record_microphone):
+    def __init__(
+            self,
+            duration, 
+            record_video,
+            record_loopback,
+            record_microphone
+        ):
         self.duration = duration
+        self.record_video = record_video
         self.record_loopback = record_loopback
         self.record_microphone = record_microphone
 
         MONITOR = 2
-        REGION = [0, 0, 1920, 1080]
-        # REGION = [60, 216, 1150, 650]
+        # REGION = [0, 0, 1920, 1080]
+        REGION = [60, 216, 1150, 650]
         FPS = 30
 
         barrier = mp.Barrier(3)
 
-        self.video_recorder = rv.VideoRecorder(
-            monitor=MONITOR, 
-            region=REGION,
-            duration=self.duration,
-            fps=FPS,
-            barrier=barrier
-        )
+        if self.record_video:
+            self.video_recorder = rv.VideoRecorder(
+                monitor=MONITOR, 
+                region=REGION,
+                duration=self.duration,
+                fps=FPS,
+                barrier=barrier
+            )
 
         if self.record_loopback or self.record_microphone:
+            lb_device = AudioUtils.get_default_loopback_device()
+            microphone = AudioUtils.get_default_microphone()
+
+            self.record_loopback = True if lb_device is not None else False
+            self.record_microphone = True if microphone is not None else False
+
             self.audio_recorder = ra.AudioRecorder(
                 duration=self.duration,
-                loopback=self.record_loopback,
-                microphone=self.record_microphone,
+                loopback_device=lb_device if self.record_loopback else None,
+                microphone=microphone if self.record_microphone else None,
                 barrier=barrier
             )
 
     def record(self):
         if self.video_recorder is not None:
             self.video_recorder.start()
+
         if self.audio_recorder is not None:
             self.audio_recorder.record()
         self.video_recorder.join()

@@ -6,30 +6,34 @@ import multiprocessing as mp
 class AudioRecorder:
     """Starts an appropriate recorder process."""
 
-    def __init__(self, duration, loopback, microphone, barrier):
+    def __init__(self, duration, loopback_device, microphone, barrier):
         self.duration = duration
-        self.loopback = loopback
+        self.loopback_device = loopback_device
         self.microphone = microphone
         self.barrier = barrier
 
     def record(self):
-        loopback_recorder = None
-        microphone_recorder = None
+        if self.loopback_device:
+            loopback_recorder = LoopbackRecorder(
+                loopback_device=self.loopback_device,
+                duration=self.duration, 
+                barrier=self.barrier
+            )
+            loopback_recorder.start()
+        else:
+            print("Can't record speaker audio! No loopback device found!")
 
-        if self.loopback:
-            loopback_recorder = LoopbackRecorder(self.duration, self.barrier)
-            if loopback_recorder.loopback_device is not None:
-                loopback_recorder.start()
-            else:
-                print("Can't record speaker audio! No loopback device found!")
         if self.microphone:
-            microphone_recorder = MicrophoneRecorder(self.duration, self.barrier)
-            if microphone_recorder.microphone is not None:
-                microphone_recorder.start()
-            else:
-                print("Can't record input audio! No microphone found!")
+            microphone_recorder = MicrophoneRecorder(
+                microphone=self.microphone,
+                duration=self.duration,
+                barrier=self.barrier
+            )
+            microphone_recorder.start()
+        else:
+            print("Can't record input audio! No microphone found!")
 
-        if loopback_recorder is not None and loopback_recorder.is_alive():
+        if self.loopback_device:
             loopback_recorder.join()
-        if microphone_recorder is not None and microphone_recorder.is_alive():
+        if self.microphone:
             microphone_recorder.join()

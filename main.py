@@ -12,6 +12,7 @@ def main():
     __create_directories()
     recorder = Recorder(
         duration=5,
+        record_video=True,
         record_loopback=True,
         record_microphone=True
     )

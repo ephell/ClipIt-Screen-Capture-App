@@ -9,24 +9,14 @@ import datetime
 class MicrophoneRecorder(mp.Process, AudioUtils):
     """Records audio from the default microphone."""
 
-    microphone = None
-    channels = None
-    rate = None
-    sample_size = None
-    device_index = None
-
-    def __init__(self, duration, barrier):
+    def __init__(self, microphone, duration, barrier):
         super().__init__()
         self.duration = duration
         self.barrier = barrier
-
-        microphone = self.get_default_microphone()
-        if microphone is not None:
-            self.microphone = microphone
-            self.channels = microphone["maxInputChannels"]
-            self.rate = int(microphone["defaultSampleRate"])
-            self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16) 
-            self.device_index = microphone["index"]
+        self.channels = microphone["maxInputChannels"]
+        self.rate = int(microphone["defaultSampleRate"])
+        self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16) 
+        self.device_index = microphone["index"]
 
     def record_microphone(self):
         with pyaudio.PyAudio() as p:

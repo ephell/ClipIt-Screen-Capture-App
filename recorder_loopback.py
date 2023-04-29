@@ -2,35 +2,39 @@ import multiprocessing as mp
 import pyaudiowpatch as pyaudio
 import time
 import wave
-from utils_audio import AudioUtils
-from pydub import AudioSegment
 import datetime
 from math import ceil
 
 
-class LoopbackRecorder(mp.Process, AudioUtils):
+class LoopbackRecorder(mp.Process):
     """Records audio from the default loopback device."""
 
-    loopback_device = None
-    channels = None
-    rate = None
-    sample_size = None
-    device_index = None
-
-    def __init__(self, duration, barrier):
+    def __init__(self, loopback_device, duration, barrier):
         super().__init__()
         self.duration = duration
         self.barrier = barrier
+        self.channels = loopback_device["maxInputChannels"]
+        self.rate = int(loopback_device["defaultSampleRate"])
+        self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16) 
+        self.device_index = loopback_device["index"]
 
-        loopback_device = self.get_default_loopback_device()
-        if loopback_device is not None:
-            self.loopback_device = loopback_device
-            self.channels = loopback_device["maxInputChannels"]
-            self.rate = int(loopback_device["defaultSampleRate"])
-            self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16) 
-            self.device_index = loopback_device["index"]
+    def run(self):
+        print("Started loopback recording process ... ")
+        started_playing = mp.Event()
 
-    def record_loopback(self):
+        silence_player = _SilencePlayer(self.duration, started_playing)
+        silence_player.start()
+
+        # Wait for silence to start playing.
+        started_playing.wait()
+
+        self.__record_loopback()
+
+        silence_player.terminate()
+        silence_player.join()
+        print("Finished loopback recording process!")
+
+    def __record_loopback(self):
         with pyaudio.PyAudio() as p:
             output_file = wave.open("temp/TEMP-loopback.wav", 'wb')
             output_file.setnchannels(self.channels)
@@ -64,21 +68,6 @@ class LoopbackRecorder(mp.Process, AudioUtils):
                     
             output_file.close()
 
-    def run(self):
-        print("Started loopback recording process ... ")
-        started_playing = mp.Event()
-
-        silence_player = _SilencePlayer(self.duration, started_playing)
-        silence_player.start()
-
-        # Wait for silence to start playing.
-        started_playing.wait()
-
-        self.record_loopback()
-
-        silence_player.terminate()
-        silence_player.join()
-        print("Finished loopback recording process!")
 
 class _SilencePlayer(mp.Process):
     """
