@@ -2,7 +2,7 @@ import os
 
 
 class Paths:
-    """Application settings."""
+    """Various paths."""
 
     __PARENT_DIR = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
     TEMP_DIR = os.path.join(__PARENT_DIR, "temp")
@@ -10,7 +10,7 @@ class Paths:
 
 
 class TempFiles:
-    """Holds names of temporary files."""
+    """Names of temporary files."""
 
     CAPTURED_VIDEO_FILE = "captured_video.mp4"
     LOOPBACK_AUDIO_FILE = "loopback_audio.wav"
