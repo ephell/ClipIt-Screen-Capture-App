@@ -1,15 +1,14 @@
 import multiprocessing as mp
-import pyaudiowpatch as pyaudio
-import time
 import wave
-from utils_audio import AudioUtils
-import datetime
+from time import perf_counter
+
+import pyaudiowpatch as pyaudio
 
 
-class MicrophoneRecorder(mp.Process, AudioUtils):
+class MicrophoneRecorder(mp.Process):
     """Records audio from the default microphone."""
 
-    def __init__(self, microphone, duration, barrier):
+    def __init__(self, microphone, duration, barrier=None):
         super().__init__()
         self.duration = duration
         self.barrier = barrier
@@ -34,16 +33,14 @@ class MicrophoneRecorder(mp.Process, AudioUtils):
                 input_device_index=self.device_index,
             ) as stream:
                 
-                print("Waiting to pass barrier in microphone recording ...")
-                self.barrier.wait()
-                print("Passed barrier in microphone recording process!")
+                if isinstance(self.barrier, mp.synchronize.Barrier):
+                    self.barrier.wait()
+                else:
+                    print(f"Barrier not set in: {self.__class__.__name__}. " \
+                          "Final audio file might be out of sync.")
 
-                now = datetime.datetime.now()
-                current_time = now.strftime("%H:%M:%S.%f")
-                print("Started recording microphone: " + current_time)
-
-                start_time = time.time()
-                while time.time() - start_time < self.duration:
+                start_time = perf_counter()
+                while perf_counter() - start_time < self.duration:
                     data = stream.read(
                         stream.get_read_available(), 
                         exception_on_overflow=False

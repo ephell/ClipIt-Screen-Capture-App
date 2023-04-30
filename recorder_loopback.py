@@ -1,15 +1,15 @@
-import multiprocessing as mp
-import pyaudiowpatch as pyaudio
-import time
-import wave
-import datetime
 from math import ceil
+import multiprocessing as mp
+import wave
+from time import perf_counter
+
+import pyaudiowpatch as pyaudio
 
 
 class LoopbackRecorder(mp.Process):
     """Records audio from the default loopback device."""
 
-    def __init__(self, loopback_device, duration, barrier):
+    def __init__(self, loopback_device, duration, barrier=None):
         super().__init__()
         self.duration = duration
         self.barrier = barrier
@@ -21,15 +21,11 @@ class LoopbackRecorder(mp.Process):
     def run(self):
         print("Started loopback recording process ... ")
         started_playing = mp.Event()
-
         silence_player = _SilencePlayer(self.duration, started_playing)
         silence_player.start()
-
         # Wait for silence to start playing.
         started_playing.wait()
-
         self.__record_loopback()
-
         silence_player.terminate()
         silence_player.join()
         print("Finished loopback recording process!")
@@ -50,16 +46,14 @@ class LoopbackRecorder(mp.Process):
                 input_device_index=self.device_index,
             ) as stream:
                 
-                print("Waiting to pass barrier in loopback recording ... ")
-                self.barrier.wait()
-                print("Passed barrier in loopback recording process!")
+                if isinstance(self.barrier, mp.synchronize.Barrier):
+                    self.barrier.wait()
+                else:
+                    print(f"Barrier not set in: {self.__class__.__name__}. " \
+                          "Final audio file might be out of sync.")
 
-                now = datetime.datetime.now()
-                current_time = now.strftime("%H:%M:%S.%f")
-                print("Started recording loopback: " + current_time)
-
-                start_time = time.time()
-                while time.time() - start_time < self.duration:
+                start_time = perf_counter()
+                while perf_counter() - start_time < self.duration:
                     data = stream.read(
                         stream.get_read_available(), 
                         exception_on_overflow=False
@@ -114,7 +108,6 @@ class _SilencePlayer(mp.Process):
                     if not started_playing_event_set:
                         self.started_playing.set()
                         started_playing_event_set = True
-                        print("Silence start event set!")
 
     def __make_chunks(self, silence):
         """Break silence into chunks that are <chunk_length> ms long."""

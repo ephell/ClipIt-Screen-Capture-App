@@ -1,16 +1,15 @@
-import numpy as np
 import multiprocessing as mp
-import mss
-import mss.tools
-import time
+from time import perf_counter, sleep
+
 from moviepy.editor import ImageSequenceClip
-import datetime
+import mss
+import numpy as np
 
 
 class VideoRecorder(mp.Process):
     """Records a video from a specified region/monitor."""
 
-    def __init__(self, monitor, region, duration, fps, barrier):
+    def __init__(self, monitor, region, duration, fps, barrier=None):
         super().__init__()
         self.monitor = monitor
         self.region = region
@@ -36,43 +35,38 @@ class VideoRecorder(mp.Process):
 
             captured_frames = []
             frame_capture_times = []
-            captured_frame_count = 0
             fps = self.fps
 
-            print("Waiting to pass barrier in video capture ... ")
-            self.barrier.wait()
-            print("Passed barrier in video capture process!")
+            if isinstance(self.barrier, mp.synchronize.Barrier):
+                self.barrier.wait()
+            else:
+                print(f"Barrier not set in: {self.__class__.__name__}. " \
+                        "Final audio file might be out of sync.")
 
-            now = datetime.datetime.now()
-            current_time = now.strftime("%H:%M:%S.%f")
-            print("Started capturing video: " + current_time)
+            start_time = perf_counter()
+            while perf_counter() - start_time < self.duration:
 
-            
-            start_time = time.time()
-            while time.time() - start_time < self.duration:
-
-                frame_capture_start_time = time.time()
+                frame_start_time = perf_counter()
 
                 screen = np.array(sct.grab(monitor))
                 screen = np.flip(screen[..., :3], axis=-1)
                 captured_frames.append(screen)
-                captured_frame_count += 1
                 
-                frame_capture_end_time = time.time() - frame_capture_start_time
-                frame_capture_times.append(frame_capture_end_time)
+                frame_end_time = perf_counter() - frame_start_time
+                frame_capture_times.append(frame_end_time)
 
-                sleep_time = (1.0 / fps) - frame_capture_end_time
+                sleep_time = (1.0 / fps) - frame_end_time
                 if sleep_time > 0:
-                    time.sleep(sleep_time)
+                    sleep(sleep_time)
 
         print("\n----------------------------------------")
-        print("Total frames captured:", captured_frame_count)
+        print("Total frames captured:", len(captured_frames))
         print("Average frame capture time:", np.mean(frame_capture_times))
-        print("Average FPS:", captured_frame_count / self.duration)
+        print("Average FPS:", len(captured_frames) / self.duration)
         print("----------------------------------------\n")
 
         print("Writing captured frames to video file ... ")
-        precise_fps = captured_frame_count / self.duration
+        precise_fps = len(captured_frames) / self.duration
         clip = ImageSequenceClip(captured_frames, fps=precise_fps)
         clip.write_videofile(
             filename="temp/TEMP-video.mp4",
