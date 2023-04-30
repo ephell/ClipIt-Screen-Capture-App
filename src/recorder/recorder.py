@@ -3,10 +3,10 @@ import multiprocessing as mp
 import os
 
 from encoder import Encoder
-from recorder_loopback import LoopbackRecorder
-from recorder_microphone import MicrophoneRecorder
-from recorder_video import VideoRecorder
-from utils_audio import AudioUtils
+from recorder.recorder_loopback import LoopbackRecorder
+from recorder.recorder_microphone import MicrophoneRecorder
+from recorder.recorder_video import VideoRecorder
+from utilities.audio import AudioUtils
 
 
 class Recorder:
@@ -55,13 +55,12 @@ class Recorder:
         self.fps = kwargs.get("fps", 30)
 
     def __initialize_video_recorder(self):
-        if self.record_video:
-            self.video_recorder = VideoRecorder(
-                monitor=self.monitor, 
-                region=self.region,
-                duration=self.duration,
-                fps=self.fps,
-            )
+        self.video_recorder = VideoRecorder(
+            monitor=self.monitor, 
+            region=self.region,
+            duration=self.duration,
+            fps=self.fps,
+        )
 
     def __initialize_loopback_recorder(self):
         loopback_device = AudioUtils.get_default_loopback_device()
