@@ -19,7 +19,6 @@ class LoopbackRecorder(mp.Process):
         self.device_index = loopback_device["index"]
 
     def run(self):
-        print("Started loopback recording process ... ")
         started_playing = mp.Event()
         silence_player = _SilencePlayer(self.duration, started_playing)
         silence_player.start()
@@ -28,7 +27,6 @@ class LoopbackRecorder(mp.Process):
         self.__record_loopback()
         silence_player.terminate()
         silence_player.join()
-        print("Finished loopback recording process!")
 
     def __record_loopback(self):
         with pyaudio.PyAudio() as p:
@@ -52,6 +50,8 @@ class LoopbackRecorder(mp.Process):
                     print(f"Barrier not set in: {self.__class__.__name__}. " \
                           "Final audio file might be out of sync.")
 
+                print("Started recording loopback audio ... ")
+
                 start_time = perf_counter()
                 while perf_counter() - start_time < self.duration:
                     data = stream.read(
@@ -61,6 +61,8 @@ class LoopbackRecorder(mp.Process):
                     output_file.writeframes(data)
                     
             output_file.close()
+
+            print("Finished recording loopback audio!")
 
 
 class _SilencePlayer(mp.Process):

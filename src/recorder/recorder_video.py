@@ -18,8 +18,6 @@ class VideoRecorder(mp.Process):
         self.barrier = barrier
 
     def run(self):
-        print("Started video recording process ... ")
-
         with mss.mss() as sct:
 
             if self.monitor == 2:
@@ -43,6 +41,8 @@ class VideoRecorder(mp.Process):
                 print(f"Barrier not set in: {self.__class__.__name__}. " \
                         "Final audio file might be out of sync.")
 
+            print("Started recording video ... ")
+
             start_time = perf_counter()
             while perf_counter() - start_time < self.duration:
 
@@ -59,13 +59,6 @@ class VideoRecorder(mp.Process):
                 if sleep_time > 0:
                     sleep(sleep_time)
 
-        print("\n----------------------------------------")
-        print("Total frames captured:", len(captured_frames))
-        print("Average frame capture time:", np.mean(frame_capture_times))
-        print("Average FPS:", len(captured_frames) / self.duration)
-        print("----------------------------------------\n")
-
-        print("Writing captured frames to video file ... ")
         precise_fps = len(captured_frames) / self.duration
         clip = ImageSequenceClip(captured_frames, fps=precise_fps)
         clip.write_videofile(
@@ -73,6 +66,11 @@ class VideoRecorder(mp.Process):
             preset="ultrafast",
             logger=None
         )
-        print("Finished writing frames!")
 
-        print("Finished video recording process!")
+        print("Finished recording video!")
+
+        print("\n----------------------------------------")
+        print("Total frames captured:", len(captured_frames))
+        print("Average frame capture time:", np.mean(frame_capture_times))
+        print("Average FPS:", precise_fps)
+        print("----------------------------------------\n")

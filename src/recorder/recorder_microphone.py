@@ -17,7 +17,10 @@ class MicrophoneRecorder(mp.Process):
         self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16) 
         self.device_index = microphone["index"]
 
-    def record_microphone(self):
+    def run(self):
+        self.__record_microphone()
+
+    def __record_microphone(self):
         with pyaudio.PyAudio() as p:
             output_file = wave.open("temp/TEMP-microphone.wav", 'wb')
             output_file.setnchannels(self.channels)
@@ -39,6 +42,8 @@ class MicrophoneRecorder(mp.Process):
                     print(f"Barrier not set in: {self.__class__.__name__}. " \
                           "Final audio file might be out of sync.")
 
+                print("Started recording microphone audio ... ")
+
                 start_time = perf_counter()
                 while perf_counter() - start_time < self.duration:
                     data = stream.read(
@@ -49,7 +54,4 @@ class MicrophoneRecorder(mp.Process):
 
             output_file.close()
 
-    def run(self):
-        print("Started microphone recording process ... ")
-        self.record_microphone()
-        print("Finished microphone recording process!")
+            print("Finished recording microphone audio!")
