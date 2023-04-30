@@ -1,30 +1,21 @@
 import multiprocessing as mp
-import pyaudiowpatch as pyaudio
-import time
 import wave
-from utils_audio import AudioUtils
+from time import perf_counter
+
+import pyaudiowpatch as pyaudio
 
 
-class MicrophoneRecorder(mp.Process, AudioUtils):
+class MicrophoneRecorder(mp.Process):
     """Records audio from the default microphone."""
 
-    microphone = None
-    channels = None
-    rate = None
-    sample_size = None
-    device_index = None
-
-    def __init__(self, duration):
+    def __init__(self, microphone, duration, barrier=None):
         super().__init__()
         self.duration = duration
-
-        microphone = self.get_default_microphone()
-        if microphone is not None:
-            self.microphone = microphone
-            self.channels = microphone["maxInputChannels"]
-            self.rate = int(microphone["defaultSampleRate"])
-            self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16) 
-            self.device_index = microphone["index"]
+        self.barrier = barrier
+        self.channels = microphone["maxInputChannels"]
+        self.rate = int(microphone["defaultSampleRate"])
+        self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16) 
+        self.device_index = microphone["index"]
 
     def record_microphone(self):
         with pyaudio.PyAudio() as p:
@@ -41,8 +32,15 @@ class MicrophoneRecorder(mp.Process, AudioUtils):
                 input=True,
                 input_device_index=self.device_index,
             ) as stream:
-                start_time = time.time()
-                while time.time() - start_time <= self.duration:
+                
+                if isinstance(self.barrier, mp.synchronize.Barrier):
+                    self.barrier.wait()
+                else:
+                    print(f"Barrier not set in: {self.__class__.__name__}. " \
+                          "Final audio file might be out of sync.")
+
+                start_time = perf_counter()
+                while perf_counter() - start_time < self.duration:
                     data = stream.read(
                         stream.get_read_available(), 
                         exception_on_overflow=False
