@@ -1,4 +1,5 @@
 from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
+from settings import Paths, TempFiles
 
 
 class Encoder:
@@ -10,18 +11,18 @@ class Encoder:
         audio_clip = AudioFileClip(audio_path)
         final_clip = video_clip.set_audio(audio_clip)
         final_clip.write_videofile(
-            filename="temp/TEMP-Final.mp4",
+            filename=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}",
             preset="ultrafast",
             logger=None
         )
 
     @staticmethod
-    def merge_audio(first_clip, second_clip, output_path):
+    def merge_audio(first_clip, second_clip):
         clip1 = AudioFileClip(first_clip)
         clip2 = AudioFileClip(second_clip)
         merged_audio = CompositeAudioClip([clip1, clip2])
         merged_audio.write_audiofile(
-            filename=output_path,
+            filename=f"{Paths.TEMP_DIR}/{TempFiles.MERGED_AUDIO_FILE}",
             fps=44100,
             logger=None
         )

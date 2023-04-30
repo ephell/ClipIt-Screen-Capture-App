@@ -5,6 +5,8 @@ from moviepy.editor import ImageSequenceClip
 import mss
 import numpy as np
 
+from settings import Paths, TempFiles
+
 
 class VideoRecorder(mp.Process):
     """Records a video from a specified region/monitor."""
@@ -19,7 +21,6 @@ class VideoRecorder(mp.Process):
 
     def run(self):
         with mss.mss() as sct:
-
             if self.monitor == 2:
                 self.region[0] += sct.monitors[self.monitor]["left"]
 
@@ -62,7 +63,7 @@ class VideoRecorder(mp.Process):
         precise_fps = len(captured_frames) / self.duration
         clip = ImageSequenceClip(captured_frames, fps=precise_fps)
         clip.write_videofile(
-            filename="temp/TEMP-video.mp4",
+            filename=f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}",
             preset="ultrafast",
             logger=None
         )
