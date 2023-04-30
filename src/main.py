@@ -1,5 +1,6 @@
 import os
-from recorder import Recorder
+
+from recorder.recorder import Recorder
 
 def __create_directories():
     """Creates directories for temporary files and final output."""
@@ -11,7 +12,7 @@ def __create_directories():
 def main():
     __create_directories()
     recorder = Recorder(
-        duration=5,
+        duration=10,
         record_video=True,
         record_loopback=True,
         record_microphone=True,
