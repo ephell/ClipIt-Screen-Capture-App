@@ -6,6 +6,7 @@ from encoder import Encoder
 from recorder.recorder_loopback import LoopbackRecorder
 from recorder.recorder_microphone import MicrophoneRecorder
 from recorder.recorder_video import VideoRecorder
+from settings import Paths, TempFiles
 from utilities.audio import AudioUtils
 
 
@@ -96,36 +97,46 @@ class Recorder:
         """Generates the final file from recorded temporary files."""
         if self.record_loopback and self.record_microphone:
             Encoder.merge_audio(
-                first_clip="temp/TEMP-loopback.wav", 
-                second_clip="temp/TEMP-microphone.wav", 
-                output_path="temp/TEMP-merged.wav"
+                first_clip=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}", 
+                second_clip=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}",
             )
             Encoder.merge_video_with_audio(
-                video_path="temp/TEMP-video.mp4",
-                audio_path="temp/TEMP-merged.wav"
+                video_path=f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}",
+                audio_path=f"{Paths.TEMP_DIR}/{TempFiles.MERGED_AUDIO_FILE}"
             )
         elif self.record_loopback and not self.record_microphone:
             Encoder.merge_video_with_audio(
-                video_path="temp/TEMP-video.mp4",
-                audio_path="temp/TEMP-loopback.wav"
+                video_path=f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}",
+                audio_path=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}"
             )
         elif self.record_microphone and not self.record_loopback:
             Encoder.merge_video_with_audio(
-                video_path="temp/TEMP-video.mp4",
-                audio_path="temp/TEMP-microphone.wav"
+                video_path=f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}",
+                audio_path=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}"
             )
         else:
-            os.replace("temp/TEMP-video.mp4", "temp/TEMP-Final.mp4")
+            os.replace(
+                src=f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}", 
+                dst=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}"
+            )
 
         # Rename the final file and move it to output folder.
         now = datetime.datetime.now()
         timestamp = now.strftime("%Y-%m-%d [] %H-%M-%S")
         filename = f"{timestamp}.mp4"
-        os.rename("temp/TEMP-Final.mp4", f"recordings/{filename}")
+        os.rename(
+            src=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}", 
+            dst=f"{Paths.RECORDINGS_DIR}/{filename}"
+        )
 
     def __clean_up_temp_directory(self):
         """Removes all temporary files from the temp directory."""
-        files = os.listdir("temp/")
-        for file in files:
-            if "TEMP-" in file:
-                os.remove("temp/" + file)
+        temp_file_names = []
+        for attribute in dir(TempFiles):
+            if not attribute.startswith('__'):
+                temp_file_names.append(getattr(TempFiles, attribute))
+
+        files_in_dir = os.listdir(Paths.TEMP_DIR)
+        for file in files_in_dir:
+            if file in temp_file_names:
+                os.remove(os.path.join(Paths.TEMP_DIR, file))

@@ -4,6 +4,8 @@ from time import perf_counter
 
 import pyaudiowpatch as pyaudio
 
+from settings import Paths, TempFiles
+
 
 class MicrophoneRecorder(mp.Process):
     """Records audio from the default microphone."""
@@ -22,7 +24,10 @@ class MicrophoneRecorder(mp.Process):
 
     def __record_microphone(self):
         with pyaudio.PyAudio() as p:
-            output_file = wave.open("temp/TEMP-microphone.wav", 'wb')
+            output_file = wave.open(
+                f=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}",
+                mode="wb"
+            )
             output_file.setnchannels(self.channels)
             output_file.setframerate(self.rate)
             output_file.setsampwidth(self.sample_size)
@@ -47,7 +52,7 @@ class MicrophoneRecorder(mp.Process):
                 start_time = perf_counter()
                 while perf_counter() - start_time < self.duration:
                     data = stream.read(
-                        stream.get_read_available(), 
+                        num_frames=stream.get_read_available(), 
                         exception_on_overflow=False
                     )
                     output_file.writeframes(data)
