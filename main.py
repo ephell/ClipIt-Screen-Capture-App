@@ -14,9 +14,13 @@ def main():
         duration=5,
         record_video=True,
         record_loopback=True,
-        record_microphone=True
+        record_microphone=True,
+        monitor=2,
+        region=[60, 216, 1150, 650],
+        fps=30,
     )
     recorder.record()
+    print("All done!")
     
 if __name__ == '__main__':
     main()
