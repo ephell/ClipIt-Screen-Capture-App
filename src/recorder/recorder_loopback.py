@@ -56,7 +56,7 @@ class LoopbackRecorder(mp.Process):
                     print(f"Barrier not set in: {self.__class__.__name__}. " \
                           "Final audio file might be out of sync.")
 
-                print("Started recording loopback audio ... ", perf_counter())
+                print("Started recording loopback audio ... ")
 
                 start_time = perf_counter()
                 while perf_counter() - start_time < self.duration:
@@ -87,6 +87,7 @@ class _SilencePlayer(threading.Thread):
 
     def __init__(self, is_silence_playing, is_recording_finished):
         super().__init__()
+        self.daemon = True
         self.is_silence_playing = is_silence_playing
         self.is_recording_finished = is_recording_finished
         self.sample_rate = 44100
