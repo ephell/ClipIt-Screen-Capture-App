@@ -2,6 +2,7 @@
 __pycache__/
 /recordings
 /temp
+/logs
 *.mp4
 *.mp3
 *.wav

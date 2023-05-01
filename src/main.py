@@ -1,7 +1,9 @@
+from settings import Paths, GlobalLogger
+log = GlobalLogger.LOGGER
+
 import os
 
 from recorder.recorder import Recorder
-from settings import Paths
 
 
 def __create_directories():
@@ -14,7 +16,7 @@ def __create_directories():
 def main():
     __create_directories()
     recorder = Recorder(
-        duration=5,
+        duration=15,
         record_video=True,
         record_loopback=True,
         record_microphone=True,
@@ -23,7 +25,7 @@ def main():
         fps=30,
     )
     recorder.record()
-    print("All done!")
+    log.info("All done!")
     
 if __name__ == '__main__':
     main()

@@ -1,11 +1,12 @@
+from settings import Paths, TempFiles, GlobalLogger
+log = GlobalLogger.LOGGER
+
 import multiprocessing as mp
 from time import perf_counter, sleep
 
 from moviepy.editor import ImageSequenceClip
 import mss
 import numpy as np
-
-from settings import Paths, TempFiles
 
 
 class VideoRecorder(mp.Process):
@@ -39,10 +40,10 @@ class VideoRecorder(mp.Process):
             if isinstance(self.barrier, mp.synchronize.Barrier):
                 self.barrier.wait()
             else:
-                print(f"Barrier not set in: {self.__class__.__name__}. " \
-                        "Final audio file might be out of sync.")
+                log.warning(f"Barrier not set in: {self.__class__.__name__}. " \
+                            "Final audio file might be out of sync.")
 
-            print("Started recording video ... ")
+            log.info("Started recording video ... ")
 
             start_time = perf_counter()
             while perf_counter() - start_time < self.duration:
@@ -68,10 +69,9 @@ class VideoRecorder(mp.Process):
             logger=None
         )
 
-        print("Finished recording video!")
-
-        print("\n----------------------------------------")
-        print("Total frames captured:", len(captured_frames))
-        print("Average frame capture time:", np.mean(frame_capture_times))
-        print("Average FPS:", precise_fps)
-        print("----------------------------------------\n")
+        log.info("Finished recording video!")
+        log.info("----------------------------------------")
+        log.info(f"Total frames captured: {len(captured_frames)}")
+        log.info(f"Average frame capture time: {np.mean(frame_capture_times)}")
+        log.info(f"Average FPS: {precise_fps}")
+        log.info("----------------------------------------")
