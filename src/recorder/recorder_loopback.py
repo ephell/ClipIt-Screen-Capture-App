@@ -1,5 +1,5 @@
-from logger import Logger
-log = Logger.setup_logger("GLOBAL", Logger.DEBUG, True, False)
+from settings import Paths, TempFiles, GlobalLogger
+log = GlobalLogger.LOGGER
 
 import multiprocessing as mp
 import threading
@@ -7,8 +7,6 @@ from time import perf_counter
 import wave
 
 import pyaudiowpatch as pyaudio
-
-from settings import Paths, TempFiles
 
 
 class LoopbackRecorder(mp.Process):
@@ -56,11 +54,10 @@ class LoopbackRecorder(mp.Process):
                 if isinstance(self.barrier, mp.synchronize.Barrier):
                     self.barrier.wait()
                 else:
-                    print(f"Barrier not set in: {self.__class__.__name__}. " \
-                          "Final audio file might be out of sync.")
+                    log.warning(f"Barrier not set in: {self.__class__.__name__}. " \
+                                "Final audio file might be out of sync.")
 
-                print("Started recording loopback audio ... ")
-                log.debug("Started recording loopback audio ... ")
+                log.info("Started recording loopback audio ... ")
 
                 start_time = perf_counter()
                 while perf_counter() - start_time < self.duration:
@@ -72,7 +69,7 @@ class LoopbackRecorder(mp.Process):
                     
             output_file.close()
             is_recording_finished.set()
-            print("Finished recording loopback audio!")
+            log.info("Finished recording loopback audio!")
 
 
 class _SilencePlayer(threading.Thread):

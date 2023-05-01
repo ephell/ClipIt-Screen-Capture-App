@@ -1,13 +1,11 @@
-from logger import Logger
-log = Logger.setup_logger("GLOBAL", Logger.DEBUG, True, False)
+from settings import Paths, TempFiles, GlobalLogger
+log = GlobalLogger.LOGGER
 
 import multiprocessing as mp
 from time import perf_counter
 import wave
 
 import pyaudiowpatch as pyaudio
-
-from settings import Paths, TempFiles
 
 
 class MicrophoneRecorder(mp.Process):
@@ -47,11 +45,10 @@ class MicrophoneRecorder(mp.Process):
                 if isinstance(self.barrier, mp.synchronize.Barrier):
                     self.barrier.wait()
                 else:
-                    print(f"Barrier not set in: {self.__class__.__name__}. " \
-                          "Final audio file might be out of sync.")
+                    log.warning(f"Barrier not set in: {self.__class__.__name__}. " \
+                                "Final audio file might be out of sync.")
 
-                print("Started recording microphone audio ... ")
-                log.debug("Started recording microphone audio ... ")
+                log.info("Started recording microphone audio ... ")
 
                 start_time = perf_counter()
                 while perf_counter() - start_time < self.duration:
@@ -63,4 +60,4 @@ class MicrophoneRecorder(mp.Process):
 
             output_file.close()
 
-            print("Finished recording microphone audio!")
+            log.info("Finished recording microphone audio!")

@@ -1,3 +1,5 @@
+from logger import Logger
+
 import os
 
 
@@ -7,7 +9,6 @@ class Paths:
     __PARENT_DIR = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
     TEMP_DIR = os.path.join(__PARENT_DIR, "temp")
     RECORDINGS_DIR = os.path.join(__PARENT_DIR, "recordings")
-    LOGS_DIR = os.path.join(__PARENT_DIR, "logs")
 
 
 class TempFiles:
@@ -18,3 +19,14 @@ class TempFiles:
     MICROPHONE_AUDIO_FILE = "microphone_audio.wav"
     MERGED_AUDIO_FILE = "merged_audio.wav"
     FINAL_FILE = "final_file.mp4"
+
+
+class GlobalLogger:
+    """Contains the global logger object."""
+    
+    LOGGER = Logger.setup_logger(
+        logger_name="GLOBAL",
+        log_level=Logger.DEBUG,
+        log_to_console=True,
+        log_to_file=False
+    )

@@ -1,10 +1,9 @@
-from logger import Logger
-log = Logger.setup_logger("GLOBAL", Logger.DEBUG, True, False)
+from settings import Paths, GlobalLogger
+log = GlobalLogger.LOGGER
 
 import os
 
 from recorder.recorder import Recorder
-from settings import Paths
 
 
 def __create_directories():
@@ -17,10 +16,10 @@ def __create_directories():
 def main():
     __create_directories()
     recorder = Recorder(
-        duration=0.01,
+        duration=15,
         record_video=True,
-        record_loopback=False,
-        record_microphone=False,
+        record_loopback=True,
+        record_microphone=True,
         monitor=2,
         region=[60, 216, 1150, 650],
         fps=30,

@@ -1,5 +1,5 @@
-from logger import Logger
-log = Logger.setup_logger("GLOBAL", Logger.DEBUG, True, False)
+from settings import GlobalLogger
+log = GlobalLogger.LOGGER
 
 import datetime
 import multiprocessing as mp
@@ -46,14 +46,11 @@ class Recorder:
             recorder.barrier = barrier
 
     def record(self):
-        # for recorder in self.__get_recorders():
-        #     recorder.start()
-        # for recorder in self.__get_recorders():
-        #     recorder.join()
-
-        log.info("Recording finished.")
-
-        # self.__generate_final_video()
+        for recorder in self.__get_recorders():
+            recorder.start()
+        for recorder in self.__get_recorders():
+            recorder.join()
+        self.__generate_final_video()
         self.__clean_up_temp_directory()
 
     def __unpack_kwargs(self, kwargs):

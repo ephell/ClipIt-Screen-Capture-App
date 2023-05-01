@@ -2,8 +2,6 @@ from datetime import datetime
 import logging
 import os
 
-from settings import Paths
-
 
 class Logger:
     """
@@ -17,8 +15,10 @@ class Logger:
     """
 
     # Creating master 'log' folder if it's missing.
-    if not os.path.exists(Paths.LOGS_DIR):
-        os.mkdir(Paths.LOGS_DIR)
+    __PARENT_DIR = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+    __LOGS_DIR = os.path.join(__PARENT_DIR, "logs")
+    if not os.path.exists(__LOGS_DIR):
+        os.mkdir(__LOGS_DIR)
 
     # Logging levels.
     NOTSET = logging.NOTSET
@@ -77,9 +77,9 @@ class Logger:
             Logging level. Available: NOTSET, DEBUG, INFO, WARNING, 
             ERROR, CRITICAL. Example: `log_level`=`Logger.DEBUG`.
         log_to_console : bool
-            Print logs to console or not.
+            Whether to log to the console.
         log_to_file : bool
-            Print logs to file or not.
+            Whether to log to a file.
 
         Returns
         ----------
@@ -117,9 +117,9 @@ class Logger:
             Logging level. Available: NOTSET, DEBUG, INFO, WARNING, 
             ERROR, CRITICAL. Example: `log_level`=`Logger.DEBUG`.
         log_to_console : bool
-            Print logs to console or not.
+            Whether to log to the console..
         log_to_file : bool
-            Print logs to file or not.
+            Whether to log to a file.
 
         Returns
         ----------
@@ -140,7 +140,7 @@ class Logger:
 
     @classmethod
     def __create_file_handler(cls, logger_name):
-        folder_path = os.path.join(Paths.LOGS_DIR, logger_name)
+        folder_path = os.path.join(cls.__LOGS_DIR, logger_name)
         if not os.path.exists(folder_path):
             os.mkdir(folder_path)
 
