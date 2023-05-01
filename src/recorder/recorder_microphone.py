@@ -1,4 +1,4 @@
-from settings import Paths, TempFiles, GlobalLogger
+from logger import GlobalLogger
 log = GlobalLogger.LOGGER
 
 import multiprocessing as mp
@@ -6,6 +6,8 @@ from time import perf_counter
 import wave
 
 import pyaudiowpatch as pyaudio
+
+from settings import Paths, TempFiles
 
 
 class MicrophoneRecorder(mp.Process):

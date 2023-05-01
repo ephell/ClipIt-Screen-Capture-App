@@ -1,4 +1,4 @@
-from settings import Paths, TempFiles, GlobalLogger
+from logger import GlobalLogger
 log = GlobalLogger.LOGGER
 
 import multiprocessing as mp
@@ -7,6 +7,8 @@ from time import perf_counter, sleep
 from moviepy.editor import ImageSequenceClip
 import mss
 import numpy as np
+
+from settings import Paths, TempFiles
 
 
 class VideoRecorder(mp.Process):
