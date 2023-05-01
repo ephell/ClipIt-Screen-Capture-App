@@ -1,3 +1,6 @@
+from logger import Logger
+log = Logger.setup_logger("GLOBAL", Logger.DEBUG, True, False)
+
 import multiprocessing as mp
 from time import perf_counter, sleep
 
@@ -43,6 +46,7 @@ class VideoRecorder(mp.Process):
                         "Final audio file might be out of sync.")
 
             print("Started recording video ... ")
+            log.debug("Started recording video ... ")
 
             start_time = perf_counter()
             while perf_counter() - start_time < self.duration:

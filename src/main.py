@@ -1,3 +1,6 @@
+from logger import Logger
+log = Logger.setup_logger("GLOBAL", Logger.DEBUG, True, False)
+
 import os
 
 from recorder.recorder import Recorder
@@ -14,16 +17,16 @@ def __create_directories():
 def main():
     __create_directories()
     recorder = Recorder(
-        duration=5,
+        duration=0.01,
         record_video=True,
-        record_loopback=True,
-        record_microphone=True,
+        record_loopback=False,
+        record_microphone=False,
         monitor=2,
         region=[60, 216, 1150, 650],
         fps=30,
     )
     recorder.record()
-    print("All done!")
+    log.info("All done!")
     
 if __name__ == '__main__':
     main()

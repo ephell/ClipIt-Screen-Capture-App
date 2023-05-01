@@ -1,3 +1,6 @@
+from logger import Logger
+log = Logger.setup_logger("GLOBAL", Logger.DEBUG, True, False)
+
 import multiprocessing as mp
 import threading
 from time import perf_counter
@@ -57,6 +60,7 @@ class LoopbackRecorder(mp.Process):
                           "Final audio file might be out of sync.")
 
                 print("Started recording loopback audio ... ")
+                log.debug("Started recording loopback audio ... ")
 
                 start_time = perf_counter()
                 while perf_counter() - start_time < self.duration:

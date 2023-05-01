@@ -1,3 +1,6 @@
+from logger import Logger
+log = Logger.setup_logger("GLOBAL", Logger.DEBUG, True, False)
+
 import multiprocessing as mp
 from time import perf_counter
 import wave
@@ -48,6 +51,7 @@ class MicrophoneRecorder(mp.Process):
                           "Final audio file might be out of sync.")
 
                 print("Started recording microphone audio ... ")
+                log.debug("Started recording microphone audio ... ")
 
                 start_time = perf_counter()
                 while perf_counter() - start_time < self.duration:

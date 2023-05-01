@@ -7,6 +7,7 @@ class Paths:
     __PARENT_DIR = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
     TEMP_DIR = os.path.join(__PARENT_DIR, "temp")
     RECORDINGS_DIR = os.path.join(__PARENT_DIR, "recordings")
+    LOGS_DIR = os.path.join(__PARENT_DIR, "logs")
 
 
 class TempFiles:
