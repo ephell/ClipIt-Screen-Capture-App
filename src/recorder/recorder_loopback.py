@@ -1,7 +1,7 @@
-from math import ceil
 import multiprocessing as mp
-import wave
+import threading
 from time import perf_counter
+import wave
 
 import pyaudiowpatch as pyaudio
 
@@ -16,34 +16,36 @@ class LoopbackRecorder(mp.Process):
         self.duration = duration
         self.barrier = barrier
         self.channels = loopback_device["maxInputChannels"]
-        self.rate = int(loopback_device["defaultSampleRate"])
+        self.sample_rate = int(loopback_device["defaultSampleRate"])
         self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16) 
         self.device_index = loopback_device["index"]
 
     def run(self):
-        started_playing = mp.Event()
-        silence_player = _SilencePlayer(self.duration, started_playing)
+        is_silence_playing = mp.Event()
+        is_recording_finished = threading.Event()
+        silence_player = _SilencePlayer(
+            is_silence_playing=is_silence_playing, 
+            is_recording_finished=is_recording_finished
+        )
         silence_player.start()
-        # Wait for silence to start playing.
-        started_playing.wait()
-        self.__record_loopback()
-        silence_player.terminate()
+        is_silence_playing.wait()
+        self.__record_loopback(is_recording_finished)
         silence_player.join()
-
-    def __record_loopback(self):
+        
+    def __record_loopback(self, is_recording_finished):
         with pyaudio.PyAudio() as p:
             output_file = wave.open(
                 f=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}",
                 mode="wb"
             )
             output_file.setnchannels(self.channels)
-            output_file.setframerate(self.rate)
+            output_file.setframerate(self.sample_rate)
             output_file.setsampwidth(self.sample_size)
 
             with p.open(
                 format=pyaudio.paInt16,
                 channels=self.channels,
-                rate=self.rate,
+                rate=self.sample_rate,
                 input=True,
                 input_device_index=self.device_index,
             ) as stream:
@@ -54,7 +56,7 @@ class LoopbackRecorder(mp.Process):
                     print(f"Barrier not set in: {self.__class__.__name__}. " \
                           "Final audio file might be out of sync.")
 
-                print("Started recording loopback audio ... ")
+                print("Started recording loopback audio ... ", perf_counter())
 
                 start_time = perf_counter()
                 while perf_counter() - start_time < self.duration:
@@ -65,11 +67,11 @@ class LoopbackRecorder(mp.Process):
                     output_file.writeframes(data)
                     
             output_file.close()
-
+            is_recording_finished.set()
             print("Finished recording loopback audio!")
 
 
-class _SilencePlayer(mp.Process):
+class _SilencePlayer(threading.Thread):
     """
     Plays silence in the background. 
     
@@ -83,18 +85,18 @@ class _SilencePlayer(mp.Process):
 
     """
 
-    def __init__(self, duration, started_playing):
+    def __init__(self, is_silence_playing, is_recording_finished):
         super().__init__()
-        self.duration = duration
-        self.started_playing = started_playing
+        self.is_silence_playing = is_silence_playing
+        self.is_recording_finished = is_recording_finished
         self.sample_rate = 44100
         self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16)
         self.channels = 1
 
     def run(self):
-        self.__play_silence()
+        self.__play()
 
-    def __play_silence(self):
+    def __play(self):
         with pyaudio.PyAudio() as p:
             with p.open(
                 format=p.get_format_from_width(self.sample_size),
@@ -102,16 +104,17 @@ class _SilencePlayer(mp.Process):
                 rate=self.sample_rate,
                 output=True
              ) as stream:
-                started_playing_event_set = False
-                for _ in range(int(self.sample_rate * self.duration)):
-                    sample = self.__generate_silent_sample(
-                        size=self.sample_size,
-                        channels=self.channels,
-                    )
-                    stream.write(sample)
-                    if not started_playing_event_set:
-                        self.started_playing.set()
-                        started_playing_event_set = True
+                is_silence_playing_event_set = False
+                while not self.is_recording_finished.is_set():
+                    for _ in range(int(self.sample_rate)):
+                        sample = self.__generate_silent_sample(
+                            size=self.sample_size,
+                            channels=self.channels,
+                        )
+                        stream.write(sample)
+                        if not is_silence_playing_event_set:
+                            self.is_silence_playing.set()
+                            is_silence_playing_event_set = True
 
     def __generate_silent_sample(self, size, channels):
         return b"\0" * size * channels

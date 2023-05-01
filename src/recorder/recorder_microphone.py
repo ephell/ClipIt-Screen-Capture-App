@@ -1,6 +1,6 @@
 import multiprocessing as mp
-import wave
 from time import perf_counter
+import wave
 
 import pyaudiowpatch as pyaudio
 
