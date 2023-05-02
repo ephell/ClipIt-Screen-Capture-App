@@ -1,7 +1,8 @@
 import tkinter as tk
-from PIL import Image, ImageTk
+
 import mss
-from PIL import Image
+from PIL import Image, ImageTk, ImageEnhance
+
 
 class MousePositionTracker(tk.Frame):
     """ Tkinter Canvas mouse position widget. """
@@ -11,11 +12,6 @@ class MousePositionTracker(tk.Frame):
         self.canv_width = self.canvas.cget('width')
         self.canv_height = self.canvas.cget('height')
         self.reset()
-
-        # Create canvas cross-hair lines.
-        xhair_opts = dict(dash=(3, 2), fill='white', state=tk.HIDDEN)
-        self.lines = (self.canvas.create_line(0, 0, 0, self.canv_height, **xhair_opts),
-                      self.canvas.create_line(0, 0, self.canv_width,  0, **xhair_opts))
 
     def cur_selection(self):
         return (self.start, self.end)
@@ -30,21 +26,21 @@ class MousePositionTracker(tk.Frame):
         self._command(self.start, (event.x, event.y))  # User callback.
 
     def _update(self, event):
-        # Update cross-hair lines.
-        self.canvas.coords(self.lines[0], event.x, 0, event.x, self.canv_height)
-        self.canvas.coords(self.lines[1], 0, event.y, self.canv_width, event.y)
+        # Update selection rectangle
+        x1, y1 = self.start
+        x2, y2 = self.end
+        self.canvas.coords(self.rect, x1, y1, x2, y2)
         self.show()
 
     def reset(self):
         self.start = self.end = None
+        self.rect = self.canvas.create_rectangle(0, 0, 0, 0, outline='')
 
     def hide(self):
-        self.canvas.itemconfigure(self.lines[0], state=tk.HIDDEN)
-        self.canvas.itemconfigure(self.lines[1], state=tk.HIDDEN)
+        self.canvas.itemconfigure(self.rect, state=tk.HIDDEN)
 
     def show(self):
-        self.canvas.itemconfigure(self.lines[0], state=tk.NORMAL)
-        self.canvas.itemconfigure(self.lines[1], state=tk.NORMAL)
+        self.canvas.itemconfigure(self.rect, state=tk.NORMAL)
 
     def autodraw(self, command=lambda *args: None):
         """Setup automatic drawing; supports command option"""
@@ -55,7 +51,7 @@ class MousePositionTracker(tk.Frame):
         self.canvas.bind("<ButtonRelease-1>", self.quit)
 
     def quit(self, event):
-        self.hide()  # Hide cross-hairs.
+        self.hide()  # Hide selection rectangle
         self.reset()
 
 
@@ -119,22 +115,29 @@ class SelectionObject:
 
 
 class Application:
+
     # Default selection object options.
     SELECT_OPTS = dict(
         dash=(2, 2),
-        stipple='gray25',
-        fill='gray',
-        outline=''
+        stipple="gray25",
+        fill="",
+        outline=""
     )
 
     def __init__(self):
         self.root = tk.Tk()
+        self.root.bind("<Escape>", func=self.__close_window)
         self.root.title("Region Selector")
-        self.root.geometry(f"{1920}x{800}")
+        # self.root.geometry(f"{1920}x{800}")
+        self.root.overrideredirect(True)
         self.root.configure(background="grey")
 
         with mss.mss() as sct:
             screenshot = Image.open(sct.shot(mon=-1))
+            enhancer = ImageEnhance.Brightness(screenshot)
+            screenshot = enhancer.enhance(0.7)
+
+        self.root.geometry(f"{screenshot.width}x{screenshot.height}+0+0")
 
         self.screenshot = ImageTk.PhotoImage(screenshot)
         self.canvas = tk.Canvas(
@@ -162,6 +165,13 @@ class Application:
     def run(self):
         self.root.mainloop()
 
+    def __close_window(self, event):
+        self.root.destroy()
+
 if __name__ == '__main__':
     app = Application()
     app.run()
+
+
+
+
