@@ -1,94 +1,167 @@
-from tkinter import *
+import tkinter as tk
+from PIL import Image, ImageTk
+import mss
+from PIL import Image
+
+class MousePositionTracker(tk.Frame):
+    """ Tkinter Canvas mouse position widget. """
+
+    def __init__(self, canvas):
+        self.canvas = canvas
+        self.canv_width = self.canvas.cget('width')
+        self.canv_height = self.canvas.cget('height')
+        self.reset()
+
+        # Create canvas cross-hair lines.
+        xhair_opts = dict(dash=(3, 2), fill='white', state=tk.HIDDEN)
+        self.lines = (self.canvas.create_line(0, 0, 0, self.canv_height, **xhair_opts),
+                      self.canvas.create_line(0, 0, self.canv_width,  0, **xhair_opts))
+
+    def cur_selection(self):
+        return (self.start, self.end)
+
+    def begin(self, event):
+        self.hide()
+        self.start = (event.x, event.y)  # Remember position (no drawing).
+
+    def update(self, event):
+        self.end = (event.x, event.y)
+        self._update(event)
+        self._command(self.start, (event.x, event.y))  # User callback.
+
+    def _update(self, event):
+        # Update cross-hair lines.
+        self.canvas.coords(self.lines[0], event.x, 0, event.x, self.canv_height)
+        self.canvas.coords(self.lines[1], 0, event.y, self.canv_width, event.y)
+        self.show()
+
+    def reset(self):
+        self.start = self.end = None
+
+    def hide(self):
+        self.canvas.itemconfigure(self.lines[0], state=tk.HIDDEN)
+        self.canvas.itemconfigure(self.lines[1], state=tk.HIDDEN)
+
+    def show(self):
+        self.canvas.itemconfigure(self.lines[0], state=tk.NORMAL)
+        self.canvas.itemconfigure(self.lines[1], state=tk.NORMAL)
+
+    def autodraw(self, command=lambda *args: None):
+        """Setup automatic drawing; supports command option"""
+        self.reset()
+        self._command = command
+        self.canvas.bind("<Button-1>", self.begin)
+        self.canvas.bind("<B1-Motion>", self.update)
+        self.canvas.bind("<ButtonRelease-1>", self.quit)
+
+    def quit(self, event):
+        self.hide()  # Hide cross-hairs.
+        self.reset()
 
 
-class RegionSelector:
+class SelectionObject:
+    """ Widget to display a rectangular area on given canvas defined by two points
+        representing its diagonal.
+    """
+    def __init__(self, canvas, select_opts):
+        # Create attributes needed to display selection.
+        self.canvas = canvas
+        self.select_opts1 = select_opts
+        self.width = self.canvas.cget('width')
+        self.height = self.canvas.cget('height')
 
-    def __init__(self, root):
-        self.root = root
+        # Options for areas outside rectanglar selection.
+        select_opts1 = self.select_opts1.copy()  # Avoid modifying passed argument.
+        select_opts1.update(state=tk.HIDDEN)  # Hide initially.
+        
+        # Selection area (rectangle).
+        select_opts2 = dict(dash=(2, 2), fill='', outline='white', state=tk.HIDDEN)
 
-        self.all_widget_info = self.root.winfo_children()
-        print(self.all_widget_info)
+        # Initial extrema of inner and outer rectangles.
+        imin_x, imin_y,  imax_x, imax_y = 0, 0,  1, 1
+        omin_x, omin_y,  omax_x, omax_y = 0, 0,  self.width, self.height
 
-        self.width = self.root.winfo_width()
-        self.height = self.root.winfo_height()
-
-    def restore_original_attributes(self, event):
-        # self.__restore_all_widgets()
-        self.root.bind("<Escape>", func=self.__close_window) 
-        self.root.geometry(f"{self.width}x{self.height}")
-        # ToDo: Don't use normal to restore the window. Move the window
-        # back manually to original position, width and height.
-        self.root.state("normal")
-        self.root.attributes('-alpha', 1.0)
-        self.root.attributes('-topmost', False)
-        self.root.overrideredirect(False)
-        # Make sure it's impossible to draw a rectangle again.
-        self.canvas.pack_forget()
-
-    def __close_window(self, event):
-        self.root.destroy()
-
-    def select_region(self):
-        # self.__remove_all_widgets()
-        self.canvas = Canvas(self.root)
-        self.canvas.pack(fill=BOTH, expand=True)
-        self.canvas.bind("<ButtonPress-1>", func=self.__on_button_press)
-        self.canvas.bind("<B1-Motion>", func=self.__on_move_press)
-        self.canvas.bind("<ButtonRelease-1>", func=self.__on_button_release)
-        self.root.bind("<Escape>", func=self.restore_original_attributes)
-        self.root.geometry(f"{1920}x{1080}")
-        # ToDo: Don't use zoomed to fill out the entire screen. Move
-        # the window to x0, y0 and set the width and height to the
-        # width and height of the screen (all screens if there are
-        # multiple).
-        self.root.wm_state('zoomed')
-        self.root.attributes('-alpha', 0.5)
-        self.root.attributes('-topmost', True)
-        self.root.overrideredirect(True)
-
-    def __on_button_press(self, event):
-        self.canvas.start_x = event.x
-        self.canvas.start_y = event.y
-
-    def __on_move_press(self, event):
-        self.canvas.delete("rect")
-        self.canvas.create_rectangle(
-            self.canvas.start_x, 
-            self.canvas.start_y, 
-            event.x, 
-            event.y, 
-            fill='', 
-            outline='red',
-            width=3, 
-            tags="rect"
+        self.rects = (
+            # Area *outside* selection (inner) rectangle.
+            self.canvas.create_rectangle(omin_x, omin_y,  omax_x, imin_y, **select_opts1),
+            self.canvas.create_rectangle(omin_x, imin_y,  imin_x, imax_y, **select_opts1),
+            self.canvas.create_rectangle(imax_x, imin_y,  omax_x, imax_y, **select_opts1),
+            self.canvas.create_rectangle(omin_x, imax_y,  omax_x, omax_y, **select_opts1),
+            # Inner rectangle.
+            self.canvas.create_rectangle(imin_x, imin_y,  imax_x, imax_y, **select_opts2)
         )
 
-    def __on_button_release(self, event):
-        self.canvas.create_rectangle(
-            self.canvas.start_x, 
-            self.canvas.start_y, 
-            event.x, 
-            event.y,
-            fill='', 
-            width=3, 
-            outline='red', 
-            tags="rect"
+    def update(self, start, end):
+        # Current extrema of inner and outer rectangles.
+        imin_x, imin_y,  imax_x, imax_y = self._get_coords(start, end)
+        omin_x, omin_y,  omax_x, omax_y = 0, 0,  self.width, self.height
+
+        # Update coords of all rectangles based on these extrema.
+        self.canvas.coords(self.rects[0], omin_x, omin_y,  omax_x, imin_y),
+        self.canvas.coords(self.rects[1], omin_x, imin_y,  imin_x, imax_y),
+        self.canvas.coords(self.rects[2], imax_x, imin_y,  omax_x, imax_y),
+        self.canvas.coords(self.rects[3], omin_x, imax_y,  omax_x, omax_y),
+        self.canvas.coords(self.rects[4], imin_x, imin_y,  imax_x, imax_y),
+
+        for rect in self.rects:  # Make sure all are now visible.
+            self.canvas.itemconfigure(rect, state=tk.NORMAL)
+
+    def _get_coords(self, start, end):
+        """ Determine coords of a polygon defined by the start and
+            end points one of the diagonals of a rectangular area.
+        """
+        return (min((start[0], end[0])), min((start[1], end[1])),
+                max((start[0], end[0])), max((start[1], end[1])))
+
+    def hide(self):
+        for rect in self.rects:
+            self.canvas.itemconfigure(rect, state=tk.HIDDEN)
+
+
+class Application:
+    # Default selection object options.
+    SELECT_OPTS = dict(
+        dash=(2, 2),
+        stipple='gray25',
+        fill='gray',
+        outline=''
+    )
+
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Region Selector")
+        self.root.geometry(f"{1920}x{800}")
+        self.root.configure(background="grey")
+
+        with mss.mss() as sct:
+            screenshot = Image.open(sct.shot(mon=-1))
+
+        self.screenshot = ImageTk.PhotoImage(screenshot)
+        self.canvas = tk.Canvas(
+            master=self.root,
+            width=self.screenshot.width(),
+            height=self.screenshot.height(),
+            borderwidth=0,
+            highlightthickness=0
         )
-        # Save the coordinates of the rectangle
-        x1 = min(self.canvas.start_x, event.x)
-        y1 = min(self.canvas.start_y, event.y)
-        x2 = max(self.canvas.start_x, event.x)
-        y2 = max(self.canvas.start_y, event.y)
-        self.rect_coords = (x1, y1, x2, y2)
-        self.canvas.delete("rect")
-        self.canvas.pack_forget()
-        self.restore_original_attributes(event=None)
-        print(self.rect_coords)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+        self.canvas.image = self.screenshot
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.canvas.image)
 
-    def __remove_all_widgets(self):
-        for widget in self.all_widget_info:
-            widget.destroy()
+        # Create selection object to show current selection boundaries.
+        self.selection_obj = SelectionObject(self.canvas, self.SELECT_OPTS)
 
-    def __restore_all_widgets(self):
-        for widget in self.all_widget_info:
-            widget.pack()
+        # Callback function to update it given two points of its diagonal.
+        def on_drag(start, end, **kwarg):  # Must accept these arguments.
+            self.selection_obj.update(start, end)
+
+        # Create mouse position tracker that uses the function.
+        self.posn_tracker = MousePositionTracker(self.canvas)
+        self.posn_tracker.autodraw(command=on_drag)  # Enable callbacks.
+
+    def run(self):
+        self.root.mainloop()
+
+if __name__ == '__main__':
+    app = Application()
+    app.run()

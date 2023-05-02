@@ -2,6 +2,7 @@ import win32api, win32con, win32gui
 
 
 class RecordingAreaBorder:
+    """Appears when recording starts."""
 
     def __init__(self):
         win32gui.InitCommonControls()
