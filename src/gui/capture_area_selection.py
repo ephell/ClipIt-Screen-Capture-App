@@ -10,21 +10,18 @@ class AreaSelector:
         self.root = root
         self.left_click_coords = None
         self.left_drag_coords = None
-        self.canvas = self.__initialize_canvas(self.root)
-        self.selection_area = self.canvas.create_rectangle(
-            0, 
-            0, 
-            0, 
-            0, 
-            dash=(2, 2),
-            outline="white",
-            state=tk.HIDDEN
-        )
+        self.canvas = None
+        self.selection_area = None
+        self.original_root_x = None
+        self.original_root_y = None
+        self.original_root_width = None
+        self.original_root_height = None
 
     def start(self):
-        self.canvas.bind("<Button-1>", self.__on_left_mouse_click)
-        self.canvas.bind("<B1-Motion>", self.__on_left_mouse_drag)
-        self.canvas.bind("<ButtonRelease-1>", self.__on_left_mouse_release)
+        self.root.overrideredirect(True)
+        self.canvas = self.__initialize_canvas(self.root)
+        self.__assign_binds(self.root, self.canvas)
+        self.__save_root_dimensions(self.root)
 
     def get_selection_coords(self):
         return (self.left_click_coords, self.left_drag_coords)
@@ -45,8 +42,29 @@ class AreaSelector:
         )
         canvas.image = screenshot
         canvas.create_image(0, 0, anchor=tk.NW, image=canvas.image)
+        self.selection_area = canvas.create_rectangle(
+            0, 
+            0, 
+            0, 
+            0, 
+            dash=(2, 2),
+            outline="white",
+            state=tk.HIDDEN
+        )
         canvas.pack(fill=tk.BOTH, expand=True)
         return canvas
+
+    def __assign_binds(self, root, canvas):
+        canvas.bind("<Button-1>", self.__on_left_mouse_click)
+        canvas.bind("<B1-Motion>", self.__on_left_mouse_drag)
+        canvas.bind("<ButtonRelease-1>", self.__on_left_mouse_release)
+        root.bind("<Escape>", func=self.__on_escape)
+
+    def __save_root_dimensions(self, root):
+        self.original_root_x = root.winfo_x()
+        self.original_root_y = root.winfo_y()
+        self.original_root_width = root.winfo_width()
+        self.original_root_height = root.winfo_height()
 
     def __on_left_mouse_click(self, event):
         self.left_click_coords = (event.x, event.y)  
@@ -57,6 +75,22 @@ class AreaSelector:
 
     def __on_left_mouse_release(self, event):
         print(self.get_selection_coords())
+        self.canvas.destroy()
+        self.__restore_root_attributes()
+        print(self.original_root_x, self.original_root_y)
+        print(self.original_root_width, self.original_root_height)
+
+    def __on_escape(self, event):
+        self.__restore_root_attributes()
+        self.canvas.destroy()
+
+    def __restore_root_attributes(self):
+        self.root.geometry(
+            f"{self.original_root_width}x{self.original_root_height}"
+            f"+{self.original_root_x}+{self.original_root_y}"
+        )
+        self.root.overrideredirect(False)
+        self.root.bind("<Escape>", func=lambda event: self.root.destroy())
 
     def __draw(self, start, end):
         x0, y0, x1, y1 = self.__determine_corners(start, end)
