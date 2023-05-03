@@ -6,8 +6,11 @@ from PIL import Image, ImageTk, ImageEnhance
 
 class AreaSelector:
 
-    def __init__(self, canvas):
-        self.canvas = canvas
+    def __init__(self, root):
+        self.root = root
+        self.left_click_coords = None
+        self.left_drag_coords = None
+        self.canvas = self.__initialize_canvas(self.root)
         self.selection_area = self.canvas.create_rectangle(
             0, 
             0, 
@@ -17,8 +20,6 @@ class AreaSelector:
             outline="white",
             state=tk.HIDDEN
         )
-        self.left_click_coords = None
-        self.left_drag_coords = None
 
     def start(self):
         self.canvas.bind("<Button-1>", self.__on_left_mouse_click)
@@ -27,6 +28,25 @@ class AreaSelector:
 
     def get_selection_coords(self):
         return (self.left_click_coords, self.left_drag_coords)
+
+    def __initialize_canvas(self, root):
+        with mss.mss() as sct:
+            screenshot = Image.open(sct.shot(mon=-1))
+        enhancer = ImageEnhance.Brightness(screenshot)
+        screenshot = enhancer.enhance(0.7)
+        screenshot = ImageTk.PhotoImage(screenshot)
+        root.geometry(f"{screenshot.width()}x{screenshot.height()}+0+0")
+        canvas = tk.Canvas(
+            master=root,
+            width=screenshot.width(),
+            height=screenshot.height(),
+            borderwidth=0,
+            highlightthickness=0
+        )
+        canvas.image = screenshot
+        canvas.create_image(0, 0, anchor=tk.NW, image=canvas.image)
+        canvas.pack(fill=tk.BOTH, expand=True)
+        return canvas
 
     def __on_left_mouse_click(self, event):
         self.left_click_coords = (event.x, event.y)  
@@ -58,26 +78,7 @@ class Application:
         self.root.overrideredirect(True)
         self.root.configure(background="grey")
 
-        with mss.mss() as sct:
-            screenshot = Image.open(sct.shot(mon=-1))
-            enhancer = ImageEnhance.Brightness(screenshot)
-            screenshot = enhancer.enhance(0.7)
-
-        self.root.geometry(f"{screenshot.width}x{screenshot.height}+0+0")
-
-        self.screenshot = ImageTk.PhotoImage(screenshot)
-        self.canvas = tk.Canvas(
-            master=self.root,
-            width=self.screenshot.width(),
-            height=self.screenshot.height(),
-            borderwidth=0,
-            highlightthickness=0
-        )
-        self.canvas.pack(fill=tk.BOTH, expand=True)
-        self.canvas.image = self.screenshot
-        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.canvas.image)
-
-        self.sa = AreaSelector(self.canvas)
+        self.sa = AreaSelector(self.root)
         self.sa.start()
 
     def run(self):
