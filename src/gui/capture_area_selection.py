@@ -100,31 +100,3 @@ class AreaSelector:
     def __determine_corners(self, start, end):
         return (min((start[0], end[0])), min((start[1], end[1])),
                 max((start[0], end[0])), max((start[1], end[1])))
-
-
-class Application:
-
-    def __init__(self):
-        self.root = tk.Tk()
-        self.root.bind("<Escape>", func=self.__close_window)
-        self.root.title("Region Selector")
-        # self.root.geometry(f"{1920}x{800}")
-        self.root.overrideredirect(True)
-        self.root.configure(background="grey")
-
-        self.sa = AreaSelector(self.root)
-        self.sa.start()
-
-    def run(self):
-        self.root.mainloop()
-
-    def __close_window(self, event):
-        self.root.destroy()
-
-if __name__ == '__main__':
-    app = Application()
-    app.run()
-
-
-
-
