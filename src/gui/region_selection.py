@@ -5,57 +5,40 @@ from PIL import Image, ImageTk, ImageEnhance
 
 
 class MousePositionTracker:
-    """ Tkinter Canvas mouse position widget. """
 
     def __init__(self, canvas):
         self.canvas = canvas
-        self.canv_width = self.canvas.cget('width')
-        self.canv_height = self.canvas.cget('height')
+        self.left_click_coords = None
+        self.left_drag_coords = None
         self.reset()
 
-    def cur_selection(self):
-        return (self.start, self.end)
+    def get_selection_coords(self):
+        return (self.left_click_coords, self.left_drag_coords)
 
-    def begin(self, event):
-        self.hide()
-        self.start = (event.x, event.y)  # Remember position (no drawing).
+    def __on_left_mouse_click(self, event):
+        self.left_click_coords = (event.x, event.y)  
 
-    def update(self, event):
-        self.end = (event.x, event.y)
-        self._update(event)
-        self._command(self.start, (event.x, event.y))  # User callback.
-
-    def _update(self, event):
-        # Update selection rectangle
-        x1, y1 = self.start
-        x2, y2 = self.end
-        self.canvas.coords(self.rect, x1, y1, x2, y2)
-        self.show()
+    def __on_left_mouse_drag(self, event):
+        self.left_drag_coords = (event.x, event.y)
+        # User callback.
+        self._command(self.left_click_coords, self.left_drag_coords) 
 
     def reset(self):
-        self.start = self.end = None
-        self.rect = self.canvas.create_rectangle(0, 0, 0, 0, outline='')
-
-    def hide(self):
-        self.canvas.itemconfigure(self.rect, state=tk.HIDDEN)
-
-    def show(self):
-        self.canvas.itemconfigure(self.rect, state=tk.NORMAL)
+        self.left_click_coords = self.left_drag_coords = None
 
     def autodraw(self, command=lambda *args: None):
         """Setup automatic drawing; supports command option"""
         self.reset()
         self._command = command
-        self.canvas.bind("<Button-1>", self.begin)
-        self.canvas.bind("<B1-Motion>", self.update)
+        self.canvas.bind("<Button-1>", self.__on_left_mouse_click)
+        self.canvas.bind("<B1-Motion>", self.__on_left_mouse_drag)
         self.canvas.bind("<ButtonRelease-1>", self.quit)
 
     def quit(self, event):
-        self.hide()  # Hide selection rectangle
         self.reset()
 
 
-class SelectionArea:
+class SelectionAreaDrawer:
     """Widget to display a rectangular selection area on a canvas."""
 
     def __init__(self, canvas):
@@ -70,15 +53,16 @@ class SelectionArea:
             state=tk.HIDDEN
         )
 
-    def update(self, start, end):
-        x0, y0, x1, y1 = self._get_coords(start, end)
+    def draw(self, start, end):
+        """Draw a rectangular area on the canvas."""
+        x0, y0, x1, y1 = self.__get_coords(start, end)
         self.canvas.coords(self.selection_area, x0, y0, x1, y1),
         self.canvas.itemconfigure(self.selection_area, state=tk.NORMAL)
 
-    def _get_coords(self, start, end):
+    def __get_coords(self, start, end):
         """ 
-        Determine coords of a polygon defined by the start and end
-        points one of the diagonals of a rectangular area.
+        Determine top left and bottom right coordinates of the selection
+        area.
         """
         return (min((start[0], end[0])), min((start[1], end[1])),
                 max((start[0], end[0])), max((start[1], end[1])))
@@ -114,11 +98,11 @@ class Application:
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.canvas.image)
 
         # Create selection object to show current selection boundaries.
-        self.selection_area = SelectionArea(self.canvas)
+        self.selection_area = SelectionAreaDrawer(self.canvas)
 
         # Callback function to update it given two points of its diagonal.
         def on_drag(start, end):  # Must accept these arguments.
-            self.selection_area.update(start, end)
+            self.selection_area.draw(start, end)
 
         # Create mouse position tracker that uses the function.
         self.posn_tracker = MousePositionTracker(self.canvas)
