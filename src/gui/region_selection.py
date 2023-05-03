@@ -4,7 +4,7 @@ import mss
 from PIL import Image, ImageTk, ImageEnhance
 
 
-class MousePositionTracker(tk.Frame):
+class MousePositionTracker:
     """ Tkinter Canvas mouse position widget. """
 
     def __init__(self, canvas):
@@ -55,74 +55,36 @@ class MousePositionTracker(tk.Frame):
         self.reset()
 
 
-class SelectionObject:
-    """ Widget to display a rectangular area on given canvas defined by two points
-        representing its diagonal.
-    """
-    def __init__(self, canvas, select_opts):
-        # Create attributes needed to display selection.
+class SelectionArea:
+    """Widget to display a rectangular selection area on a canvas."""
+
+    def __init__(self, canvas):
         self.canvas = canvas
-        self.select_opts1 = select_opts
-        self.width = self.canvas.cget('width')
-        self.height = self.canvas.cget('height')
-
-        # Options for areas outside rectanglar selection.
-        select_opts1 = self.select_opts1.copy()  # Avoid modifying passed argument.
-        select_opts1.update(state=tk.HIDDEN)  # Hide initially.
-        
-        # Selection area (rectangle).
-        select_opts2 = dict(dash=(2, 2), fill='', outline='white', state=tk.HIDDEN)
-
-        # Initial extrema of inner and outer rectangles.
-        imin_x, imin_y,  imax_x, imax_y = 0, 0,  1, 1
-        omin_x, omin_y,  omax_x, omax_y = 0, 0,  self.width, self.height
-
-        self.rects = (
-            # Area *outside* selection (inner) rectangle.
-            self.canvas.create_rectangle(omin_x, omin_y,  omax_x, imin_y, **select_opts1),
-            self.canvas.create_rectangle(omin_x, imin_y,  imin_x, imax_y, **select_opts1),
-            self.canvas.create_rectangle(imax_x, imin_y,  omax_x, imax_y, **select_opts1),
-            self.canvas.create_rectangle(omin_x, imax_y,  omax_x, omax_y, **select_opts1),
-            # Inner rectangle.
-            self.canvas.create_rectangle(imin_x, imin_y,  imax_x, imax_y, **select_opts2)
+        self.selection_area = self.canvas.create_rectangle(
+            0, 
+            0, 
+            0, 
+            0, 
+            dash=(2, 2),
+            outline="white",
+            state=tk.HIDDEN
         )
 
     def update(self, start, end):
-        # Current extrema of inner and outer rectangles.
-        imin_x, imin_y,  imax_x, imax_y = self._get_coords(start, end)
-        omin_x, omin_y,  omax_x, omax_y = 0, 0,  self.width, self.height
-
-        # Update coords of all rectangles based on these extrema.
-        self.canvas.coords(self.rects[0], omin_x, omin_y,  omax_x, imin_y),
-        self.canvas.coords(self.rects[1], omin_x, imin_y,  imin_x, imax_y),
-        self.canvas.coords(self.rects[2], imax_x, imin_y,  omax_x, imax_y),
-        self.canvas.coords(self.rects[3], omin_x, imax_y,  omax_x, omax_y),
-        self.canvas.coords(self.rects[4], imin_x, imin_y,  imax_x, imax_y),
-
-        for rect in self.rects:  # Make sure all are now visible.
-            self.canvas.itemconfigure(rect, state=tk.NORMAL)
+        x0, y0, x1, y1 = self._get_coords(start, end)
+        self.canvas.coords(self.selection_area, x0, y0, x1, y1),
+        self.canvas.itemconfigure(self.selection_area, state=tk.NORMAL)
 
     def _get_coords(self, start, end):
-        """ Determine coords of a polygon defined by the start and
-            end points one of the diagonals of a rectangular area.
+        """ 
+        Determine coords of a polygon defined by the start and end
+        points one of the diagonals of a rectangular area.
         """
         return (min((start[0], end[0])), min((start[1], end[1])),
                 max((start[0], end[0])), max((start[1], end[1])))
 
-    def hide(self):
-        for rect in self.rects:
-            self.canvas.itemconfigure(rect, state=tk.HIDDEN)
-
 
 class Application:
-
-    # Default selection object options.
-    SELECT_OPTS = dict(
-        dash=(2, 2),
-        stipple="gray25",
-        fill="",
-        outline=""
-    )
 
     def __init__(self):
         self.root = tk.Tk()
@@ -152,11 +114,11 @@ class Application:
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.canvas.image)
 
         # Create selection object to show current selection boundaries.
-        self.selection_obj = SelectionObject(self.canvas, self.SELECT_OPTS)
+        self.selection_area = SelectionArea(self.canvas)
 
         # Callback function to update it given two points of its diagonal.
-        def on_drag(start, end, **kwarg):  # Must accept these arguments.
-            self.selection_obj.update(start, end)
+        def on_drag(start, end):  # Must accept these arguments.
+            self.selection_area.update(start, end)
 
         # Create mouse position tracker that uses the function.
         self.posn_tracker = MousePositionTracker(self.canvas)
