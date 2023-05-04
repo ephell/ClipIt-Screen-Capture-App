@@ -3,33 +3,48 @@ import threading
 import win32api, win32con, win32gui
 
 
-class RecordingAreaBorder:
+class RecordingAreaBorder(threading.Thread):
 
     def __init__(self, top_left_x, top_left_y, bottom_right_x, bottom_right_y):
+        super().__init__()
+        self.daemon = True
+        self.hwnd = None
         self.top_left_x = top_left_x
         self.top_left_y = top_left_y
         self.bottom_right_x = bottom_right_x
         self.bottom_right_y = bottom_right_y
-        self.hwnd = self.__generate_hwnd(
+
+    def run(self):
+        """
+        Create the border and start listening for messages. 
+        
+        Window creation must be done in the thread and not in the 
+        constructor because to be able to listen for messages the 
+        thread must own the window. If the window is created in the
+        constructor, the thread that initialized the object will own
+        the window instead and the messages will not be received.
+        """
+        self.hwnd = self.__create_window(
             top_left_x=self.top_left_x,
             top_left_y=self.top_left_y,
             width=self.bottom_right_x - self.top_left_x,
             height=self.bottom_right_y - self.top_left_y
         )
-        self.__create_border_region (self.hwnd)
+        self.__crop_window(self.hwnd)
         self.__set_opacity(self.hwnd, 255)
         self.__set_color(self.hwnd)
         self.__set_always_on_top(self.hwnd)
         self.__show_window(self.hwnd)
-        
-    def run(self):
-        """Listen for window messages until the window is destroyed."""
         win32gui.PumpMessages()
 
-    def __generate_hwnd(self, top_left_x, top_left_y, width, height):
+    def destroy(self):
+        win32gui.SendMessage(self.hwnd, win32con.WM_QUIT, 0, 0)
+        return True
+
+    def __create_window(self, top_left_x, top_left_y, width, height):
         message_handler = {
-            win32con.WM_DESTROY: self.__on_destroy,
-            win32con.WM_PAINT: self.__on_paint
+            win32con.WM_PAINT: self.__on_paint,
+            win32con.WM_QUIT: self.__on_quit
         }
         wc = win32gui.WNDCLASS()
         wc.lpfnWndProc = message_handler
@@ -37,7 +52,7 @@ class RecordingAreaBorder:
         win32gui.RegisterClass(wc)
         hwnd = win32gui.CreateWindowEx(
             # ToDo: Uncomment second tag' to hide the window from the taskbar.
-            win32con.WS_EX_LAYERED, #| win32con.WS_EX_TOOLWINDOW
+            win32con.WS_EX_LAYERED, #| win32con.WS_EX_TOOLWINDOW,
             "BorderClass",
             "RECORDING AREA BORDER",
             win32con.WS_VISIBLE | win32con.WS_POPUP,
@@ -52,10 +67,10 @@ class RecordingAreaBorder:
         )
         return hwnd
 
-    def __create_border_region(self, hwnd):
+    def __crop_window(self, hwnd):
         """
         Modify the window region of the given window handle `hwnd` to 
-        remove the interior area and leave only a border. 
+        remove the interior area and leave only a custom border.
         
         Specifically, this method creates a round rectangular region 
         covering the entire window area, then subtracts another round 
@@ -81,7 +96,7 @@ class RecordingAreaBorder:
         win32gui.SetLayeredWindowAttributes(hwnd, 0, opacity, win32con.LWA_ALPHA)
 
     def __set_color(self, hwnd):
-        """Post a WM_PAINT message to the given window handle `hwnd`."""
+        """Post a WM_PAINT message."""
         win32gui.UpdateWindow(hwnd)
 
     def __set_always_on_top(self, hwnd):
@@ -108,7 +123,7 @@ class RecordingAreaBorder:
         win32gui.EndPaint(hwnd, paint_struct)
         return 0
 
-    def __on_destroy(self, hwnd, message, wparam, lparam):
-        """Callback for the WM_DESTROY message."""
+    def __on_quit(self, hwnd, message, wparam, lparam):
+        """Callback for the WM_QUIT message."""
         win32gui.PostQuitMessage(0)
         return True
