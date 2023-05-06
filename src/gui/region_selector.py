@@ -8,14 +8,12 @@ from PySide6.QtWidgets import QWidget
 class RegionSelector(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowFlags(
-            Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.ToolTip
-        )
-        self.screenshot = self.take_screenshot()
-        self.setFixedSize(self.screenshot.width(), self.screenshot.height())
         self.dragging = False
         self.start_pos = None
         self.end_pos = None
+        self.screenshot = self.take_screenshot()
+        self.setFixedSize(self.screenshot.width(), self.screenshot.height())
+        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.ToolTip)
 
     def take_screenshot(self):
         with mss.mss() as sct:
