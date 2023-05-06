@@ -1,9 +1,9 @@
 import mss
+import numpy as np
 from PIL import Image
 from PySide6.QtCore import Qt, QRect, QTimer
 from PySide6.QtGui import QPainter, QBrush, QPen, QPixmap, QImage, QColor, QRegion
 from PySide6.QtWidgets import QWidget
-
 
 class RegionSelector(QWidget):
     def __init__(self):
@@ -11,23 +11,32 @@ class RegionSelector(QWidget):
         self.setWindowFlags(
             Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.ToolTip
         )
-        self.initUI()
-
-    def initUI(self):
         self.screenshot = self.take_screenshot()
         self.setFixedSize(self.screenshot.width(), self.screenshot.height())
         self.dragging = False
-        self.startPos = None
-        self.endPos = None
+        self.start_pos = None
+        self.end_pos = None
 
     def take_screenshot(self):
         with mss.mss() as sct:
-            screenshot = Image.open(sct.shot(mon=-1))
+            sc = sct.grab({
+                'top': 0, 
+                'left': 0, 
+                'width': sct.monitors[0]["width"], 
+                'height': sct.monitors[0]["height"]
+            })
+
+        # Remove alpha channel and convert to RGB
+        sc_bgra = np.frombuffer(sc.bgra, dtype=np.uint8)
+        sc_bgr = sc_bgra.reshape((sc.height, sc.width, 4))
+        sc_bgr = np.delete(sc_bgr, 3, axis=2)
+        sc_rgb = sc_bgr[...,::-1]
+        sc_rgb = np.ascontiguousarray(sc_rgb)
 
         q_image = QImage(
-            screenshot.tobytes(),
-            screenshot.width,
-            screenshot.height,
+            sc_rgb,
+            sc.width,
+            sc.height,
             QImage.Format_RGB888,
         )
 
@@ -43,19 +52,19 @@ class RegionSelector(QWidget):
             QTimer.singleShot(100, self.close)
         elif event.button() == Qt.LeftButton:
             self.dragging = True
-            self.startPos = event.position()
-            self.endPos = event.position()
+            self.start_pos = event.position()
+            self.end_pos = event.position()
             self.update()
 
     def mouseMoveEvent(self, event):
         if self.dragging:
-            self.endPos = event.position()
+            self.end_pos = event.position()
             self.update()
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton and self.dragging:
             self.dragging = False
-            self.endPos = event.position()
+            self.end_pos = event.position()
             self.update()
             print(f"Rectangle: {self.getRect()}")
 
@@ -70,7 +79,7 @@ class RegionSelector(QWidget):
         dimmed_region = QRegion(self.rect())
 
         # Draw the rectangle
-        if self.startPos is not None and self.endPos is not None:
+        if self.start_pos is not None and self.end_pos is not None:
             rectangle = QRect(*self.getRect())
             pen = QPen(Qt.white, 1)
             pen.setStyle(Qt.DashLine)
@@ -87,8 +96,8 @@ class RegionSelector(QWidget):
         painter.fillRect(self.rect(), QBrush(QColor(0, 0, 0, 128)))
 
     def getRect(self):
-        x1, y1 = self.startPos.x(), self.startPos.y()
-        x2, y2 = self.endPos.x(), self.endPos.y()
+        x1, y1 = self.start_pos.x(), self.start_pos.y()
+        x2, y2 = self.end_pos.x(), self.end_pos.y()
 
         x = min(x1, x2)
         y = min(y1, y2)
