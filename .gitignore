@@ -1,8 +1,10 @@
-/venv
 __pycache__/
+/venv
 /recordings
 /temp
 /logs
+/.vscode
+/.idea
 *.mp4
 *.mp3
 *.wav

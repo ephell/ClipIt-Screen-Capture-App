@@ -87,8 +87,7 @@ class Logger:
             An instance of `logging.getLogger()`.
         
         """
-        all_loggers = logging.Logger.manager.loggerDict
-        if logger_name in all_loggers:
+        if logger_name in logging.Logger.manager.loggerDict:
             return logging.getLogger(logger_name)
         else:
             return cls.__create_logger(
@@ -165,3 +164,14 @@ class Logger:
         stream_handler.setFormatter(stream_formatter)
         
         return stream_handler
+
+
+class GlobalLogger:
+    """Contains the global logger object."""
+
+    LOGGER = Logger.setup_logger(
+        logger_name="GLOBAL",
+        log_level=Logger.DEBUG,
+        log_to_console=True,
+        log_to_file=False
+    )

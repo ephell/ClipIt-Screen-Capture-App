@@ -1,4 +1,4 @@
-from settings import GlobalLogger
+from logger import GlobalLogger
 log = GlobalLogger.LOGGER
 
 import datetime
