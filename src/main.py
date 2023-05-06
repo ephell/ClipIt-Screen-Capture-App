@@ -1,9 +1,9 @@
-from logger import GlobalLogger
-log = GlobalLogger.LOGGER
-
 import os
+import sys
 
-from recorder.recorder import Recorder
+from PySide6.QtWidgets import QApplication
+
+from gui.main_window import MainWindow
 from settings import Paths
 
 
@@ -14,19 +14,10 @@ def __create_directories():
     if not os.path.exists(Paths.RECORDINGS_DIR):
         os.makedirs(Paths.RECORDINGS_DIR)
 
-def main():
-    __create_directories()
-    recorder = Recorder(
-        duration=3,
-        record_video=True,
-        record_loopback=True,
-        record_microphone=True,
-        monitor=2,
-        region=[60, 216, 1150, 650],
-        fps=30,
-    )
-    recorder.record()
-    log.info("All done!")
     
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    __create_directories()
+    app = QApplication(sys.argv)
+    main_window = MainWindow(app)
+    main_window.show()
+    app.exec()

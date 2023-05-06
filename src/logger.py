@@ -2,6 +2,8 @@ from datetime import datetime
 import logging
 import os
 
+from settings import Paths
+
 
 class Logger:
     """
@@ -15,8 +17,7 @@ class Logger:
     """
 
     # Creating master 'log' folder if it's missing.
-    __PARENT_DIR = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-    __LOGS_DIR = os.path.join(__PARENT_DIR, "logs")
+    __LOGS_DIR = os.path.join(Paths.CWD, "logs")
     if not os.path.exists(__LOGS_DIR):
         os.mkdir(__LOGS_DIR)
 
@@ -173,5 +174,5 @@ class GlobalLogger:
         logger_name="GLOBAL",
         log_level=Logger.DEBUG,
         log_to_console=True,
-        log_to_file=False
+        log_to_file=True
     )

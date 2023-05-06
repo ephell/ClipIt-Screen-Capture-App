@@ -1,8 +1,8 @@
-import sys
+from logger import GlobalLogger
+log = GlobalLogger.LOGGER
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QApplication,
     QWidget,
     QMainWindow,
     QPushButton,
@@ -10,8 +10,9 @@ from PySide6.QtWidgets import (
     QLabel,
 )
 
-from recording_area_border import RecordingAreaBorder
-from region_selector import RegionSelector
+from gui.recording_area_border import RecordingAreaBorder
+from gui.region_selector import RegionSelector
+from recorder.recorder import Recorder
 
 
 class MainWindow(QMainWindow):
@@ -30,6 +31,7 @@ class MainWindow(QMainWindow):
 
         start_recording_button = QPushButton()
         start_recording_button.setText("Start Recording")
+        start_recording_button.clicked.connect(self.__on_start_clicked)
 
         stop_recording_button = QPushButton()
         stop_recording_button.setText("Stop Recording")
@@ -54,11 +56,6 @@ class MainWindow(QMainWindow):
             if self.region_selector is not None:
                 self.region_selector.close()
 
-    def __on_stop_clicked(self):
-        if self.recording_area_border is not None:
-            self.recording_area_border.destroy()
-            self.recording_area_border = None
-
     def __on_select_region_clicked(self):
         def get_region(x0, y0, x1, y1):
             self.region_label.setText(f"Region: ({x0}, {y0}, {x1}, {y1})")
@@ -74,9 +71,20 @@ class MainWindow(QMainWindow):
         self.region_selector = RegionSelector(get_region)
         self.region_selector.show()
 
+    def __on_stop_clicked(self):
+        if self.recording_area_border is not None:
+            self.recording_area_border.destroy()
+            self.recording_area_border = None
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    main_window = MainWindow(app)
-    main_window.show()
-    app.exec()
+    def __on_start_clicked(self):
+        recorder = Recorder(
+            duration=3,
+            record_video=True,
+            record_loopback=True,
+            record_microphone=True,
+            monitor=2,
+            region=[60, 216, 1150, 650],
+            fps=30,
+        )
+        recorder.record()
+        log.info("All done!")
