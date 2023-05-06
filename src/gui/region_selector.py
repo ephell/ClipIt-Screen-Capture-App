@@ -5,8 +5,9 @@ from PySide6.QtGui import QPainter, QBrush, QPen, QPixmap, QImage, QColor, QRegi
 from PySide6.QtWidgets import QWidget
 
 class RegionSelector(QWidget):
-    def __init__(self):
+    def __init__(self, callback):
         super().__init__()
+        self.callback = callback
         self.dragging = False
         self.start_pos = None
         self.end_pos = None
@@ -62,8 +63,12 @@ class RegionSelector(QWidget):
         if event.button() == Qt.LeftButton and self.dragging:
             self.dragging = False
             self.end_pos = event.position()
-            self.update()
-            print(f"Rectangle: {self.getRect()}")
+            self.callback(
+                self.start_pos.x(),
+                self.start_pos.y(),
+                self.end_pos.x(),
+                self.end_pos.y(),
+            )
 
     def paintEvent(self, event):
         painter = QPainter(self)
