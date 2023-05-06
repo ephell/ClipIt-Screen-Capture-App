@@ -1,3 +1,5 @@
+import random
+import string
 import threading
 
 import win32api, win32con, win32gui
@@ -9,10 +11,10 @@ class RecordingAreaBorder(threading.Thread):
         super().__init__()
         self.daemon = True
         self.hwnd = None
-        self.top_left_x = top_left_x
-        self.top_left_y = top_left_y
-        self.bottom_right_x = bottom_right_x
-        self.bottom_right_y = bottom_right_y
+        self.top_left_x = int(top_left_x)
+        self.top_left_y = int(top_left_y)
+        self.bottom_right_x = int(bottom_right_x)
+        self.bottom_right_y = int(bottom_right_y)
 
     def run(self):
         """
@@ -41,6 +43,10 @@ class RecordingAreaBorder(threading.Thread):
         win32gui.SendMessage(self.hwnd, win32con.WM_QUIT, 0, 0)
         return True
 
+    def __generate_class_name(self):
+        chars = string.ascii_letters + string.digits
+        return ''.join(random.choice(chars) for _ in range(20))
+
     def __create_window(self, top_left_x, top_left_y, width, height):
         message_handler = {
             win32con.WM_PAINT: self.__on_paint,
@@ -48,12 +54,11 @@ class RecordingAreaBorder(threading.Thread):
         }
         wc = win32gui.WNDCLASS()
         wc.lpfnWndProc = message_handler
-        wc.lpszClassName = "BorderClass"
+        wc.lpszClassName = self.lpszClassName = self.__generate_class_name()
         win32gui.RegisterClass(wc)
         hwnd = win32gui.CreateWindowEx(
-            # ToDo: Uncomment second tag' to hide the window from the taskbar.
-            win32con.WS_EX_LAYERED, #| win32con.WS_EX_TOOLWINDOW,
-            "BorderClass",
+            win32con.WS_EX_LAYERED | win32con.WS_EX_TOOLWINDOW,
+            self.lpszClassName,
             "RECORDING AREA BORDER",
             win32con.WS_VISIBLE | win32con.WS_POPUP,
             top_left_x,
@@ -117,7 +122,6 @@ class RecordingAreaBorder(threading.Thread):
         """Callback for the WM_PAINT message."""
         hdc, paint_struct = win32gui.BeginPaint(hwnd)
         left, top, right, bottom = win32gui.GetClientRect(hwnd)
-        print(left, top, right, bottom)
         brush = win32gui.CreateSolidBrush(win32api.RGB(30, 200, 30))
         win32gui.FillRect(hdc, (left, top, right, bottom), brush)
         win32gui.EndPaint(hwnd, paint_struct)
