@@ -64,10 +64,10 @@ class RegionSelector(QWidget):
             self.dragging = False
             self.end_pos = event.position()
             self.callback(
-                self.start_pos.x(),
-                self.start_pos.y(),
-                self.end_pos.x(),
-                self.end_pos.y(),
+                min(self.start_pos.x(), self.end_pos.x()),
+                min(self.start_pos.y(), self.end_pos.y()),
+                max(self.start_pos.x(), self.end_pos.x()),
+                max(self.start_pos.y(), self.end_pos.y())
             )
 
     def paintEvent(self, event):

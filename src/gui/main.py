@@ -60,21 +60,19 @@ class MainWindow(QMainWindow):
             self.recording_area_border = None
 
     def __on_select_region_clicked(self):
+        def get_region(x0, y0, x1, y1):
+            self.region_label.setText(f"Region: ({x0}, {y0}, {x1}, {y1})")
+            self.region_selector.close() 
+            draw_recording_area_border(x0, y0, x1, y1)
+
+        def draw_recording_area_border(x0, y0, x1, y1):
+            self.recording_area_border = RecordingAreaBorder(x0, y0, x1, y1)
+            self.recording_area_border.start()
+
         if self.recording_area_border is not None:
             self.recording_area_border.destroy()
-        self.region_selector = RegionSelector(self.__get_region)
+        self.region_selector = RegionSelector(get_region)
         self.region_selector.show()
-
-    def __get_region(self, x0, y0, x1, y1):
-        self.region_label.setText(
-            f"Region selected: ({x0}, {y0}) ({x1}, {y1})"
-        )
-        self.region_selector.close() 
-        self.__draw_recording_area_border(x0, y0, x1, y1)
-
-    def __draw_recording_area_border(self, x0, y0, x1, y1):
-        self.recording_area_border = RecordingAreaBorder(x0, y0, x1, y1)
-        self.recording_area_border.start()
 
 
 if __name__ == "__main__":
