@@ -1,6 +1,7 @@
 from logger import GlobalLogger
 log = GlobalLogger.LOGGER
 
+import mss
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget,
@@ -57,10 +58,36 @@ class MainWindow(QMainWindow):
                 self.region_selector.close()
 
     def __on_select_region_clicked(self):
+        """Callback function for the select region button."""
         def get_region(x0, y0, x1, y1):
+            """Callback function for the region selector."""
+            if not is_within_single_monitor_bounds(x0, y0, x1, y1):
+                log.error("Region must be within a single monitor.")
+                self.region_selector.close()
+                return
+            
             self.region_label.setText(f"Region: ({x0}, {y0}, {x1}, {y1})")
             self.region_selector.close() 
             draw_recording_area_border(x0, y0, x1, y1)
+
+        def is_within_single_monitor_bounds(x0, y0, x1, y1):
+            with mss.mss() as sct:
+                monitors = sct.monitors
+                monitor_index_1 = None
+                monitor_index_2 = None
+                for i in range(1, len(monitors)):
+                    m = monitors[i]
+                    if (m["left"] <= x0 < m["left"] + m["width"] 
+                        and m["top"] <= y0 < m["top"] + m["height"]):
+                        monitor_index_1 = i
+                    if (m["left"] <= x1 < m["left"] + m["width"] 
+                        and m["top"] <= y1 < m["top"] + m["height"]):
+                        monitor_index_2 = i
+
+                if monitor_index_1 == monitor_index_2:
+                    return True
+                else:
+                    return False
 
         def draw_recording_area_border(x0, y0, x1, y1):
             self.recording_area_border = RecordingAreaBorder(x0, y0, x1, y1)
@@ -86,5 +113,4 @@ class MainWindow(QMainWindow):
             region=[60, 216, 1150, 650],
             fps=30,
         )
-        recorder.record()
-        log.info("All done!")
+        recorder.start()

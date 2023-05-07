@@ -174,5 +174,5 @@ class GlobalLogger:
         logger_name="GLOBAL",
         log_level=Logger.DEBUG,
         log_to_console=True,
-        log_to_file=True
+        log_to_file=False
     )
