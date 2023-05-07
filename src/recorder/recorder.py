@@ -4,6 +4,7 @@ log = GlobalLogger.LOGGER
 import datetime
 import multiprocessing as mp
 import os
+import threading
 
 from encoder import Encoder
 from recorder.recorder_loopback import LoopbackRecorder
@@ -13,7 +14,7 @@ from settings import Paths, TempFiles
 from utilities.audio import AudioUtils
 
 
-class Recorder:
+class Recorder(threading.Thread):
     """Recording controller."""
 
     def __init__(
@@ -24,6 +25,7 @@ class Recorder:
             record_microphone,
             **kwargs
         ):
+        super().__init__()
         self.duration = duration
         self.record_video = record_video
         self.record_loopback = record_loopback
@@ -45,22 +47,21 @@ class Recorder:
         for recorder in self.__get_recorders():
             recorder.barrier = barrier
 
-    def record(self):
+    def run(self):
         for recorder in self.__get_recorders():
             recorder.start()
         for recorder in self.__get_recorders():
             recorder.join()
         self.__generate_final_video()
         self.__clean_up_temp_directory()
+        log.info("All done!")
 
     def __unpack_kwargs(self, kwargs):
-        self.monitor = kwargs.get("monitor", 1)
         self.region = kwargs.get("region", [0, 0, 1920, 1080])
         self.fps = kwargs.get("fps", 30)
 
     def __initialize_video_recorder(self):
         self.video_recorder = VideoRecorder(
-            monitor=self.monitor, 
             region=self.region,
             duration=self.duration,
             fps=self.fps,

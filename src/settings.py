@@ -4,9 +4,9 @@ import os
 class Paths:
     """Various paths."""
 
-    __PARENT_DIR = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-    TEMP_DIR = os.path.join(__PARENT_DIR, "temp")
-    RECORDINGS_DIR = os.path.join(__PARENT_DIR, "recordings")
+    CWD = os.getcwd()
+    TEMP_DIR = os.path.join(CWD, "temp")
+    RECORDINGS_DIR = os.path.join(CWD, "recordings")
 
 
 class TempFiles:
