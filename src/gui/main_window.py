@@ -1,6 +1,8 @@
 from logger import GlobalLogger
 log = GlobalLogger.LOGGER
 
+import multiprocessing as mp
+
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget,
@@ -26,6 +28,8 @@ class MainWindow(QMainWindow):
         start_recording_button = QPushButton()
         start_recording_button.setText("Start Recording")
         start_recording_button.clicked.connect(self.__on_start_clicked)
+        self.stop_event = None
+        self.is_recording = False
 
         stop_recording_button = QPushButton()
         stop_recording_button.setText("Stop Recording")
@@ -52,17 +56,31 @@ class MainWindow(QMainWindow):
             self.select_area_button.recording_area_border.destroy()
             self.select_area_button.recording_area_border = None
             self.select_area_button.update_area_label()
+            self.stop_event.set()
+            self.stop_event = None
 
     def __on_start_clicked(self):
-        if self.select_area_button.recording_area_border is not None:
-            recorder = Recorder(
-                duration=3,
-                record_video=True,
-                record_loopback=True,
-                record_microphone=True,
-                region=[*self.select_area_button.get_area_coords()],
-                fps=30,
-            )
-            recorder.start()
+        if not self.is_recording:
+            if self.select_area_button.recording_area_border is not None:
+                self.is_recording = True
+                self.stop_event = mp.Event()
+                recorder = Recorder(
+                    record_video=True,
+                    record_loopback=True,
+                    record_microphone=True,
+                    stop_event=self.stop_event,
+                    region=[*self.select_area_button.get_area_coords()],
+                    monitor=self.select_area_button.get_monitor(),
+                    fps=30,
+                    is_recording_callback=self.__is_recording
+                )
+                recorder.start()
         else:
-            log.error("Recording area not selected.")
+            log.error("Recording is process is already running.")
+
+    def __is_recording(self, value):
+        """
+        Callback function for the `Recorder` object. Called when 
+        the recording has ended.
+        """
+        self.is_recording = value
