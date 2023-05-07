@@ -14,12 +14,13 @@ from settings import Paths, TempFiles
 class VideoRecorder(mp.Process):
     """Records a video from a specified region/monitor."""
 
-    def __init__(self, region, duration, fps, barrier=None):
+    def __init__(self, region, monitor, fps, barrier=None, stop_event=None):
         super().__init__()
         self.region = region
-        self.duration = duration
+        self.monitor = monitor
         self.fps = fps
         self.barrier = barrier
+        self.stop_event = stop_event
 
     def run(self):
         with mss.mss() as sct:
@@ -28,23 +29,22 @@ class VideoRecorder(mp.Process):
                 "top": int(self.region[1]),
                 "width": int(self.region[2]),
                 "height": int(self.region[3]),
-                "mon": 0,
+                "mon": self.monitor,
             }
-
-            captured_frames = []
-            frame_capture_times = []
-            fps = self.fps
 
             if isinstance(self.barrier, mp.synchronize.Barrier):
                 self.barrier.wait()
             else:
                 log.warning(f"Barrier not set in: {self.__class__.__name__}. " \
-                            "Final audio file might be out of sync.")
+                            "Final file might be out of sync.")
 
             log.info("Started recording video ... ")
 
+            captured_frames = []
+            frame_capture_times = []
+            fps = self.fps
             start_time = perf_counter()
-            while perf_counter() - start_time < self.duration:
+            while not self.stop_event.is_set():
 
                 frame_start_time = perf_counter()
 
@@ -59,7 +59,12 @@ class VideoRecorder(mp.Process):
                 if sleep_time > 0:
                     sleep(sleep_time)
 
-        precise_fps = len(captured_frames) / self.duration
+        log.debug(
+            f"Stopped recording video at: {perf_counter()}, " \
+            f"Duration: {perf_counter() - start_time}"
+        )
+
+        precise_fps = len(captured_frames) / (perf_counter() - start_time)
         clip = ImageSequenceClip(captured_frames, fps=precise_fps)
         clip.write_videofile(
             filename=f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}",
@@ -67,9 +72,9 @@ class VideoRecorder(mp.Process):
             logger=None
         )
 
-        log.info("Finished recording video!")
-        log.info("----------------------------------------")
-        log.info(f"Total frames captured: {len(captured_frames)}")
-        log.info(f"Average frame capture time: {np.mean(frame_capture_times)}")
-        log.info(f"Average FPS: {precise_fps}")
-        log.info("----------------------------------------")
+        log.debug("Finished recording video!")
+        log.debug("----------------------------------------")
+        log.debug(f"Total frames captured: {len(captured_frames)}")
+        log.debug(f"Average frame capture time: {np.mean(frame_capture_times)}")
+        log.debug(f"Average FPS: {precise_fps}")
+        log.debug("----------------------------------------")
