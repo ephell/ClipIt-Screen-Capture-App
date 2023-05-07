@@ -14,9 +14,8 @@ from settings import Paths, TempFiles
 class VideoRecorder(mp.Process):
     """Records a video from a specified region/monitor."""
 
-    def __init__(self, monitor, region, duration, fps, barrier=None):
+    def __init__(self, region, duration, fps, barrier=None):
         super().__init__()
-        self.monitor = monitor
         self.region = region
         self.duration = duration
         self.fps = fps
@@ -24,15 +23,12 @@ class VideoRecorder(mp.Process):
 
     def run(self):
         with mss.mss() as sct:
-            if self.monitor == 2:
-                self.region[0] += sct.monitors[self.monitor]["left"]
-
             monitor = {
-                "left": self.region[0],
-                "top": self.region[1],
-                "width": self.region[2],
-                "height": self.region[3],
-                "mon": self.monitor,
+                "left": int(self.region[0]),
+                "top": int(self.region[1]),
+                "width": int(self.region[2]),
+                "height": int(self.region[3]),
+                "mon": 0,
             }
 
             captured_frames = []

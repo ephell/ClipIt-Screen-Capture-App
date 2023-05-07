@@ -57,13 +57,11 @@ class Recorder(threading.Thread):
         log.info("All done!")
 
     def __unpack_kwargs(self, kwargs):
-        self.monitor = kwargs.get("monitor", 1)
         self.region = kwargs.get("region", [0, 0, 1920, 1080])
         self.fps = kwargs.get("fps", 30)
 
     def __initialize_video_recorder(self):
         self.video_recorder = VideoRecorder(
-            monitor=self.monitor, 
             region=self.region,
             duration=self.duration,
             fps=self.fps,

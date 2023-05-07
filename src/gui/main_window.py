@@ -25,6 +25,10 @@ class MainWindow(QMainWindow):
         self.app = app
         self.region_selector = None
         self.recording_area_border = None
+        self.recording_area_top_x = None
+        self.recording_area_top_y = None
+        self.recording_area_bottom_x = None
+        self.recording_area_bottom_y = None
 
         select_region = QPushButton()
         select_region.setText("Select Area")
@@ -69,6 +73,10 @@ class MainWindow(QMainWindow):
             self.region_label.setText(f"Region: ({x0}, {y0}, {x1}, {y1})")
             self.region_selector.close() 
             draw_recording_area_border(x0, y0, x1, y1)
+            self.recording_area_top_x = x0
+            self.recording_area_top_y = y0
+            self.recording_area_bottom_x = x1
+            self.recording_area_bottom_y = y1
 
         def is_within_single_monitor_bounds(x0, y0, x1, y1):
             with mss.mss() as sct:
@@ -104,13 +112,20 @@ class MainWindow(QMainWindow):
             self.recording_area_border = None
 
     def __on_start_clicked(self):
-        recorder = Recorder(
-            duration=3,
-            record_video=True,
-            record_loopback=True,
-            record_microphone=True,
-            monitor=2,
-            region=[60, 216, 1150, 650],
-            fps=30,
-        )
-        recorder.start()
+        if self.recording_area_border is not None:
+            recorder = Recorder(
+                duration=5,
+                record_video=True,
+                record_loopback=True,
+                record_microphone=True,
+                region=[
+                    self.recording_area_top_x,
+                    self.recording_area_top_y,
+                    self.recording_area_bottom_x - self.recording_area_top_x,
+                    self.recording_area_bottom_y - self.recording_area_top_y
+                ],
+                fps=30,
+            )
+            recorder.start()
+        else:
+            log.error("No region selected.")
