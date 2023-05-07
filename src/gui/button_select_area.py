@@ -18,6 +18,7 @@ class SelectAreaButton(QWidget):
         self.recording_area_top_y = None
         self.recording_area_bottom_x = None
         self.recording_area_bottom_y = None
+        self.recording_area_monitor = None
 
         button = QPushButton()
         button.setText("Select Area")
@@ -38,6 +39,9 @@ class SelectAreaButton(QWidget):
             self.recording_area_bottom_x,
             self.recording_area_bottom_y
         )
+    
+    def get_monitor(self):
+        return self.recording_area_monitor
 
     def update_area_label(self, value=None):
         if isinstance(value, str):
@@ -67,12 +71,22 @@ class SelectAreaButton(QWidget):
             return
         
         self.update_area_label((x0, y0, x1, y1))
-        self.recording_area_top_x = x0
-        self.recording_area_top_y = y0
-        self.recording_area_bottom_x = x1
-        self.recording_area_bottom_y = y1
-        self.area_selector.close()
         self.__draw_recording_area_border(x0, y0, x1, y1)
+        self.area_selector.close()
+
+        self.recording_area_monitor = self.__get_monitor_by_point(x0, y0)
+        coords = self.__calculate_coords_within_monitor(
+            self.recording_area_monitor,
+            x0, y0, x1, y1
+        )
+        self.recording_area_top_x = coords[0]
+        self.recording_area_top_y = coords[1]
+        self.recording_area_bottom_x = coords[2]
+        self.recording_area_bottom_y = coords[3]
+
+    def __draw_recording_area_border(self, x0, y0, x1, y1):
+        self.recording_area_border = RecordingAreaBorder(x0, y0, x1, y1)
+        self.recording_area_border.start()
 
     def __is_within_single_monitor_bounds(self, x0, y0, x1, y1):
         """
@@ -97,6 +111,23 @@ class SelectAreaButton(QWidget):
             else:
                 return False
 
-    def __draw_recording_area_border(self, x0, y0, x1, y1):
-        self.recording_area_border = RecordingAreaBorder(x0, y0, x1, y1)
-        self.recording_area_border.start()
+    def __get_monitor_by_point(self, x, y):
+        """Get the index of the monitor that contains the point (x, y)."""
+        with mss.mss() as sct:
+            monitors = sct.monitors
+            for i in range(1, len(monitors)):
+                m = monitors[i]
+                if (m["left"] <= x < m["left"] + m["width"] 
+                    and m["top"] <= y < m["top"] + m["height"]):
+                    return i
+            return None
+
+    def __calculate_coords_within_monitor(self, monitor_index, x0, y0, x1, y1):
+        """Calculate coordinates within the bounds of a single monitor."""
+        with mss.mss() as sct:
+            monitor = sct.monitors[monitor_index]
+            top_left_x = x0
+            top_left_y = y0
+            bottom_right_x = (x1 - monitor["left"]) - (x0 - monitor["left"])
+            bottom_right_y = (y1 - monitor["top"]) - (y0 - monitor["top"])
+            return (top_left_x, top_left_y, bottom_right_x, bottom_right_y)
