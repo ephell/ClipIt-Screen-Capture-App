@@ -39,9 +39,11 @@ class SelectAreaButton(QWidget):
             self.recording_area_bottom_y
         )
 
-    def update_area_label(self, area_coords=None):
-        if area_coords is not None:
-            self.area_label.setText(f"Area: {area_coords}")
+    def update_area_label(self, value=None):
+        if isinstance(value, str):
+            self.area_label.setText(value)
+        elif isinstance(value, tuple):
+            self.area_label.setText(f"Area: {value}")
         else:
             self.area_label.setText(f"No area selected.")
 
@@ -58,7 +60,9 @@ class SelectAreaButton(QWidget):
     def __get_area_coords(self, x0, y0, x1, y1):
         """Callback function for the area selector."""
         if not self.__is_within_single_monitor_bounds(x0, y0, x1, y1):
-            log.error("Selected area must be within a single monitor.")
+            self.update_area_label(
+                "Invalid selection. Area must be within a single monitor."
+            )
             self.area_selector.close()
             return
         
