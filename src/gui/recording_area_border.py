@@ -11,10 +11,11 @@ class RecordingAreaBorder(threading.Thread):
         super().__init__()
         self.daemon = True
         self.hwnd = None
-        self.top_left_x = int(top_left_x)
-        self.top_left_y = int(top_left_y)
-        self.bottom_right_x = int(bottom_right_x)
-        self.bottom_right_y = int(bottom_right_y)
+        self.border_width = 1
+        self.top_left_x = int(top_left_x) - self.border_width
+        self.top_left_y = int(top_left_y) - self.border_width
+        self.bottom_right_x = int(bottom_right_x) + self.border_width + 1
+        self.bottom_right_y = int(bottom_right_y) + self.border_width + 1
 
     def run(self):
         """
@@ -83,14 +84,13 @@ class RecordingAreaBorder(threading.Thread):
         interior border. The resulting region is then set as the new 
         window region for `hwnd`.
         """
-        border_width = 2
         x0, y0, x1, y1 = win32gui.GetClientRect(hwnd)
         region = win32gui.CreateRoundRectRgn(x0, y0, x1, y1, 0, 0)
         exclude = win32gui.CreateRoundRectRgn(
-            x0 + border_width, 
-            y0 + border_width, 
-            x1 - border_width, 
-            y1 - border_width, 
+            x0 + self.border_width, 
+            y0 + self.border_width, 
+            x1 - self.border_width, 
+            y1 - self.border_width, 
             0, 
             0
         )
