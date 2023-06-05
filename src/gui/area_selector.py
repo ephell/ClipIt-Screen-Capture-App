@@ -4,10 +4,12 @@ from PySide6.QtCore import Qt, QRect, QTimer
 from PySide6.QtGui import QPainter, QBrush, QPen, QPixmap, QImage, QColor, QRegion
 from PySide6.QtWidgets import QWidget
 
-class RegionSelector(QWidget):
-    def __init__(self, callback):
+
+class AreaSelector(QWidget):
+    def __init__(self, get_area_coords_callback, update_area_label_callback):
         super().__init__()
-        self.callback = callback
+        self.get_area_coords_callback = get_area_coords_callback
+        self.update_area_label_callback = update_area_label_callback
         self.dragging = False
         self.start_pos = None
         self.end_pos = None
@@ -46,8 +48,9 @@ class RegionSelector(QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.RightButton:
-            # Prevents the right-click menu from appearing.
+            # Wating prevents the right-click menu from appearing.
             QTimer.singleShot(100, self.close)
+            self.update_area_label_callback()
         elif event.button() == Qt.LeftButton:
             self.dragging = True
             self.start_pos = event.position()
@@ -63,7 +66,7 @@ class RegionSelector(QWidget):
         if event.button() == Qt.LeftButton and self.dragging:
             self.dragging = False
             self.end_pos = event.position()
-            self.callback(
+            self.get_area_coords_callback(
                 min(self.start_pos.x(), self.end_pos.x()),
                 min(self.start_pos.y(), self.end_pos.y()),
                 max(self.start_pos.x(), self.end_pos.x()),

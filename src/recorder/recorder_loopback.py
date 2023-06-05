@@ -14,10 +14,10 @@ from settings import Paths, TempFiles
 class LoopbackRecorder(mp.Process):
     """Records audio from the default loopback device."""
 
-    def __init__(self, loopback_device, duration, barrier=None):
+    def __init__(self, loopback_device, barrier=None, stop_event=None):
         super().__init__()
-        self.duration = duration
         self.barrier = barrier
+        self.stop_event = stop_event
         self.channels = loopback_device["maxInputChannels"]
         self.sample_rate = int(loopback_device["defaultSampleRate"])
         self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16) 
@@ -62,13 +62,18 @@ class LoopbackRecorder(mp.Process):
                 log.info("Started recording loopback audio ... ")
 
                 start_time = perf_counter()
-                while perf_counter() - start_time < self.duration:
+                while not self.stop_event.is_set():
                     data = stream.read(
                         num_frames=stream.get_read_available(), 
                         exception_on_overflow=False
                     )
                     output_file.writeframes(data)
-                    
+
+            log.debug(
+                f"Stopped recording loopback audio at: {perf_counter()}, " \
+                f"Duration: {perf_counter() - start_time}"
+            )
+
             output_file.close()
             is_recording_finished.set()
             log.info("Finished recording loopback audio!")

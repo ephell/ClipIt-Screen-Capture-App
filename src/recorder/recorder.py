@@ -19,22 +19,25 @@ class Recorder(threading.Thread):
 
     def __init__(
             self,
-            duration, 
             record_video,
             record_loopback,
             record_microphone,
+            stop_event=None,
             **kwargs
         ):
         super().__init__()
-        self.duration = duration
         self.record_video = record_video
         self.record_loopback = record_loopback
         self.record_microphone = record_microphone
+        self.stop_event = stop_event
         self.__unpack_kwargs(kwargs)
         self.video_recorder = None
         self.loopback_recorder = None
         self.microphone_recorder = None
-
+        self.video_recorder_stop_event = None
+        self.loopback_recorder_stop_event = None
+        self.microphone_recorder_stop_event = None
+    
         if self.record_video:
             self.__initialize_video_recorder()
         if self.record_loopback:
@@ -50,30 +53,43 @@ class Recorder(threading.Thread):
     def run(self):
         for recorder in self.__get_recorders():
             recorder.start()
+
+        self.stop_event.wait()
+
+        for recorder in self.__get_recorders():
+            recorder.stop_event.set()
+
         for recorder in self.__get_recorders():
             recorder.join()
+
         self.__generate_final_video()
         self.__clean_up_temp_directory()
+        self.is_recording_callback(False)
         log.info("All done!")
 
     def __unpack_kwargs(self, kwargs):
-        self.region = kwargs.get("region", [0, 0, 1920, 1080])
-        self.fps = kwargs.get("fps", 30)
+        self.region = kwargs.get("region")
+        self.monitor = kwargs.get("monitor")
+        self.fps = kwargs.get("fps")
+        self.is_recording_callback = kwargs.get("is_recording_callback")
 
     def __initialize_video_recorder(self):
+        self.video_recorder_stop_event = mp.Event()
         self.video_recorder = VideoRecorder(
             region=self.region,
-            duration=self.duration,
+            monitor=self.monitor,
             fps=self.fps,
+            stop_event=self.video_recorder_stop_event
         )
 
     def __initialize_loopback_recorder(self):
         loopback_device = AudioUtils.get_default_loopback_device()
         if loopback_device is not None:
             self.record_loopback = True
+            self.loopback_recorder_stop_event = mp.Event()
             self.loopback_recorder = LoopbackRecorder(
                 loopback_device=loopback_device,
-                duration=self.duration,
+                stop_event=self.loopback_recorder_stop_event
             )
         else:
             self.record_loopback = False
@@ -82,9 +98,10 @@ class Recorder(threading.Thread):
         microphone = AudioUtils.get_default_microphone()
         if microphone is not None:
             self.record_microphone = True
+            self.microphone_recorder_stop_event = mp.Event()
             self.microphone_recorder = MicrophoneRecorder(
                 microphone=microphone,
-                duration=self.duration,
+                stop_event=self.microphone_recorder_stop_event
             )
         else:
             self.record_microphone = False

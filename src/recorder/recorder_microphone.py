@@ -13,10 +13,10 @@ from settings import Paths, TempFiles
 class MicrophoneRecorder(mp.Process):
     """Records audio from the default microphone."""
 
-    def __init__(self, microphone, duration, barrier=None):
+    def __init__(self, microphone, barrier=None, stop_event=None):
         super().__init__()
-        self.duration = duration
         self.barrier = barrier
+        self.stop_event = stop_event
         self.channels = microphone["maxInputChannels"]
         self.rate = int(microphone["defaultSampleRate"])
         self.sample_size = pyaudio.get_sample_size(pyaudio.paInt16) 
@@ -53,12 +53,17 @@ class MicrophoneRecorder(mp.Process):
                 log.info("Started recording microphone audio ... ")
 
                 start_time = perf_counter()
-                while perf_counter() - start_time < self.duration:
+                while not self.stop_event.is_set():
                     data = stream.read(
                         num_frames=stream.get_read_available(), 
                         exception_on_overflow=False
                     )
                     output_file.writeframes(data)
+
+            log.debug(
+                f"Stopped recording microphone audio at: {perf_counter()}, " \
+                f"Duration: {perf_counter() - start_time}"
+            )
 
             output_file.close()
 
