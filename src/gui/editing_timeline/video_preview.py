@@ -36,6 +36,9 @@ if __name__ == "__main__":
     videoItem = QGraphicsVideoItem()
     player.setVideoOutput(videoItem)
 
+    audioOutput = QAudioOutput()  # Create an audio output
+    player.setAudioOutput(audioOutput)  # Set the audio output for the player
+
     scene = QGraphicsScene()
     scene.addItem(videoItem)
 
