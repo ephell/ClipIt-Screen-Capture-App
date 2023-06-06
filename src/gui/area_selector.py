@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QWidget
 
 
 class AreaSelector(QWidget):
+    
     def __init__(self, get_area_coords_callback, update_area_label_callback):
         super().__init__()
         self.get_area_coords_callback = get_area_coords_callback
