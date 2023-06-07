@@ -19,25 +19,15 @@ class VideoGraphicsView(QGraphicsView):
         self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
 
 
-class VideoPlayer(QMediaPlayer):
-    def __init__(self):
-        super().__init__()
-
-    def restartPlayback(self, mediaStatus):
-        if mediaStatus == QMediaPlayer.EndOfMedia:
-            self.setPosition(0)  # Restart playback from the beginning
-            self.play()
-
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    player = VideoPlayer()
+    player = QMediaPlayer()
     videoItem = QGraphicsVideoItem()
     player.setVideoOutput(videoItem)
 
-    audioOutput = QAudioOutput()  # Create an audio output
-    player.setAudioOutput(audioOutput)  # Set the audio output for the player
+    audioOutput = QAudioOutput()
+    player.setAudioOutput(audioOutput)
 
     scene = QGraphicsScene()
     scene.addItem(videoItem)
@@ -47,12 +37,10 @@ if __name__ == "__main__":
     view.show()
 
     player.setSource(QUrl("src/gui/editing_timeline/test.mp4"))
+    player.setLoops(QMediaPlayer.Infinite)
     player.play()
 
     # Set the initial size of the video item to match the size of the QGraphicsView
     videoItem.setSize(view.size())
-
-    # Connect the mediaStatusChanged signal to restartPlayback slot
-    player.mediaStatusChanged.connect(player.restartPlayback)
 
     sys.exit(app.exec())
