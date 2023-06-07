@@ -19,28 +19,39 @@ class VideoGraphicsView(QGraphicsView):
         self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
 
 
+class MediaPlayer(QMediaPlayer):
+    def __init__(self):
+        super().__init__()
+        self.video_item = QGraphicsVideoItem()
+        self.setVideoOutput(self.video_item)
+        self.audio_output = QAudioOutput()
+        self.setAudioOutput(self.audio_output)
+        self.setSource(QUrl("src/gui/editing_timeline/test.mp4"))
+        self.setLoops(QMediaPlayer.Infinite)
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Video Preview")
+
+        self.player = MediaPlayer()
+
+        self.scene = QGraphicsScene()
+        self.scene.addItem(self.player.video_item)
+
+        self.view = VideoGraphicsView(self.scene)
+        self.view.resize(800, 600)
+
+        # Set the initial size of the video item to match QGraphicsView
+        self.player.video_item.setSize(self.view.size())
+        self.player.play()
+
+        self.setCentralWidget(self.view)
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-
-    player = QMediaPlayer()
-    videoItem = QGraphicsVideoItem()
-    player.setVideoOutput(videoItem)
-
-    audioOutput = QAudioOutput()
-    player.setAudioOutput(audioOutput)
-
-    scene = QGraphicsScene()
-    scene.addItem(videoItem)
-
-    view = VideoGraphicsView(scene)
-    view.resize(800, 600)
-    view.show()
-
-    player.setSource(QUrl("src/gui/editing_timeline/test.mp4"))
-    player.setLoops(QMediaPlayer.Infinite)
-    player.play()
-
-    # Set the initial size of the video item to match the size of the QGraphicsView
-    videoItem.setSize(view.size())
-
+    window = MainWindow()
+    window.show()
     sys.exit(app.exec())
