@@ -6,31 +6,32 @@ from PySide6.QtMultimedia import *
 from PySide6.QtMultimediaWidgets import *
 
 
-class VideoGraphicsView(QGraphicsView):
-    def __init__(self, scene):
-        super().__init__(scene)
+class GraphicsView(QGraphicsView):
+    def __init__(self):
+        super().__init__()
         self.setRenderHint(QPainter.Antialiasing)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setAlignment(Qt.AlignCenter)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
+    """Override"""
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+        self.fitInView(self.sceneRect(), Qt.IgnoreAspectRatio)
 
 
 class MediaPlayer(QMediaPlayer):
     def __init__(self):
         super().__init__()
-        self.video_item = QGraphicsVideoItem()
-        self.setVideoOutput(self.video_item)
+        self.video_output = QGraphicsVideoItem()
+        self.setVideoOutput(self.video_output)
         self.audio_output = QAudioOutput()
         self.setAudioOutput(self.audio_output)
         self.setSource(QUrl("src/gui/editing_timeline/test.mp4"))
         self.setLoops(QMediaPlayer.Infinite)
 
 
-class PlaybackSlider(QSlider):
+class MediaSlider(QSlider):
     def __init__(self, mediaPlayer):
         super().__init__(Qt.Horizontal)
         self.mediaPlayer = mediaPlayer
@@ -69,32 +70,41 @@ class PlaybackSlider(QSlider):
             super().mouseMoveEvent(event)
 
 
+class VideoPreview(QWidget):
+    """Main class holding all video preview widgets."""
+    def __init__(self):
+        super().__init__()
+        self.mediaPlayer = MediaPlayer()
+        self.mediaPlayer.video_output.nativeSizeChanged.connect(self.stretchVOutput)
+        self.mediaPlayer.play()
+
+        self.mediaSlider = MediaSlider(self.mediaPlayer)
+
+        self.scene = QGraphicsScene()
+        self.scene.addItem(self.mediaPlayer.video_output)
+
+        self.view = GraphicsView()
+        self.view.setScene(self.scene)
+
+        self.layoutas = QVBoxLayout()
+        self.layoutas.addWidget(self.view)
+        self.layoutas.addWidget(self.mediaSlider)
+        self.setLayout(self.layoutas)
+
+    @Slot()
+    def stretchVOutput(self):
+        """Stretch video output to fit the whole view."""
+        self.view.fitInView(self.mediaPlayer.video_output, Qt.IgnoreAspectRatio)
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Video Preview")
+        self.setGeometry(100, 100, 800, 600)
 
-        self.player = MediaPlayer()
-
-        self.scene = QGraphicsScene()
-        self.scene.addItem(self.player.video_item)
-
-        self.view = VideoGraphicsView(self.scene)
-        self.view.resize(800, 600)
-
-        self.player.video_item.setSize(self.view.size())
-
-        self.playbackSlider = PlaybackSlider(self.player)
-        
-        self.layoutas = QVBoxLayout()
-        self.layoutas.addWidget(self.view)
-        self.layoutas.addWidget(self.playbackSlider)
-
-        self.container = QWidget()
-        self.container.setLayout(self.layoutas)
-
-        self.setCentralWidget(self.container)
-        self.player.play()
+        self.video_preview = VideoPreview()
+        self.setCentralWidget(self.video_preview)
 
 
 if __name__ == "__main__":
