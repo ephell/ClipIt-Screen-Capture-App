@@ -30,6 +30,45 @@ class MediaPlayer(QMediaPlayer):
         self.setLoops(QMediaPlayer.Infinite)
 
 
+class PlaybackSlider(QSlider):
+    def __init__(self, mediaPlayer):
+        super().__init__(Qt.Horizontal)
+        self.mediaPlayer = mediaPlayer
+        self.mediaPlayer.positionChanged.connect(self.setValue)
+        self.mousePressed = False
+        self.setRange(0, self.mediaPlayer.duration())
+        self.setTickInterval(1000)
+        self.setTickPosition(QSlider.TicksBelow)
+
+    """Override"""
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.mousePressed = True
+            self.mouseMoveEvent(event)
+        else:
+            super().mousePressEvent(event)
+
+    """Override"""
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.mousePressed = False
+            self.mediaPlayer.play()
+        else:
+            super().mouseReleaseEvent(event)
+
+    """Override"""
+    def mouseMoveEvent(self, event):
+        if self.mousePressed:
+            self.mediaPlayer.pause()
+            slider_range = self.maximum() - self.minimum()
+            click_position = event.position().x()
+            slider_width = self.width()
+            position = int(slider_range * click_position / slider_width)
+            self.mediaPlayer.setPosition(position)
+        else:
+            super().mouseMoveEvent(event)
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -43,11 +82,19 @@ class MainWindow(QMainWindow):
         self.view = VideoGraphicsView(self.scene)
         self.view.resize(800, 600)
 
-        # Set the initial size of the video item to match QGraphicsView
         self.player.video_item.setSize(self.view.size())
-        self.player.play()
 
-        self.setCentralWidget(self.view)
+        self.playbackSlider = PlaybackSlider(self.player)
+        
+        self.layoutas = QVBoxLayout()
+        self.layoutas.addWidget(self.view)
+        self.layoutas.addWidget(self.playbackSlider)
+
+        self.container = QWidget()
+        self.container.setLayout(self.layoutas)
+
+        self.setCentralWidget(self.container)
+        self.player.play()
 
 
 if __name__ == "__main__":
