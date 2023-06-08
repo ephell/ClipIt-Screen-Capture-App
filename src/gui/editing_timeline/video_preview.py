@@ -70,15 +70,35 @@ class MediaSlider(QSlider):
             super().mouseMoveEvent(event)
 
 
+class MediaButtons(QWidget):
+    def __init__(self, mediaPlayer):
+        super().__init__()
+        self.mediaPlayer = mediaPlayer
+        self.playButton = QPushButton("Play")
+        self.playButton.clicked.connect(self.mediaPlayer.play)
+        self.pauseButton = QPushButton("Pause")
+        self.pauseButton.clicked.connect(self.mediaPlayer.pause)
+        self.stopButton = QPushButton("Reset")
+        self.stopButton.clicked.connect(self.mediaPlayer.stop)
+        self.layout = QHBoxLayout()
+        self.layout.addWidget(self.playButton)
+        self.layout.addWidget(self.pauseButton)
+        self.layout.addWidget(self.stopButton)
+        self.setLayout(self.layout)
+
+
 class VideoPreview(QWidget):
     """Main class holding all video preview widgets."""
     def __init__(self):
         super().__init__()
         self.mediaPlayer = MediaPlayer()
+        # Has to be connected for the video to stretch properly once
+        # it's loaded for the first time.
         self.mediaPlayer.video_output.nativeSizeChanged.connect(self.stretchVOutput)
         self.mediaPlayer.play()
 
         self.mediaSlider = MediaSlider(self.mediaPlayer)
+        self.mediaButtons = MediaButtons(self.mediaPlayer)
 
         self.scene = QGraphicsScene()
         self.scene.addItem(self.mediaPlayer.video_output)
@@ -88,7 +108,9 @@ class VideoPreview(QWidget):
 
         self.layoutas = QVBoxLayout()
         self.layoutas.addWidget(self.view)
+        self.layoutas.addWidget(self.mediaButtons)
         self.layoutas.addWidget(self.mediaSlider)
+        
         self.setLayout(self.layoutas)
 
     @Slot()
