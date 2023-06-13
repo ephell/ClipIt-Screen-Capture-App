@@ -5,7 +5,7 @@ from PySide6.QtGui import *
 from PySide6.QtMultimedia import *
 from PySide6.QtMultimediaWidgets import *
 
-from video_timeline import LoadedMediaWidget
+from editing_timeline.timeline import TimelineWidget
 
 
 class GraphicsView(QGraphicsView):
@@ -108,14 +108,14 @@ class VideoPreview(QWidget):
         self.view = GraphicsView()
         self.view.setScene(self.scene)
 
-        self.editing_timeline = LoadedMediaWidget(self.mediaPlayer.duration())
+        self.editing_timeline = TimelineWidget()
 
         self.layoutas = QVBoxLayout()
         self.layoutas.addWidget(self.view)
         self.layoutas.addWidget(self.mediaButtons)
         self.layoutas.addWidget(self.mediaSlider)
         self.layoutas.addWidget(self.editing_timeline.view)
-        
+
         self.setLayout(self.layoutas)
 
     @Slot()
