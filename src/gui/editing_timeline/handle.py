@@ -9,8 +9,8 @@ class RulerHandle(QGraphicsWidget):
     
     def __init__(self):
         super().__init__()
-        self.rect_brush = QBrush(Qt.blue)
-        self.rect_pen = QPen(Qt.blue)
+        self.brush = QBrush(Qt.blue)
+        self.pen = QPen(Qt.blue)
         self.rect = self.boundingRect()
         self.setFlag(QGraphicsWidget.ItemIsMovable, True)
         self.setFlag(QGraphicsWidget.ItemIsSelectable, True)
@@ -21,8 +21,8 @@ class RulerHandle(QGraphicsWidget):
 
     """Override"""
     def paint(self, painter, option, widget):
-        painter.setBrush(self.rect_brush)
-        painter.setPen(self.rect_pen)
+        painter.setBrush(self.brush)
+        painter.setPen(self.pen)
         painter.drawRect(self.boundingRect())
 
     """Override"""

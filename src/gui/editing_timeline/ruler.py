@@ -15,7 +15,7 @@ class Ruler(QGraphicsWidget):
     """Override"""
     def paint(self, painter, option, widget):
         super().paint(painter, option, widget)
-        tickPositions = self.calculateTickPositions()
+        tick_positions = self.calculate_tick_positions()
 
         # Set the font for the tick labels
         font = painter.font()
@@ -27,21 +27,21 @@ class Ruler(QGraphicsWidget):
         painter.setPen(pen)
 
         # Draw the tick marks and labels
-        for tickPos in tickPositions:
+        for tick_pos in tick_positions:
         
             # Draw the tick mark
-            painter.drawLine(tickPos, 0, tickPos, self.height)
+            painter.drawLine(tick_pos, 0, tick_pos, self.height)
 
             # Draw the tick label
-            text = str(tickPos)
-            textRect = painter.fontMetrics().boundingRect(text)
-            textWidth = textRect.width()
-            textHeight = textRect.height()
-            textX = tickPos - textWidth // 2
-            textY = self.height + textHeight
-            painter.drawText(textX, textY, text)
+            text = str(tick_pos)
+            text_rect = painter.fontMetrics().boundingRect(text)
+            text_width = text_rect.width()
+            text_height = text_rect.height()
+            text_x = tick_pos - text_width // 2
+            text_y = self.height + text_height
+            painter.drawText(text_x, text_y, text)
 
-    def calculateTickPositions(self):
+    def calculate_tick_positions(self):
         interval = 50
         return [i * interval for i in range(int(self.width / interval) + 1)]
     

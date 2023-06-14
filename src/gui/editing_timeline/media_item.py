@@ -6,17 +6,17 @@ from PySide6.QtMultimediaWidgets import *
 
 
 class MediaItem(QGraphicsWidget):
-    
+
     def __init__(self):
         super().__init__()
-        self.rect_brush = QBrush(Qt.red)
-        self.rect_pen = QPen(Qt.red, 3)
+        self.pen = QPen(Qt.red, 3)
         self.rect = self.boundingRect()
 
+    """Override"""
     def boundingRect(self):
         return QRectF(0, 0, 750, 100)
 
+    """Override"""
     def paint(self, painter, option, widget):
-        # painter.setBrush(self.rect_brush)
-        painter.setPen(self.rect_pen)
+        painter.setPen(self.pen)
         painter.drawRect(self.boundingRect())

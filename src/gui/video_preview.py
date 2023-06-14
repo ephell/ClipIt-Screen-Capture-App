@@ -34,19 +34,19 @@ class MediaPlayer(QMediaPlayer):
 
 
 class MediaSlider(QSlider):
-    def __init__(self, mediaPlayer):
+    def __init__(self, media_player):
         super().__init__(Qt.Horizontal)
-        self.mediaPlayer = mediaPlayer
-        self.mediaPlayer.positionChanged.connect(self.setValue)
-        self.mousePressed = False
-        self.setRange(0, self.mediaPlayer.duration())
+        self.media_player = media_player
+        self.media_player.positionChanged.connect(self.setValue)
+        self.is_mouse_pressed = False
+        self.setRange(0, self.media_player.duration())
         self.setTickInterval(1000)
         self.setTickPosition(QSlider.TicksBelow)
 
     """Override"""
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.mousePressed = True
+            self.is_mouse_pressed = True
             self.mouseMoveEvent(event)
         else:
             super().mousePressEvent(event)
@@ -54,38 +54,38 @@ class MediaSlider(QSlider):
     """Override"""
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.mousePressed = False
-            self.mediaPlayer.play()
+            self.is_mouse_pressed = False
+            self.media_player.play()
         else:
             super().mouseReleaseEvent(event)
 
     """Override"""
     def mouseMoveEvent(self, event):
-        if self.mousePressed:
-            self.mediaPlayer.pause()
+        if self.is_mouse_pressed:
+            self.media_player.pause()
             slider_range = self.maximum() - self.minimum()
             click_position = event.position().x()
             slider_width = self.width()
             position = int(slider_range * click_position / slider_width)
-            self.mediaPlayer.setPosition(position)
+            self.media_player.setPosition(position)
         else:
             super().mouseMoveEvent(event)
 
 
 class MediaButtons(QWidget):
-    def __init__(self, mediaPlayer):
+    def __init__(self, media_player):
         super().__init__()
-        self.mediaPlayer = mediaPlayer
-        self.playButton = QPushButton("Play")
-        self.playButton.clicked.connect(self.mediaPlayer.play)
-        self.pauseButton = QPushButton("Pause")
-        self.pauseButton.clicked.connect(self.mediaPlayer.pause)
-        self.stopButton = QPushButton("Reset")
-        self.stopButton.clicked.connect(self.mediaPlayer.stop)
+        self.media_player = media_player
+        self.play_button = QPushButton("Play")
+        self.play_button.clicked.connect(self.media_player.play)
+        self.pause_button = QPushButton("Pause")
+        self.pause_button.clicked.connect(self.media_player.pause)
+        self.stop_button = QPushButton("Reset")
+        self.stop_button.clicked.connect(self.media_player.stop)
         self.layout = QHBoxLayout()
-        self.layout.addWidget(self.playButton)
-        self.layout.addWidget(self.pauseButton)
-        self.layout.addWidget(self.stopButton)
+        self.layout.addWidget(self.play_button)
+        self.layout.addWidget(self.pause_button)
+        self.layout.addWidget(self.stop_button)
         self.setLayout(self.layout)
 
 
@@ -93,17 +93,19 @@ class VideoPreview(QWidget):
     """Main class holding all video preview widgets."""
     def __init__(self):
         super().__init__()
-        self.mediaPlayer = MediaPlayer()
+        self.media_player = MediaPlayer()
         # Has to be connected for the video to stretch properly once
         # it's loaded for the first time.
-        self.mediaPlayer.video_output.nativeSizeChanged.connect(self.stretchVOutput)
-        self.mediaPlayer.play()
+        self.media_player.video_output.nativeSizeChanged.connect(
+            self.stretch_video_output
+        )
+        self.media_player.play()
 
-        self.mediaSlider = MediaSlider(self.mediaPlayer)
-        self.mediaButtons = MediaButtons(self.mediaPlayer)
+        self.media_slider = MediaSlider(self.media_player)
+        self.media_buttons = MediaButtons(self.media_player)
 
         self.scene = QGraphicsScene()
-        self.scene.addItem(self.mediaPlayer.video_output)
+        self.scene.addItem(self.media_player.video_output)
 
         self.view = GraphicsView()
         self.view.setScene(self.scene)
@@ -112,16 +114,16 @@ class VideoPreview(QWidget):
 
         self.layoutas = QVBoxLayout()
         self.layoutas.addWidget(self.view)
-        self.layoutas.addWidget(self.mediaButtons)
-        self.layoutas.addWidget(self.mediaSlider)
+        self.layoutas.addWidget(self.media_buttons)
+        self.layoutas.addWidget(self.media_slider)
         self.layoutas.addWidget(self.editing_timeline.view)
 
         self.setLayout(self.layoutas)
 
     @Slot()
-    def stretchVOutput(self):
+    def stretch_video_output(self):
         """Stretch video output to fit the whole view."""
-        self.view.fitInView(self.mediaPlayer.video_output, Qt.IgnoreAspectRatio)
+        self.view.fitInView(self.media_player.video_output, Qt.IgnoreAspectRatio)
 
 
 class MainWindow(QMainWindow):
