@@ -7,9 +7,10 @@ class Ruler(QGraphicsWidget):
     def __init__(self, media_duration):
         super().__init__()
         self.media_duration = media_duration
-        self.width = None
-        self.height = None
+        self.width = 0
+        self.height = 0
         
+    """Override"""
     def paint(self, painter, option, widget):
         super().paint(painter, option, widget)
         tick_positions = self.calculate_tick_positions()
@@ -37,10 +38,16 @@ class Ruler(QGraphicsWidget):
             text_y = self.height + text_height
             painter.drawText(text_x, text_y, text)
 
+    """Override"""
+    def sizeHint(self, which, constraint):
+        # Takes into account the position of the widget inside the scene
+        self.width = int(self.scene().width() - self.pos().x() * 2)
+        self.height = 10
+        return QSizeF(self.width, self.height)
+
     def calculate_tick_positions(self):
-        num_ticks = 10
-        tick_interval = self.width / num_ticks
-        return [int(i * tick_interval) for i in range(num_ticks + 1)]
+        tick_interval = self.width / self.tick_amount()
+        return [int(i * tick_interval) for i in range(self.tick_amount() + 1)]
 
     def generate_tick_label(self, tick_pos):
         time_value = tick_pos * self.media_duration / self.width
@@ -49,9 +56,5 @@ class Ruler(QGraphicsWidget):
         minutes, seconds = divmod(seconds, 60)
         return f"{minutes:02d}:{seconds:02d}:{milliseconds:02d}"
     
-    """Override"""
-    def sizeHint(self, which, constraint):
-        # Takes into account the position of the widget inside the scene
-        self.width = int(self.scene().width() - self.pos().x() * 2)
-        self.height = 10
-        return QSizeF(self.width, self.height)
+    def tick_amount(self):
+        return 10
