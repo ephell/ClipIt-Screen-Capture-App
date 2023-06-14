@@ -11,16 +11,30 @@ from .media_item import MediaItem
 from .ruler import Ruler
 
 
-class TimelineWidget(QWidget):
+class GraphicsView(QGraphicsView):
     
-    def __init__(self):
-        super().__init__()        
-        scene_x = 800
-        scene_y = 175
+    def __init__(self, scene):
+        super().__init__()
+        self.setScene(scene)
 
-        self.scene = QGraphicsScene()
-        self.view = QGraphicsView(self.scene)
-        self.scene.setSceneRect(0, 0, scene_x, scene_y)
+
+class GraphicsScene(QGraphicsScene):
+
+    def __init__(self, width, height):
+        super().__init__()
+        self.setSceneRect(0, 0, width, height)
+
+
+class TimelineWidget(QWidget):
+
+    def __init__(self):
+        super().__init__()
+        scene_width = 800
+        scene_height = 175
+        self.setGeometry(500, 500, scene_width + 20, scene_height + 20)
+
+        self.scene = GraphicsScene(scene_width, scene_height)
+        self.view = GraphicsView(self.scene)
 
         self.ruler = Ruler()
         self.handle = RulerHandle()
