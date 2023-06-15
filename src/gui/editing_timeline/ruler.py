@@ -4,8 +4,11 @@ from PySide6.QtGui import *
 
 class Ruler(QGraphicsWidget):
     
-    def __init__(self, media_duration):
+    def __init__(self, scene, media_duration):
         super().__init__()
+        self.scene = scene
+        self.scene.addItem(self)
+        self.setPos(30, 20)
         self.media_duration = media_duration
         self.width = 0
         self.height = 0
@@ -41,7 +44,7 @@ class Ruler(QGraphicsWidget):
     """Override"""
     def sizeHint(self, which, constraint):
         # Takes into account the position of the widget inside the scene
-        self.width = int(self.scene().width() - self.pos().x() * 2)
+        self.width = int(self.scene.width() - self.pos().x() * 2)
         self.height = 10
         return QSizeF(self.width, self.height)
 

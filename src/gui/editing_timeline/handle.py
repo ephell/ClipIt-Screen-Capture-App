@@ -7,17 +7,20 @@ from PySide6.QtMultimediaWidgets import *
 
 class RulerHandle(QGraphicsWidget):
     
-    def __init__(self):
+    def __init__(self, scene):
         super().__init__()
-        self.brush = QBrush(Qt.blue)
-        self.pen = QPen(Qt.blue)
+        self.scene = scene
+        self.scene.addItem(self)
+        self.setPos(30, 0)
+        self.brush = QBrush(Qt.magenta)
+        self.pen = QPen(Qt.magenta)
         self.rect = self.boundingRect()
         self.setFlag(QGraphicsWidget.ItemIsMovable, True)
         self.setFlag(QGraphicsWidget.ItemIsSelectable, True)
 
     """Override"""
     def boundingRect(self):
-        return QRectF(0, 0, 5, 100)
+        return QRectF(0, 0, 1, 100)
 
     """Override"""
     def paint(self, painter, option, widget):
