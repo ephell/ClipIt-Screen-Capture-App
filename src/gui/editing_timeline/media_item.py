@@ -10,7 +10,7 @@ class MediaItem(QGraphicsRectItem):
         super().__init__()
         self.scene = scene
         self.scene.addItem(self)
-        self.setPos(30, 55)
+        self.setPos(self.scene.media_item_x, self.scene.media_item_y)
         self.setRect(QRectF(0, 0, self.scene.width() - self.pos().x() * 2, 100))
         self.setPen(QPen(Qt.blue, 1))
         self.setFlag(QGraphicsItem.ItemSendsScenePositionChanges)

@@ -16,17 +16,14 @@ class RulerHandle(QGraphicsItem):
         self.width = 30
         self.height = 100 + self.scene.media_item_y - self.scene.ruler_handle_y
         self.rect = self.boundingRect()
-
         self.head_width = self.width
         self.head_height = self.height / 10
         self.needle_width = 1
         self.needle_height = self.height - self.head_height
         self.needle_x = (self.width - self.needle_width) / 2
         self.needle_y = self.head_height
-
         self.minimum_x = self.scene.ruler_handle_x - self.width / 2
         self.maximum_x = self.scene.width() - self.width * 2 + self.minimum_x
-
         self.setPos(self.minimum_x, self.scene.ruler_handle_y)
 
 

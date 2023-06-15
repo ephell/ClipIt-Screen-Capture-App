@@ -2,20 +2,20 @@ from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 
-class Ruler(QGraphicsWidget):
+class Ruler(QGraphicsItem):
     
     def __init__(self, scene, media_duration):
         super().__init__()
         self.scene = scene
         self.scene.addItem(self)
-        self.setPos(30, 20)
+        self.setPos(self.scene.ruler_x, self.scene.ruler_y)
         self.media_duration = media_duration
-        self.width = 0
-        self.height = 0
+        self.width = int(self.scene.width() - self.pos().x() * 2)
+        self.height = 10
+        self.tick_amount = 10
         
     """Override"""
     def paint(self, painter, option, widget):
-        super().paint(painter, option, widget)
         tick_positions = self.calculate_tick_positions()
 
         # Set the font for the tick labels
@@ -31,7 +31,6 @@ class Ruler(QGraphicsWidget):
         for tick_pos in tick_positions:
             # Draw the tick mark
             painter.drawLine(tick_pos, 0, tick_pos, self.height)
-
             # Draw the tick label
             text = self.generate_tick_label(tick_pos)
             text_rect = painter.fontMetrics().boundingRect(text)
@@ -42,15 +41,12 @@ class Ruler(QGraphicsWidget):
             painter.drawText(text_x, text_y, text)
 
     """Override"""
-    def sizeHint(self, which, constraint):
-        # Takes into account the position of the widget inside the scene
-        self.width = int(self.scene.width() - self.pos().x() * 2)
-        self.height = 10
-        return QSizeF(self.width, self.height)
+    def boundingRect(self):
+        return QRectF(0, 0, self.width, self.height)
 
     def calculate_tick_positions(self):
-        tick_interval = self.width / self.tick_amount()
-        return [int(i * tick_interval) for i in range(self.tick_amount() + 1)]
+        tick_interval = self.width / self.tick_amount
+        return [int(i * tick_interval) for i in range(self.tick_amount + 1)]
 
     def generate_tick_label(self, tick_pos):
         time_value = tick_pos * self.media_duration / self.width
@@ -58,6 +54,3 @@ class Ruler(QGraphicsWidget):
         seconds, milliseconds = divmod(milliseconds, 1000)
         minutes, seconds = divmod(seconds, 60)
         return f"{minutes:02d}:{seconds:02d}:{milliseconds:02d}"
-    
-    def tick_amount(self):
-        return 10

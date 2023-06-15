@@ -6,7 +6,7 @@ from PySide6.QtGui import *
 from PySide6.QtMultimedia import *
 from PySide6.QtMultimediaWidgets import *
 
-from .handle import RulerHandle
+from .ruler_handle import RulerHandle
 from .media_item import MediaItem
 from .ruler import Ruler
 
