@@ -12,10 +12,15 @@ from .ruler import Ruler
 
 
 class GraphicsView(QGraphicsView):
-    
+
     def __init__(self, scene):
         super().__init__()
+        self.scene = scene
         self.setScene(scene)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setMinimumSize(self.scene.width(), self.scene.height())
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
 
 class GraphicsScene(QGraphicsScene):
@@ -23,6 +28,13 @@ class GraphicsScene(QGraphicsScene):
     def __init__(self, width, height):
         super().__init__()
         self.setSceneRect(0, 0, width, height)
+        # Try keeping x offsets the same
+        self.media_item_x = 30
+        self.media_item_y = 55
+        self.ruler_x = 30
+        self.ruler_y = 20
+        self.ruler_handle_x = 30
+        self.ruler_handle_y = 0
 
 
 class TimelineWidget(QWidget):
@@ -30,24 +42,15 @@ class TimelineWidget(QWidget):
     def __init__(self):
         super().__init__()
         scene_width = 800
-        scene_height = 175
+        scene_height = 200
         self.setGeometry(500, 500, scene_width + 20, scene_height + 20)
 
         self.scene = GraphicsScene(scene_width, scene_height)
         self.view = GraphicsView(self.scene)
 
-        self.ruler = Ruler()
-        self.handle = RulerHandle()
-        self.video_item = MediaItem()
-
-        self.scene.addItem(self.ruler)
-        self.scene.addItem(self.video_item)
-        self.scene.addItem(self.handle)
-
-        placement_offset_x = 10
-        self.ruler.setPos(placement_offset_x, 20)
-        self.handle.setPos(placement_offset_x, 0)
-        self.video_item.setPos(placement_offset_x, 55)
+        self.ruler_handle = RulerHandle(self.scene, 10000)
+        self.media_item = MediaItem(self.scene, 10000)
+        self.ruler = Ruler(self.scene, 10000)
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.view)

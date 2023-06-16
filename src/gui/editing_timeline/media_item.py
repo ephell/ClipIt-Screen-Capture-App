@@ -4,8 +4,11 @@ from PySide6.QtGui import *
 from PySide6.QtMultimedia import *
 from PySide6.QtMultimediaWidgets import *
 
+from .time_utils import TimeUtils
+
 
 class MediaItem(QGraphicsRectItem):
+
     def __init__(self, scene, media_duration):
         super().__init__()
         self.scene = scene
@@ -17,44 +20,25 @@ class MediaItem(QGraphicsRectItem):
         self.original_width = self.rect().width()
         self.minimum_width = 1
         self.media_duration = media_duration
-        self.maximum_media_duration = media_duration
+        self.maximum_possible_duration = media_duration
         self.right_handle = _RightHandle(self)
         self.left_handle = _LeftHandle(self)
-
-    """Override"""
-    def setRect(self, *args):
-        if len(args) == 4:
-            super().setRect(*args)
-        elif len(args) == 1 and isinstance(args[0], QRectF):
-            super().setRect(args[0])
-        else:
-            raise ValueError("Invalid arguments for setRect")
-        
-        # print(
-        #     f"Width: {self.rect().width()}, Height: {self.rect().height()} ||| "
-        #     f"X: {self.rect().x()}, Y: {self.rect().y()}"
-        # )
-
-    def adjust_duration(self):
-        duration_ratio = self.rect().width() / self.original_width
-        new_duration = duration_ratio * self.maximum_media_duration   
-        self.media_duration = new_duration
-        # print(f"New duration: {self.media_duration}")
+        self.time_label = _TimeLabel(self)
 
 
 class _RightHandle(QGraphicsRectItem):
+
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
         self.parent.scene.addItem(self)
         self.setRect(0, 0, 15, self.parent.rect().height())
         self.setPen(QPen(Qt.red, 1))
-        self.setPos(
-            parent.pos().x() + parent.rect().width(),
-            parent.pos().y()
-        )
+        self.setPos(parent.pos().x() + parent.rect().width(), parent.pos().y())
         self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setFlag(QGraphicsItem.ItemSendsScenePositionChanges)
+        self.minimum_x = self.parent.pos().x()
+        self.maximum_x = self.parent.pos().x() + self.parent.original_width
 
     """Override"""
     def itemChange(self, change, value):
@@ -72,26 +56,34 @@ class _RightHandle(QGraphicsRectItem):
                     new_width,
                     self.parent.rect().height()
                 )
-                self.parent.adjust_duration()
+                timestamp = TimeUtils.calculate_timestamp_by_handle_position(
+                    delta_x,
+                    self.pos().x(),
+                    self.maximum_x,
+                    self.minimum_x,
+                    self.parent.maximum_possible_duration
+                )
+                timestamp = TimeUtils.format_timestamp(timestamp)
+                self.parent.time_label.update_right_handle_timestamp(timestamp)
                 return QPointF(value.x(), self.parent.pos().y())
             return QPointF(self.pos().x(), self.parent.pos().y())
         return super().itemChange(change, value)
     
 
 class _LeftHandle(QGraphicsRectItem):
+
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
         self.parent.scene.addItem(self)
         self.setRect(0, 0, 15, self.parent.rect().height())
         self.setPen(QPen(Qt.red, 1))
-        self.setPos(
-            parent.pos().x() - self.rect().width(),
-            parent.pos().y()
-        )
+        self.setPos(parent.pos().x() - self.rect().width(), parent.pos().y())
         self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setFlag(QGraphicsItem.ItemSendsScenePositionChanges)
-
+        self.minimum_x = self.parent.pos().x() - self.rect().width()
+        self.maximum_x = self.minimum_x + self.parent.original_width
+        
     """Override"""
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
@@ -105,7 +97,47 @@ class _LeftHandle(QGraphicsRectItem):
                     new_width, 
                     self.parent.rect().height()
                 )
-                self.parent.adjust_duration()
+                timestamp = TimeUtils.calculate_timestamp_by_handle_position(
+                    delta_x,
+                    self.pos().x(),
+                    self.maximum_x,
+                    self.minimum_x,
+                    self.parent.maximum_possible_duration
+                )
+                timestamp = TimeUtils.format_timestamp(timestamp)
+                self.parent.time_label.update_left_handle_timestamp(timestamp)
                 return QPointF(value.x(), self.parent.pos().y())
             return QPointF(self.pos().x(), self.parent.pos().y())
         return super().itemChange(change, value)
+
+
+class _TimeLabel(QGraphicsTextItem):
+
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+        self.parent.scene.addItem(self)
+        self.setPos(
+            self.parent.scene.media_item_x + 535, 
+            self.parent.scene.media_item_y + 105
+        )
+        font = self.font()
+        font.setPointSize(15)
+        font.setWeight(QFont.Bold)
+        self.setFont(font)
+        self.left_handle_timestamp = "00:00:000"
+        self.right_handle_timestamp = "00:00:000"
+        self.__update_label()
+
+    def update_left_handle_timestamp(self, timestamp):
+        self.left_handle_timestamp = timestamp
+        self.__update_label()
+
+    def update_right_handle_timestamp(self, timestamp):
+        self.right_handle_timestamp = timestamp
+        self.__update_label()
+
+    def __update_label(self):
+        self.setPlainText(
+            f"{self.left_handle_timestamp} to {self.right_handle_timestamp}"
+        )
