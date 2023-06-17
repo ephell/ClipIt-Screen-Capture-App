@@ -11,10 +11,12 @@ class MediaItem(QGraphicsRectItem):
         super().__init__()
         self.scene = scene
         self.scene.addItem(self)
-        self.setPos(self.scene.media_item_x, self.scene.media_item_y)
-        self.__initial_width = self.scene.width() - self.pos().x() * 2
-        self.__initial_height = 100
-        self.setRect(0, 0, self.__initial_width, self.__initial_height)
+        self.initial_x = self.scene.media_item_x
+        self.initial_y = self.scene.media_item_y
+        self.setPos(self.initial_x, self.initial_y)
+        self.initial_width = self.scene.width() - self.pos().x() * 2
+        self.initial_height = 100
+        self.setRect(0, 0, self.initial_width, self.initial_height)
         self.left_handle = LeftHandle(self)
         self.right_handle = RightHandle(self)
         self.media_duration = media_duration
@@ -27,7 +29,7 @@ class MediaItem(QGraphicsRectItem):
     @Slot()
     def on_view_resize(self, old_scene_w, new_scene_w):
         pass
-    
+
         
 class RightHandle(QGraphicsRectItem):
 
@@ -35,22 +37,16 @@ class RightHandle(QGraphicsRectItem):
         super().__init__()
         self.parent = parent
         self.parent.scene.addItem(self)
-        self.__initial_width = 20
-        self.__initial_height = self.parent.rect().height()
-        self.setRect(0, 0, self.__initial_width, self.__initial_height)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.set_position(
-            self.parent.pos().x() + self.parent.rect().width() - self.rect().width(), 
-            self.parent.pos().y()
-        )
+        self.initial_width = 20
+        self.initial_height = self.parent.rect().height()
+        self.setRect(0, 0, self.initial_width, self.initial_height)
+        self.initial_x = self.parent.pos().x() + self.parent.rect().width() - self.rect().width()
+        self_initial_y = self.parent.pos().y()
+        self.set_position(self.initial_x, self_initial_y)
 
     def set_position(self, new_x, new_y):
         self.setPos(new_x, new_y)
-
-    def recalculate_position(self):
-        new_x = self.parent.pos().x() + self.parent.rect().width() - self.rect().width()
-        new_y = self.parent.pos().y()
-        self.set_position(new_x, new_y)
 
     """Override"""
     def paint(self, painter, option, widget):
@@ -74,16 +70,14 @@ class RightHandle(QGraphicsRectItem):
             new_parent_rect_height = self.parent.rect().height()
             new_handle_x = self.pos().x() + delta
             new_handle_y = self.pos().y()
-            # Prevents media item from being dragged off further than
-            # the width of the scene
-            max_width = (self.parent.scene.width() - self.parent.pos().x() * 2)
-            avail_width = max_width - new_parent_rect_width
-            # Prevents right handle from being dragged over left handle
-            min_width = self.__initial_width * 2
+            available_width = self.parent.initial_width - new_parent_rect_width
+            min_width = self.initial_width * 2
+            max_x = self.parent.scene.width() - self.initial_width - self.parent.initial_x 
             if (
                 new_parent_rect_width > 0
-                and new_parent_rect_width > min_width
-                and avail_width > 0
+                and new_parent_rect_width > min_width # Prevent handle overlap
+                and available_width > 0 # Prevent media item oversizing
+                and new_handle_x < max_x # Prevent handle out of bounds
             ):
                 self.parent.setRect(
                     new_parent_rect_x,
@@ -107,11 +101,13 @@ class LeftHandle(QGraphicsRectItem):
         super().__init__()
         self.parent = parent
         self.parent.scene.addItem(self)
-        self.__initial_width = 20
-        self.__initial_height = self.parent.rect().height()
-        self.setRect(0, 0, self.__initial_width, self.__initial_height)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.set_position(self.parent.pos().x(), self.parent.pos().y())
+        self.initial_width = 20
+        self.initial_height = self.parent.rect().height()
+        self.setRect(0, 0, self.initial_width, self.initial_height)
+        self.initial_x = self.parent.pos().x()
+        self.initial_y = self.parent.pos().y()
+        self.set_position(self.initial_x, self.initial_y)
         self.minimum_x = self.parent.pos().x()
 
     def set_position(self, new_x, new_y):
@@ -139,12 +135,13 @@ class LeftHandle(QGraphicsRectItem):
             new_parent_rect_height = self.parent.rect().height()
             new_handle_x = self.pos().x() + delta
             new_handle_y = self.pos().y()
-            # Prevents left handle from being dragged over right handle
-            min_width = self.__initial_width * 2
+            available_width = self.parent.initial_width - new_parent_rect_width
+            min_width = self.initial_width * 2
             if (
                 new_parent_rect_width > 0
-                and new_handle_x > self.minimum_x
-                and new_parent_rect_width > min_width
+                and new_parent_rect_width > min_width # Prevent handle overlap
+                and available_width > 0 # Prevent media item oversizing
+                and new_handle_x > self.initial_x # Prevent handle out of bounds
             ):
                 self.parent.setRect(
                     new_parent_rect_x,
