@@ -110,7 +110,7 @@ class VideoPreview(QWidget):
         self.view = GraphicsView()
         self.view.setScene(self.scene)
 
-        self.editing_timeline = TimelineWidget()
+        self.editing_timeline = TimelineWidget(self.media_player)
 
         self.layoutas = QVBoxLayout()
         self.layoutas.addWidget(self.view)

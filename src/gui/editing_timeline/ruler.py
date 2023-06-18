@@ -8,7 +8,9 @@ class Ruler(QGraphicsItem):
         super().__init__()
         self.scene = scene
         self.scene.addItem(self)
-        self.setPos(self.scene.ruler_x, self.scene.ruler_y)
+        self.initial_x = self.scene.ruler_x
+        self.initial_y = self.scene.ruler_y
+        self.setPos(self.initial_x, self.initial_y)
         self.media_duration = media_duration
         self.__initial_width = self.scene.width() - self.pos().x() * 2
         self.__initial_height = 10
@@ -55,8 +57,11 @@ class Ruler(QGraphicsItem):
     def calculate_tick_interval(self, width, tick_amount):
         return width / tick_amount
     
+    def calculate_max_possible_width(self):
+        return self.scene.width() - self.initial_x * 2
+
     def calculate_one_pixel_time_value(self):
-        return self.media_duration / self.__initial_width
+        return self.media_duration / self.calculate_max_possible_width()
 
     def generate_tick_label(self, tick_pos):
         time_value = tick_pos * self.calculate_one_pixel_time_value()
@@ -66,7 +71,7 @@ class Ruler(QGraphicsItem):
         return f"{minutes:02d}:{seconds:02d}:{milliseconds:03d}"
 
     @Slot()
-    def on_view_resize(self, old_scene_w, new_scene_w):
+    def on_view_resize(self, new_scene_w, old_scene_w):
         resize_amount = new_scene_w - old_scene_w
         self.width += resize_amount
         self.update()
