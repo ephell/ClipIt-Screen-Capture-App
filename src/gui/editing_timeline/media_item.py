@@ -40,6 +40,7 @@ class MediaItem(QGraphicsRectItem):
         self.move_to_x_based_on_time(self.start_time)
         self.left_handle.update_position()
         self.right_handle.update_position()
+        self.time_label.update_position()
         self.update()
 
     def calculate_max_possible_width(self):
@@ -87,8 +88,8 @@ class _TimeLabel(QGraphicsTextItem):
         self.parent = parent
         self.parent.scene.addItem(self)
         self.setPos(
-            self.parent.scene.media_item_x + 485, 
-            self.parent.scene.media_item_y + 105
+            self.parent.scenePos().x() + self.parent.rect().width() - 195, 
+            self.parent.scenePos().y() + 105
         )
         font = self.font()
         font.setPointSize(15)
@@ -108,6 +109,12 @@ class _TimeLabel(QGraphicsTextItem):
 
     def __update_label(self):
         self.setPlainText(f"{self.start_time} to {self.end_time}")
+
+    def update_position(self):
+        self.setPos(
+            self.parent.scenePos().x() + self.parent.rect().width() - 195, 
+            self.parent.scenePos().y() + 105
+        )
 
     @staticmethod
     def format_timestamp(time):

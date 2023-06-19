@@ -26,7 +26,8 @@ class GraphicsScene(QGraphicsScene):
 
 class GraphicsView(QGraphicsView):
 
-    resize_signal = Signal(int, int)
+    resize_ruler = Signal()
+    resize_media_item = Signal()
 
     def __init__(self, scene):
         super().__init__()
@@ -41,11 +42,11 @@ class GraphicsView(QGraphicsView):
     """Override"""
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        old_width = self.scene.width()
-        new_width = event.size().width()
-        new_height = event.size().height()
-        self.scene.setSceneRect(0, 0, new_width, new_height)
-        self.resize_signal.emit(new_width, old_width)
+        self.resize_ruler.emit()
+        self.resize_media_item.emit()
+
+    def resize_scene(self, new_width):
+        self.scene.setSceneRect(0, 0, new_width, self.scene.height())
 
 
 class TimelineWidget(QWidget):
@@ -59,10 +60,10 @@ class TimelineWidget(QWidget):
 
         self.ruler_handle = RulerHandle(self.scene, self.media_player.duration())
         self.media_item = MediaItem(self.scene, self.media_player.duration())
-        self.ruler = Ruler(self.scene, self.media_player.duration())
+        self.ruler = Ruler(self.scene, self.view, self.media_player.duration())
 
-        self.view.resize_signal.connect(self.ruler.on_view_resize)
-        self.view.resize_signal.connect(self.media_item.on_view_resize)
+        self.view.resize_ruler.connect(self.ruler.on_view_resize)
+        self.view.resize_media_item.connect(self.media_item.on_view_resize)
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.view)
