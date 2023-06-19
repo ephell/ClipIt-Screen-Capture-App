@@ -24,9 +24,10 @@ class MediaItem(QGraphicsRectItem):
             self.start_time, self.end_time
         )
         self.initial_height = 100
+        self.setRect(0, 0, self.initial_width, self.initial_height)
         self.left_handle = LeftHandle(self)
         self.right_handle = RightHandle(self)
-        self.time_label = TimeLabel(self)
+        self.time_label = _TimeLabel(self)
 
     """Override"""
     def paint(self, painter, option, widget):
@@ -42,7 +43,7 @@ class MediaItem(QGraphicsRectItem):
         self.update()
 
     def calculate_max_possible_width(self):
-        return self.scene.width() - self.initial_x * 2
+        return int(self.scene.width() - self.initial_x * 2)
 
     def calculate_width_from_time_interval(self, start_time, end_time):
         total_time = self.media_duration
@@ -79,7 +80,7 @@ class MediaItem(QGraphicsRectItem):
         self.time_label.update_end_time(time)
 
 
-class TimeLabel(QGraphicsTextItem):
+class _TimeLabel(QGraphicsTextItem):
 
     def __init__(self, parent):
         super().__init__()
@@ -93,8 +94,8 @@ class TimeLabel(QGraphicsTextItem):
         font.setPointSize(15)
         font.setWeight(QFont.Bold)
         self.setFont(font)
-        self.start_time = "00:00:000"
-        self.end_time = "00:00:000"
+        self.start_time = self.format_timestamp(self.parent.start_time)
+        self.end_time = self.format_timestamp(self.parent.end_time)
         self.__update_label()
 
     def update_start_time(self, timestamp):
