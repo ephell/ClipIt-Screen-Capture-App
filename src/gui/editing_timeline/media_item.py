@@ -38,8 +38,14 @@ class MediaItem(QGraphicsRectItem):
     def on_view_resize(self):
         self.resize_based_on_time_interval(self.start_time, self.end_time)
         self.move_to_x_based_on_time(self.start_time)
-        self.left_handle.update_position()
-        self.right_handle.update_position()
+        self.left_handle.setPos(
+            self.scenePos().x() - self.left_handle.handle_width,
+            self.scenePos().y()
+        )
+        self.right_handle.setPos(
+            self.scenePos().x() + self.rect().width(),
+            self.scenePos().y()
+        )
         self.time_label.update_position()
         self.update()
 
@@ -107,14 +113,14 @@ class _TimeLabel(QGraphicsTextItem):
         self.end_time = self.format_timestamp(timestamp)
         self.__update_label()
 
-    def __update_label(self):
-        self.setPlainText(f"{self.start_time} to {self.end_time}")
-
     def update_position(self):
         self.setPos(
-            self.parent.scenePos().x() + self.parent.rect().width() - 195, 
-            self.parent.scenePos().y() + 105
+            self.parent.scene.width() - 250,
+            self.parent.scene.height() - 40
         )
+
+    def __update_label(self):
+        self.setPlainText(f"{self.start_time} to {self.end_time}")
 
     @staticmethod
     def format_timestamp(time):
