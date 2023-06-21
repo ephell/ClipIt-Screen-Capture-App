@@ -21,7 +21,7 @@ class LeftHandle(QGraphicsRectItem):
         self.initial_y = self.parent.scenePos().y()
         self.setPos(self.initial_x, self.initial_y)
         self.media_duration = self.parent.media_duration
-        self.delta_needed_to_move = 20
+        self.delta_needed_to_move = 10
         self.move_by_ms = 50
 
     """Override"""
@@ -62,7 +62,14 @@ class LeftHandle(QGraphicsRectItem):
                 elif delta_x <= -self.delta_needed_to_move:
                     new_width = available_width + abs(delta_width)
 
-                if new_width != available_width:
+                min_duration = self.__convert_time_to_pixels(self.move_by_ms)
+                current_x_time = self.__convert_scene_x_to_time(new_x)
+                current_duration = self.parent.end_time - current_x_time
+                current_duration = self.__convert_time_to_pixels(current_duration)
+                if (
+                    new_width != available_width 
+                    and current_duration >= min_duration
+                ):
                     self.parent.setPos(
                         new_x + self.rect().width(), 
                         self.parent.scenePos().y()

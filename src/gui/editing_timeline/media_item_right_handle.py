@@ -62,7 +62,14 @@ class RightHandle(QGraphicsRectItem):
                 elif delta_x <= -self.delta_needed_to_move and available_width > 0:
                     new_width = available_width - abs(delta_width)
 
-                if new_width != available_width:
+                min_duration = self.__convert_time_to_pixels(self.move_by_ms)
+                current_x_time = self.__convert_scene_x_to_time(new_x)
+                current_duration = self.parent.end_time - current_x_time
+                current_duration = self.__convert_time_to_pixels(current_duration)
+                if (
+                    new_width != available_width
+                    and new_width >= min_duration
+                ):
                     self.parent.setPos(
                         self.parent.scenePos().x(), 
                         self.parent.scenePos().y()
