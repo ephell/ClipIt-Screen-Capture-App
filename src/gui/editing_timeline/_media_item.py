@@ -19,8 +19,9 @@ class MediaItem(QGraphicsRectItem):
         self.end_time = media_duration
         self.left_pad_x = self.scene.media_item_x
         self.right_pad_x = self.scene.media_item_x
+        self.top_pad_y = self.scene.media_item_y
         self.initial_x = self.left_pad_x
-        self.initial_y = self.scene.media_item_y
+        self.initial_y = self.top_pad_y
         self.setPos(self.initial_x, self.initial_y)
         self.initial_width = self.__get_width_from_time_interval(
             self.start_time, self.end_time
@@ -48,7 +49,7 @@ class MediaItem(QGraphicsRectItem):
             self.scenePos().x() + self.rect().width(),
             self.scenePos().y()
         )
-        self.time_label.update_position()
+        self.time_label.on_view_resize()
         self.update()
 
     def update_start_time(self, time):
@@ -110,7 +111,7 @@ class _TimeLabel(QGraphicsTextItem):
         self.end_time = self.format_time(time)
         self.__update_label()
 
-    def update_position(self):
+    def on_view_resize(self):
         self.setPos(
             self.parent.scene.width() - 250,
             self.parent.scene.height() - 40

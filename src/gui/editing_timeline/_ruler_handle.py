@@ -7,21 +7,23 @@ from PySide6.QtMultimediaWidgets import *
 
 class RulerHandle(QGraphicsItem):
     
-    def __init__(self, scene, media_duration):
+    def __init__(self, ruler, media_duration):
         super().__init__()
-        self.scene = scene
+        self.ruler = ruler
+        self.scene = self.ruler.scene
         self.scene.addItem(self)
         self.setFlag(QGraphicsWidget.ItemIsMovable, True)
         self.media_duration = media_duration
-        self.width = 30
-        self.height = 100 + self.scene.media_item_y - self.scene.ruler_handle_y
-        self.left_pad_x = self.scene.ruler_handle_x
-        self.right_pad_x = self.scene.ruler_handle_x
+        self.width = 10
+        self.height = 100 + self.scene.media_item_y
+        self.left_pad_x = self.scene.ruler_x
+        self.right_pad_x = self.scene.ruler_x
+        self.top_pad_y = 0
         self.initial_x = self.__get_min_possible_x()
-        self.initial_y = self.scene.ruler_handle_y
+        self.initial_y = self.top_pad_y
         self.setPos(self.initial_x, self.initial_y)
         self.head_width = self.width
-        self.head_height = self.height / 10
+        self.head_height = self.height / 15
         self.needle_width = 1
         self.needle_height = self.height - self.head_height
         self.needle_x = (self.width - self.needle_width) / 2
@@ -50,35 +52,42 @@ class RulerHandle(QGraphicsItem):
     """Override"""
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.click_offset = event.pos()
+            self.dragging = True
 
     """Override"""
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.click_offset = None
+            self.dragging = False
 
     """Override"""
     def mouseMoveEvent(self, event):
-        if self.click_offset is not None:
-            new_x = event.scenePos().x() - self.click_offset.x()
-            if new_x <= self.__get_min_possible_x():
-                new_x = self.__get_min_possible_x()
-            elif new_x >= self.__get_max_possible_x():
-                new_x = self.__get_max_possible_x()
-            self.setPos(new_x, self.scenePos().y())
-            self.time_label.update_label(self.__get_current_time())
+        if self.dragging:
+            self.__move(event.scenePos())
 
-    @Slot()
     def on_view_resize(self):
+        """Not a slot. Called in 'Ruler' object."""
         label_time = self.time_label.get_time()
         new_x = self.__get_x_pos_from_time(label_time)
         self.setPos(new_x, self.scenePos().y())
+
+    def on_ruler_left_mouse_clicked(self, click_pos):
+        """Not a slot. Called in 'Ruler' object."""
+        self.__move(click_pos)
+
+    def __move(self, position):
+        new_x = position.x() - self.width / 2
+        if new_x <= self.__get_min_possible_x():
+            new_x = self.__get_min_possible_x()
+        elif new_x >= self.__get_max_possible_x():
+            new_x = self.__get_max_possible_x()
+        self.setPos(new_x, self.scenePos().y())
+        self.time_label.update_label(self.__get_current_time())
 
     def __get_max_possible_width(self):
         return self.scene.width() - self.left_pad_x - self.right_pad_x
 
     def __get_min_possible_x(self):
-        return self.scene.ruler_x - self.width / 2
+        return self.left_pad_x - self.width / 2
 
     def __get_max_possible_x(self):
         return self.__get_min_possible_x() + self.__get_max_possible_width()
