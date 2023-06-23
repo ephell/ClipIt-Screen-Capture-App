@@ -4,8 +4,8 @@ from PySide6.QtGui import *
 from PySide6.QtMultimedia import *
 from PySide6.QtMultimediaWidgets import *
 
-from .media_item_left_handle import LeftHandle
-from .media_item_right_handle import RightHandle
+from ._media_item_left_handle import LeftHandle
+from ._media_item_right_handle import RightHandle
 
 
 class MediaItem(QGraphicsRectItem):
@@ -17,10 +17,12 @@ class MediaItem(QGraphicsRectItem):
         self.media_duration = media_duration
         self.start_time = 0
         self.end_time = media_duration
-        self.initial_x = self.scene.media_item_x
+        self.left_pad_x = self.scene.media_item_x
+        self.right_pad_x = self.scene.media_item_x
+        self.initial_x = self.left_pad_x
         self.initial_y = self.scene.media_item_y
         self.setPos(self.initial_x, self.initial_y)
-        self.initial_width = self.calculate_width_from_time_interval(
+        self.initial_width = self.__get_width_from_time_interval(
             self.start_time, self.end_time
         )
         self.initial_height = 100
@@ -36,8 +38,8 @@ class MediaItem(QGraphicsRectItem):
 
     @Slot()
     def on_view_resize(self):
-        self.resize_based_on_time_interval(self.start_time, self.end_time)
-        self.move_to_x_based_on_time(self.start_time)
+        self.__resize_based_on_time_interval(self.start_time, self.end_time)
+        self.__move_to_x_based_on_time(self.start_time)
         self.left_handle.setPos(
             self.scenePos().x() - self.left_handle.handle_width,
             self.scenePos().y()
@@ -49,35 +51,6 @@ class MediaItem(QGraphicsRectItem):
         self.time_label.update_position()
         self.update()
 
-    def calculate_max_possible_width(self):
-        return int(self.scene.width() - self.initial_x * 2)
-
-    def calculate_width_from_time_interval(self, start_time, end_time):
-        total_time = self.media_duration
-        max_possible_width = self.calculate_max_possible_width()
-        return (end_time - start_time) / total_time * max_possible_width
-    
-    def calculate_x_pos_from_time(self, time):
-        total_time = self.media_duration
-        max_possible_width = self.calculate_max_possible_width()
-        return (time / total_time) * max_possible_width + self.initial_x
-
-    def calculate_time_from_x_pos(self, x_pos):
-        total_time = self.media_duration
-        max_possible_width = self.calculate_max_possible_width()
-        return (x_pos - self.initial_x) / max_possible_width * total_time
-
-    def move_to_x_based_on_time(self, time):
-        self.setPos(self.calculate_x_pos_from_time(time), self.initial_y)
-
-    def resize_based_on_time_interval(self, start_time, end_time):
-        self.setRect(
-            0, 
-            0,
-            self.calculate_width_from_time_interval(start_time, end_time), 
-            self.initial_height
-        )
-
     def update_start_time(self, time):
         self.start_time = time
         self.time_label.update_start_time(time)
@@ -85,6 +58,30 @@ class MediaItem(QGraphicsRectItem):
     def update_end_time(self, time):
         self.end_time = time
         self.time_label.update_end_time(time)
+
+    def __get_max_possible_width(self):
+        return self.scene.width() - self.left_pad_x - self.right_pad_x
+    
+    def __get_x_pos_from_time(self, time):
+        total_time = self.media_duration
+        max_possible_width = self.__get_max_possible_width()
+        return (time / total_time) * max_possible_width + self.initial_x
+
+    def __move_to_x_based_on_time(self, time):
+        self.setPos(self.__get_x_pos_from_time(time), self.initial_y)
+
+    def __get_width_from_time_interval(self, start_time, end_time):
+        total_time = self.media_duration
+        max_possible_width = self.__get_max_possible_width()
+        return (end_time - start_time) / total_time * max_possible_width
+
+    def __resize_based_on_time_interval(self, start_time, end_time):
+        self.setRect(
+            0, 
+            0,
+            self.__get_width_from_time_interval(start_time, end_time), 
+            self.initial_height
+        )
 
 
 class _TimeLabel(QGraphicsTextItem):
@@ -101,16 +98,16 @@ class _TimeLabel(QGraphicsTextItem):
         font.setPointSize(15)
         font.setWeight(QFont.Bold)
         self.setFont(font)
-        self.start_time = self.format_timestamp(self.parent.start_time)
-        self.end_time = self.format_timestamp(self.parent.end_time)
+        self.start_time = self.format_time(self.parent.start_time)
+        self.end_time = self.format_time(self.parent.end_time)
         self.__update_label()
 
-    def update_start_time(self, timestamp):
-        self.start_time = self.format_timestamp(timestamp)
+    def update_start_time(self, time):
+        self.start_time = self.format_time(time)
         self.__update_label()
 
-    def update_end_time(self, timestamp):
-        self.end_time = self.format_timestamp(timestamp)
+    def update_end_time(self, time):
+        self.end_time = self.format_time(time)
         self.__update_label()
 
     def update_position(self):
@@ -123,8 +120,8 @@ class _TimeLabel(QGraphicsTextItem):
         self.setPlainText(f"{self.start_time} to {self.end_time}")
 
     @staticmethod
-    def format_timestamp(time):
-        """Formats a timestamp in milliseconds to a string."""
+    def format_time(time):
+        """Formats a time in milliseconds to a string."""
         milliseconds = int(time)
         seconds, milliseconds = divmod(milliseconds, 1000)
         minutes, seconds = divmod(seconds, 60)

@@ -9,7 +9,9 @@ class Ruler(QGraphicsItem):
         self.scene = scene
         self.scene.addItem(self)
         self.view = view
-        self.initial_x = self.scene.ruler_x
+        self.left_pad_x = self.scene.ruler_x
+        self.right_pad_x = self.scene.ruler_x
+        self.initial_x = self.left_pad_x
         self.initial_y = self.scene.ruler_y
         self.setPos(self.initial_x, self.initial_y)
         self.media_duration = media_duration
@@ -106,4 +108,4 @@ class Ruler(QGraphicsItem):
         return pixel_time_value * pixels_per_interval
 
     def __get_x_padding(self):
-        return self.scene.ruler_x * 2
+        return self.left_pad_x + self.right_pad_x

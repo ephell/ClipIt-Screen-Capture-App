@@ -6,9 +6,9 @@ from PySide6.QtGui import *
 from PySide6.QtMultimedia import *
 from PySide6.QtMultimediaWidgets import *
 
-from .ruler_handle import RulerHandle
-from .media_item import MediaItem
-from .ruler import Ruler
+from ._ruler import Ruler
+from ._ruler_handle import RulerHandle
+from ._media_item import MediaItem
 
 
 class GraphicsScene(QGraphicsScene):
@@ -27,6 +27,7 @@ class GraphicsScene(QGraphicsScene):
 class GraphicsView(QGraphicsView):
 
     resize_ruler = Signal()
+    resize_ruler_handle = Signal()
     resize_media_item = Signal()
 
     def __init__(self, scene):
@@ -43,9 +44,14 @@ class GraphicsView(QGraphicsView):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.resize_ruler.emit()
+        self.resize_ruler_handle.emit()
         self.resize_media_item.emit()
 
     def resize_scene(self, new_width):
+        """
+        Called after calculating the new scene size in the ruler. Make
+        sure the first connected slot is the ruler's 'on_view_resize'.
+        """
         self.scene.setSceneRect(0, 0, new_width, self.scene.height())
 
 
@@ -58,11 +64,12 @@ class TimelineWidget(QWidget):
         self.scene = GraphicsScene(800, 200)
         self.view = GraphicsView(self.scene)
 
+        self.ruler = Ruler(self.scene, self.view, self.media_player.duration())
         self.ruler_handle = RulerHandle(self.scene, self.media_player.duration())
         self.media_item = MediaItem(self.scene, self.media_player.duration())
-        self.ruler = Ruler(self.scene, self.view, self.media_player.duration())
 
         self.view.resize_ruler.connect(self.ruler.on_view_resize)
+        self.view.resize_ruler_handle.connect(self.ruler_handle.on_view_resize)
         self.view.resize_media_item.connect(self.media_item.on_view_resize)
 
         self.layout = QVBoxLayout()
