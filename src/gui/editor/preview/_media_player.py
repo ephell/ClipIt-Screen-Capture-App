@@ -11,11 +11,37 @@ class MediaPlayer(QMediaPlayer):
         super().__init__()
         self.scene = scene
         self.setSource(QUrl("src/gui/editor/test.mp4"))
-        # self.setLoops(QMediaPlayer.Infinite)
         self.video_output = _VideoOutput(self.scene)
         self.setVideoOutput(self.video_output)
-        # self.audio_output = _AudioOutput()
-        # self.setAudioOutput(self.audio_output)
+        self.audio_output = _AudioOutput()
+        self.setAudioOutput(self.audio_output)
+        self.start_time = 0
+        self.end_time = self.duration()
+
+    def update_start_time(self, new_start_time):
+        self.start_time = new_start_time
+
+    def update_end_time(self, new_end_time):
+        self.end_time = new_end_time
+
+    """Override"""
+    def stop(self):
+        if self.playbackState() == QMediaPlayer.PlayingState:
+            self.setPosition(self.start_time)
+        else:
+            super().stop()
+            self.setPosition(self.start_time)
+
+    """Override"""
+    def play(self):
+        if (
+            self.playbackState() == QMediaPlayer.PausedState
+            and self.position() >= self.end_time
+        ):
+            self.setPosition(self.start_time)
+            super().play()
+        else:
+            super().play()
 
 
 class _VideoOutput(QGraphicsVideoItem):

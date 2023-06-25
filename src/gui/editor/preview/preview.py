@@ -45,13 +45,16 @@ class Preview(QWidget):
 
     def __init__(self):
         super().__init__()
-        
         self.scene = _GraphicsScene(600, 400)
         self.view = _GraphicsView(self.scene)
-
         self.media_player = MediaPlayer(self.scene)
         self.media_slider = MediaSlider(self.media_player)
         self.media_buttons = MediaButtons(self.media_player)
+        self.layoutas = QVBoxLayout()
+        self.layoutas.addWidget(self.view)
+        self.layoutas.addWidget(self.media_slider)
+        self.layoutas.addWidget(self.media_buttons)
+        self.setLayout(self.layoutas)
 
         # Connecting to 'nativeSizeChanged' stretches video output 
         # properly once it's loaded for the first time.
@@ -59,16 +62,7 @@ class Preview(QWidget):
             self.__stretch_video_output
         )
         self.view.view_resized.connect(self.__stretch_video_output)
-        self.media_player.play()
-
-        self.layoutas = QVBoxLayout()
-        self.layoutas.addWidget(self.view)
-        self.layoutas.addWidget(self.media_slider)
-        self.layoutas.addWidget(self.media_buttons)
-        self.setLayout(self.layoutas)
-
-    def get_media_player(self):
-        return self.media_player
+        self.media_player.pause()
     
     @Slot()
     def __stretch_video_output(self):

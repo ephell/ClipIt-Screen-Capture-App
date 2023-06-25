@@ -73,10 +73,12 @@ class MediaItem(QGraphicsRectItem):
     def update_start_time(self, time):
         self.start_time = time
         self.time_label.update_start_time(time)
+        self.scene.media_item_start_time_changed.emit(time)
 
     def update_end_time(self, time):
         self.end_time = time
         self.time_label.update_end_time(time)
+        self.scene.media_item_end_time_changed.emit(time)
 
     def __get_max_possible_width(self):
         return self.scene.width() - self.left_pad_x - self.right_pad_x
