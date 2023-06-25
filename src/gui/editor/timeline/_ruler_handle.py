@@ -15,7 +15,7 @@ class RulerHandle(QGraphicsItem):
         self.setFlag(QGraphicsWidget.ItemIsMovable, True)
         self.media_duration = media_duration
         self.width = 10
-        self.height = 100 + self.scene.media_item_y
+        self.height = 120 + self.scene.media_item_y
         self.left_pad_x = self.scene.ruler_x
         self.right_pad_x = self.scene.ruler_x
         self.top_pad_y = 0
@@ -146,10 +146,10 @@ class _RulerHandleTimeLabel(QGraphicsTextItem):
         self.parent.scene.addItem(self)
         self.setPos(
             self.parent.scene.sceneRect().x() + 23,
-            self.parent.scene.sceneRect().y() + 160
+            self.parent.scene.sceneRect().y() + 185
         )
         font = self.font()
-        font.setPointSize(15)
+        font.setPointSize(17)
         font.setWeight(QFont.Bold)
         self.setFont(font)
         self.time = 0

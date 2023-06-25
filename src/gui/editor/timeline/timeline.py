@@ -22,7 +22,7 @@ class _GraphicsScene(QGraphicsScene):
         super().__init__()
         self.setSceneRect(0, 0, width, height)
         self.media_item_x = 50
-        self.media_item_y = 55
+        self.media_item_y = 60
         self.ruler_x = 50
         self.ruler_y = 0
 
@@ -39,8 +39,8 @@ class _GraphicsView(QGraphicsView):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setMaximumHeight(self.scene.height())
         self.setMinimumWidth(self.scene.width())
+        self.setMaximumHeight(self.scene.height())
 
     """Override"""
     def resizeEvent(self, event):
@@ -61,7 +61,7 @@ class Timeline(QWidget):
     def __init__(self, media_duration):
         super().__init__()
         self.media_duration = media_duration
-        self.scene = _GraphicsScene(800, 200)
+        self.scene = _GraphicsScene(800, 225)
         self.view = _GraphicsView(self.scene)
         self.ruler = Ruler(self.scene, self.view, self.media_duration)
         self.media_item = MediaItem(self.scene, self.media_duration)

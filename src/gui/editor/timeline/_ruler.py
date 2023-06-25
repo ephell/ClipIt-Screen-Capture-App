@@ -34,7 +34,7 @@ class Ruler(QGraphicsItem):
     """Override"""
     def paint(self, painter, option, widget):
         font = painter.font()
-        font.setPointSize(8)
+        font.setPointSize(10)
         painter.setFont(font)
 
         pen = QPen(Qt.black)
@@ -56,7 +56,7 @@ class Ruler(QGraphicsItem):
         # Draw intermediate (smaller) tick marks
         i_tick_positions = self.__get_intermediate_tick_positions(tick_positions)
         for tick_pos in i_tick_positions:
-            painter.drawLine(tick_pos, 0, tick_pos, self.height * 3 / 4)
+            painter.drawLine(tick_pos, 0, tick_pos, self.height / 2)
 
     """Override"""
     def mousePressEvent(self, event):
