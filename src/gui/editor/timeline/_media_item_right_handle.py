@@ -69,6 +69,7 @@ class RightHandle(QGraphicsRectItem):
                 )
                 self.setPos(new_handle_x, new_handle_y)
                 self.parent.update_end_time(self.__get_current_time())
+                self.scene().media_item_right_handle_moved.emit(self.__get_current_time())
 
             self.previous_scene_pos = event.scenePos()
 

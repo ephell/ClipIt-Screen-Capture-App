@@ -64,11 +64,40 @@ class RulerHandle(QGraphicsItem):
         if self.dragging:
             self.__move(event.scenePos())
 
+    @Slot()
+    def on_media_player_position_changed(self, time):
+        self.setPos(
+            self.__get_x_pos_from_time(time), 
+            self.scenePos().y()
+        )   
+        self.time_label.update_label(time)
+
+    @Slot()
+    def on_media_item_left_handle_moved(self, time):
+        if time > self.time_label.get_time():
+            self.setPos(
+                self.__get_x_pos_from_time(time),
+                self.scenePos().y()
+            )
+            self.time_label.update_label(time)
+            self.scene.ruler_handle_time_changed.emit(time)
+
+    @Slot()
+    def on_media_item_right_handle_moved(self, time):
+        if time < self.time_label.get_time():
+            self.setPos(
+                self.__get_x_pos_from_time(time),
+                self.scenePos().y()
+            )
+            self.time_label.update_label(time)
+            self.scene.ruler_handle_time_changed.emit(time)
+
     def on_view_resize(self):
         """Not a slot. Called in 'Ruler' object."""
-        label_time = self.time_label.get_time()
-        new_x = self.__get_x_pos_from_time(label_time)
-        self.setPos(new_x, self.scenePos().y())
+        self.setPos(
+            self.__get_x_pos_from_time(self.time_label.get_time()), 
+            self.scenePos().y()
+        )
 
     def on_ruler_left_mouse_clicked(self, click_pos):
         """Not a slot. Called in 'Ruler' object."""
@@ -82,6 +111,7 @@ class RulerHandle(QGraphicsItem):
             new_x = self.__get_max_possible_x()
         self.setPos(new_x, self.scenePos().y())
         self.time_label.update_label(self.__get_current_time())
+        self.scene.ruler_handle_time_changed.emit(self.__get_current_time())
 
     def __get_max_possible_width(self):
         return self.scene.width() - self.left_pad_x - self.right_pad_x

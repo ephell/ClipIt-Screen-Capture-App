@@ -16,6 +16,8 @@ class _GraphicsScene(QGraphicsScene):
     def __init__(self, width, height):
         super().__init__()
         self.setSceneRect(0, 0, width, height)
+        self.initial_width = width
+        self.initial_height = height
 
 
 class _GraphicsView(QGraphicsView):
@@ -30,6 +32,8 @@ class _GraphicsView(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
+        self.setMinimumWidth(self.scene.initial_width)
+        self.setMinimumHeight(self.scene.initial_height)
 
     """Override"""
     def resizeEvent(self, event):
@@ -59,8 +63,8 @@ class Preview(QWidget):
 
         self.layoutas = QVBoxLayout()
         self.layoutas.addWidget(self.view)
-        self.layoutas.addWidget(self.media_buttons)
         self.layoutas.addWidget(self.media_slider)
+        self.layoutas.addWidget(self.media_buttons)
         self.setLayout(self.layoutas)
 
     def get_media_player(self):

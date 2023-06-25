@@ -11,11 +11,11 @@ class MediaPlayer(QMediaPlayer):
         super().__init__()
         self.scene = scene
         self.setSource(QUrl("src/gui/editor/test.mp4"))
-        self.setLoops(QMediaPlayer.Infinite)
+        # self.setLoops(QMediaPlayer.Infinite)
         self.video_output = _VideoOutput(self.scene)
         self.setVideoOutput(self.video_output)
-        self.audio_output = _AudioOutput()
-        self.setAudioOutput(self.audio_output)
+        # self.audio_output = _AudioOutput()
+        # self.setAudioOutput(self.audio_output)
 
 
 class _VideoOutput(QGraphicsVideoItem):

@@ -52,6 +52,24 @@ class MediaItem(QGraphicsRectItem):
         self.time_label.on_view_resize()
         self.update()
 
+    @Slot()
+    def on_ruler_handle_time_changed(self, time):
+        if time < self.start_time:
+            self.update_start_time(time)
+            self.__resize_based_on_time_interval(time, self.end_time)
+            self.__move_to_x_based_on_time(time)
+            self.left_handle.setPos(
+                self.scenePos().x() - self.left_handle.handle_width,
+                self.scenePos().y()
+            )
+        elif time > self.end_time:
+            self.update_end_time(time)
+            self.__resize_based_on_time_interval(self.start_time, time)
+            self.right_handle.setPos(
+                self.scenePos().x() + self.rect().width(),
+                self.scenePos().y()
+            )
+
     def update_start_time(self, time):
         self.start_time = time
         self.time_label.update_start_time(time)
