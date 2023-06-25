@@ -10,7 +10,7 @@ from ._ruler import Ruler
 from ._media_item import MediaItem
 
 
-class GraphicsScene(QGraphicsScene):
+class _GraphicsScene(QGraphicsScene):
 
     def __init__(self, width, height):
         super().__init__()
@@ -21,7 +21,7 @@ class GraphicsScene(QGraphicsScene):
         self.ruler_y = 0
 
 
-class GraphicsView(QGraphicsView):
+class _GraphicsView(QGraphicsView):
 
     resize_ruler = Signal()
     resize_media_item = Signal()
@@ -50,14 +50,14 @@ class GraphicsView(QGraphicsView):
         self.scene.setSceneRect(0, 0, new_width, self.scene.height())
 
 
-class TimelineWidget(QWidget):
+class Timeline(QWidget):
 
     def __init__(self, media_player):
         super().__init__()
         self.media_player = media_player
 
-        self.scene = GraphicsScene(800, 200)
-        self.view = GraphicsView(self.scene)
+        self.scene = _GraphicsScene(800, 200)
+        self.view = _GraphicsView(self.scene)
 
         self.ruler = Ruler(self.scene, self.view, self.media_player.duration())
         self.media_item = MediaItem(self.scene, self.media_player.duration())
