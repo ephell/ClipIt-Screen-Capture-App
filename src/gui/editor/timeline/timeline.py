@@ -53,7 +53,7 @@ class _GraphicsView(QGraphicsView):
         Called after calculating the new scene size in the ruler. Make
         sure the first connected slot is the ruler's 'on_view_resize'.
         """
-        self.scene.setSceneRect(0, 0, new_width, self.scene.height())
+        self.scene.setSceneRect(0, 0, new_width, self.contentsRect().height())
 
 
 class Timeline(QWidget):
