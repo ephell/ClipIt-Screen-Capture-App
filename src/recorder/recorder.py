@@ -62,16 +62,16 @@ class Recorder(threading.Thread):
         for recorder in self.__get_recorders():
             recorder.join()
 
-        self.__generate_final_video()
+        file_path = self.__generate_final_video()
         self.__clean_up_temp_directory()
-        self.is_recording_callback(False)
+        self.recording_finished_callback(file_path)
         log.info("All done!")
 
     def __unpack_kwargs(self, kwargs):
         self.region = kwargs.get("region")
         self.monitor = kwargs.get("monitor")
         self.fps = kwargs.get("fps")
-        self.is_recording_callback = kwargs.get("is_recording_callback")
+        self.recording_finished_callback = kwargs.get("recording_finished_callback")
 
     def __initialize_video_recorder(self):
         self.video_recorder_stop_event = mp.Event()
@@ -149,6 +149,7 @@ class Recorder(threading.Thread):
             src=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}", 
             dst=f"{Paths.RECORDINGS_DIR}/{filename}"
         )
+        return os.path.join(Paths.RECORDINGS_DIR, filename)
 
     def __clean_up_temp_directory(self):
         """Removes all temporary files from the temp directory."""

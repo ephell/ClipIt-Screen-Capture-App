@@ -7,10 +7,12 @@ from PySide6.QtMultimediaWidgets import *
 
 class MediaPlayer(QMediaPlayer):
 
-    def __init__(self, scene):
+    def __init__(self, scene, file_path):
         super().__init__()
         self.scene = scene
-        self.setSource(QUrl("src/gui/editor/test.mp4"))
+        self.file_path = file_path
+        self.source_file = QUrl.fromLocalFile(self.file_path)
+        self.setSource(self.source_file)
         self.video_output = _VideoOutput(self.scene)
         self.setVideoOutput(self.video_output)
         self.audio_output = _AudioOutput()
@@ -50,6 +52,7 @@ class _VideoOutput(QGraphicsVideoItem):
         super().__init__()
         self.scene = scene
         self.scene.addItem(self)
+        self.setAspectRatioMode(Qt.KeepAspectRatio)
 
 
 class _AudioOutput(QAudioOutput):

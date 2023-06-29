@@ -7,7 +7,6 @@ from PySide6.QtMultimedia import *
 from PySide6.QtMultimediaWidgets import *
 
 from ._media_player import MediaPlayer
-from ._media_slider import MediaSlider
 from ._media_buttons import MediaButtons
 
 
@@ -31,39 +30,40 @@ class _GraphicsView(QGraphicsView):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(
+            QPainter.Antialiasing | 
+            QPainter.SmoothPixmapTransform | 
+            QPainter.TextAntialiasing
+        )
         self.setMinimumWidth(self.scene.initial_width)
         self.setMinimumHeight(self.scene.initial_height)
 
     """Override"""
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        self.scene.setSceneRect(0, 0, event.size().width(), event.size().height())
         self.view_resized.emit()
 
 
 class Preview(QWidget):
 
-    def __init__(self):
+    def __init__(self, file_path):
         super().__init__()
-        self.scene = _GraphicsScene(600, 400)
+        self.scene = _GraphicsScene(740, 400)
         self.view = _GraphicsView(self.scene)
-        self.media_player = MediaPlayer(self.scene)
-        self.media_slider = MediaSlider(self.media_player)
+        self.media_player = MediaPlayer(self.scene, file_path)
         self.media_buttons = MediaButtons(self.media_player)
         self.layoutas = QVBoxLayout()
         self.layoutas.addWidget(self.view)
-        self.layoutas.addWidget(self.media_slider)
         self.layoutas.addWidget(self.media_buttons)
         self.setLayout(self.layoutas)
 
-        # Connecting to 'nativeSizeChanged' stretches video output 
-        # properly once it's loaded for the first time.
-        self.media_player.video_output.nativeSizeChanged.connect(
-            self.__stretch_video_output
-        )
         self.view.view_resized.connect(self.__stretch_video_output)
         self.media_player.pause()
-    
+
     @Slot()
     def __stretch_video_output(self):
-        self.view.fitInView(self.media_player.video_output, Qt.IgnoreAspectRatio)
+        self.media_player.video_output.setSize(
+            QSize(self.scene.width(), self.scene.height())
+        )
+        self.view.fitInView(self.media_player.video_output, Qt.KeepAspectRatio)

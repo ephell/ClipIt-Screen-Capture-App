@@ -10,9 +10,11 @@ from .timeline.timeline import Timeline
 
 class Editor(QWidget):
 
-    def __init__(self):
-        super().__init__()
-        self.preview = Preview()
+    def __init__(self, file_path, parent=None):
+        super().__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setWindowFlag(Qt.Window)
+        self.preview = Preview(file_path)
         self.timeline = Timeline(self.preview.media_player.duration())
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.preview)
@@ -34,6 +36,15 @@ class Editor(QWidget):
         self.timeline.scene.media_item_end_time_changed.connect(
             self.on_media_item_end_time_changed
         )
+
+    """Override"""
+    def closeEvent(self, event):
+        super().closeEvent(event)
+        if self.parent() is not None:
+            for attr_name, attr_value in vars(self.parent()).items():
+                if isinstance(attr_value, Editor):
+                    setattr(self.parent(), attr_name, None)
+                    break
 
     @Slot()
     def on_ruler_handle_time_changed(self, time_ms):

@@ -20,7 +20,7 @@ class Ruler(QGraphicsItem):
         self.setPos(self.initial_x, self.initial_y)
         self.media_duration = media_duration
         self.initial_width = self.__get_max_possible_width()
-        self.initial_height = 28
+        self.initial_height = 18
         self.width = self.initial_width
         self.height = self.initial_height
         self.tick_amount = 10
