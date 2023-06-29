@@ -5,7 +5,7 @@ import threading
 import win32api, win32con, win32gui
 
 
-class RecordingAreaBorder(threading.Thread):
+class AreaBorderCreator(threading.Thread):
 
     def __init__(self, top_left_x, top_left_y, bottom_right_x, bottom_right_y):
         super().__init__()

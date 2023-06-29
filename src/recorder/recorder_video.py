@@ -4,7 +4,7 @@ log = GlobalLogger.LOGGER
 import multiprocessing as mp
 from time import perf_counter, sleep
 
-from moviepy.editor import ImageSequenceClip
+import cv2
 import mss
 import numpy as np
 
@@ -45,36 +45,35 @@ class VideoRecorder(mp.Process):
             fps = self.fps
             start_time = perf_counter()
             while not self.stop_event.is_set():
-
                 frame_start_time = perf_counter()
-
-                screen = np.array(sct.grab(monitor))
-                screen = np.flip(screen[..., :3], axis=-1)
+                screen = np.array(sct.grab(monitor))[:, :, :3]
                 captured_frames.append(screen)
-                
-                frame_end_time = perf_counter() - frame_start_time
-                frame_capture_times.append(frame_end_time)
-
-                sleep_time = (1.0 / fps) - frame_end_time
+                frame_capture_time = perf_counter() - frame_start_time
+                frame_capture_times.append(frame_capture_time)
+                sleep_time = (1.0 / fps) - frame_capture_time
                 if sleep_time > 0:
                     sleep(sleep_time)
 
         log.debug(
-            f"Stopped recording video at: {perf_counter()}, " \
+            f"Stopped capturing frames at: {perf_counter()}, " \
             f"Duration: {perf_counter() - start_time}"
         )
+        log.debug("Writing frames to file ... ")
 
-        precise_fps = len(captured_frames) / (perf_counter() - start_time)
-        clip = ImageSequenceClip(captured_frames, fps=precise_fps)
-        clip.write_videofile(
+        fps = len(captured_frames) / (perf_counter() - start_time)
+        out = cv2.VideoWriter(
             filename=f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}",
-            preset="ultrafast",
-            logger=None
+            fourcc=cv2.VideoWriter_fourcc(*"mp4v"), 
+            fps=fps,
+            frameSize=(int(self.region[2]), int(self.region[3]))
         )
+        for frame in captured_frames:
+            out.write(frame)
+        out.release()
 
         log.debug("Finished recording video!")
         log.debug("----------------------------------------")
         log.debug(f"Total frames captured: {len(captured_frames)}")
         log.debug(f"Average frame capture time: {np.mean(frame_capture_times)}")
-        log.debug(f"Average FPS: {precise_fps}")
+        log.debug(f"Average FPS: {fps}")
         log.debug("----------------------------------------")
