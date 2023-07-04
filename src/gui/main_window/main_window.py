@@ -35,7 +35,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.finished_recording_signal.connect(self.__on_recording_finished)
 
-        self.editor = None
         self.open_editor_button.clicked.connect(self.__on_open_editor_clicked)
 
         self.widget_button = QPushButton("Print All Added Widgets", self)
@@ -44,10 +43,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             lambda: print(
                 "----------------------------------------\n"
                 + "".join(repr(w) + "\n" for w in self.app.allWidgets())
+                + str(self.__get_editor())
                 + "----------------------------------------"
             )
         )
-
 
     """Override"""
     def keyPressEvent(self, event):
@@ -60,6 +59,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().closeEvent(event)
         if self.is_recording and not self.stop_event.is_set():
             self.stop_event.set()
+        if self.__get_editor() is not None:
+            self.__get_editor().close()
 
     def __on_stop_clicked(self):
         if self._select_area_button_logic.recording_area_border is not None:
@@ -96,22 +97,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         message_box = _RecordingFinishedMessageBox(file_path)
         user_choice = message_box.exec()
         if user_choice == QMessageBox.Yes:
-            self.editor = Editor(file_path, parent=self)
+            self.editor = Editor(file_path)
             self.editor.show()
-        elif user_choice == QMessageBox.No:
-            pass
 
     def __on_open_editor_clicked(self):
-        if self.editor is None:
+        if self.__get_editor() is None:
             file_dialog = _OpenFileInEditorDialog(self)
             user_choice = file_dialog.exec()
             if user_choice == QFileDialog.Accepted:
                 file_path = file_dialog.selectedFiles()[0]
-                self.editor = Editor(file_path, parent=self)
+                self.editor = Editor(file_path)
                 self.editor.show()
             file_dialog.deleteLater()
         else:
             print("Editor is already open.")
+
+    def __get_editor(self):
+        for widget in self.app.allWidgets():
+            if isinstance(widget, Editor):
+                return widget
+        return None
 
 
 class _OpenFileInEditorDialog(QFileDialog):

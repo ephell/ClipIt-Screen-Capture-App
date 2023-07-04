@@ -12,6 +12,7 @@ class Editor(QWidget):
 
     def __init__(self, file_path, parent=None):
         super().__init__(parent)
+        self.setWindowTitle("ClipIt - Editor")
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowFlag(Qt.Window)
         self.preview = Preview(file_path)
