@@ -9,6 +9,7 @@ from PySide6.QtWidgets import QMainWindow, QMessageBox, QPushButton, QFileDialog
 from .buttons.select_area_button.main_logic import SelectAreaButtonLogic
 from gui.editor.editor import Editor
 from recorder.recorder import Recorder
+from settings import Paths
 from .Ui_MainWindow import Ui_MainWindow
 
 
@@ -99,6 +100,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if user_choice == QMessageBox.Yes:
             self.editor = Editor(file_path)
             self.editor.show()
+        message_box.deleteLater()
 
     def __on_open_editor_clicked(self):
         if self.__get_editor() is None:
@@ -110,8 +112,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.editor.show()
             file_dialog.deleteLater()
         else:
-            print("Editor is already open.")
-
+            _EditorAlreadyOpenMessageBox(self).exec()
+            
     def __get_editor(self):
         for widget in self.app.allWidgets():
             if isinstance(widget, Editor):
@@ -127,9 +129,7 @@ class _OpenFileInEditorDialog(QFileDialog):
         self.setNameFilter("Video Files (*.mp4)")
         self.setFileMode(QFileDialog.ExistingFile)
         self.setViewMode(QFileDialog.Detail)
-        self.setDirectory(
-            "C:/Users/drema/Desktop/Programming/ClipIt/recordings"
-        )
+        self.setDirectory(Paths.RECORDINGS_DIR)
 
 
 class _RecordingFinishedMessageBox(QMessageBox):
@@ -142,4 +142,16 @@ class _RecordingFinishedMessageBox(QMessageBox):
         self.setInformativeText("Do you want to edit the recording?")
         self.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         self.setDefaultButton(QMessageBox.Yes)
+        self.setIcon(QMessageBox.Information)
+
+
+class _EditorAlreadyOpenMessageBox(QMessageBox):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+        self.setWindowTitle("Editor Already Open")
+        self.setText("Editor is already open.")
+        self.setStandardButtons(QMessageBox.Ok)
+        self.setDefaultButton(QMessageBox.Ok)
         self.setIcon(QMessageBox.Information)
