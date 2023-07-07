@@ -37,7 +37,7 @@ class VideoRecorder(mp.Process):
 
     def run(self):
         fps, total_frames_captured = self.__capture_and_save_video()
-        self.__reencode_video(fps, total_frames_captured)
+        self.__reencode_captured_video(fps, total_frames_captured)
 
     def __capture_and_save_video(self):
         with mss.mss() as sct:
@@ -82,7 +82,7 @@ class VideoRecorder(mp.Process):
         avg_fps = total_frames_captured / (perf_counter() - start_time)
         return avg_fps, total_frames_captured
 
-    def __reencode_video(self, fps, total_frames_in_input_file):
+    def __reencode_captured_video(self, fps, total_frames_in_input_file):
         """Reencodes video with precise fps."""
         video_to_reencode = cv2.VideoCapture(self.captured_filename)
         reencoder = cv2.VideoWriter(
