@@ -132,7 +132,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.editor.show()
             else:
                 _EditorAlreadyOpenMessageBox(self).exec()
-        self.final_file_generation_dialog.close()
         message_box.deleteLater()
 
     @Slot()
@@ -147,7 +146,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             file_dialog.deleteLater()
         else:
             _EditorAlreadyOpenMessageBox(self).exec()
-            
+
 
 class _OpenFileInEditorDialog(QFileDialog):
 

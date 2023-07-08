@@ -12,7 +12,7 @@ class FinalFileGenerationDialog(QDialog, Ui_FinalFileGenerationDialog):
         self.setupUi(self)
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowFlag(Qt.Window)
-        self.setWindowFlag(Qt.WindowCloseButtonHint, False)
+        self.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
         self.setWindowModality(Qt.ApplicationModal)
         self.setFixedSize(self.size())
         self.recorder = recorder
@@ -21,6 +21,7 @@ class FinalFileGenerationDialog(QDialog, Ui_FinalFileGenerationDialog):
         self.is_first_video_reencoding_signal = True
         self.is_first_audio_merging_signal = True
         self.is_first_video_and_audio_merging_signal = True
+        self.is_file_generation_complete = False
         self.__connect_signals_and_slots()
 
     def __connect_signals_and_slots(self):
@@ -36,6 +37,13 @@ class FinalFileGenerationDialog(QDialog, Ui_FinalFileGenerationDialog):
         self.recorder.file_generation_finished_signal.connect(
             self.__on_file_generation_finished_signal_received
         )
+
+    """Override"""
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            event.ignore()
+        else:
+            super().keyPressEvent(event)
 
     @Slot()
     def __on_video_reencoding_progress_signal_received(self, value):
@@ -72,5 +80,4 @@ class FinalFileGenerationDialog(QDialog, Ui_FinalFileGenerationDialog):
 
     @Slot()
     def __on_file_generation_finished_signal_received(self):
-        self.status_message_label.setText("File generation complete!")
-        self.setWindowFlag(Qt.WindowCloseButtonHint, True)
+        self.close()
