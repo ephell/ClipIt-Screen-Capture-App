@@ -15,6 +15,7 @@ class AreaSelector(QWidget):
         self.end_pos = None
         self.screenshot = self.__take_screenshot()
         self.setFixedSize(self.screenshot.width(), self.screenshot.height())
+        self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.ToolTip)
 
     """Override"""

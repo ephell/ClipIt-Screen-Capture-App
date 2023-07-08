@@ -2,19 +2,22 @@ from logger import GlobalLogger
 log = GlobalLogger.LOGGER
 
 import multiprocessing as mp
+import threading
 
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QMainWindow, QMessageBox, QPushButton, QFileDialog
+from PySide6.QtCore import Qt, Slot
+from PySide6.QtWidgets import (
+    QMainWindow, QMessageBox, QPushButton, QFileDialog
+)
 
 from .buttons.select_area_button.main_logic import SelectAreaButtonLogic
 from gui.editor.editor import Editor
+from .final_file_generation_dialog.final_file_generation_dialog import FinalFileGenerationDialog
 from recorder.recorder import Recorder
+from settings import Paths
 from .Ui_MainWindow import Ui_MainWindow
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-
-    finished_recording_signal = Signal(str)
 
     def __init__(self, app):
         super().__init__()
@@ -33,21 +36,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.stop_event = None
         self.stop_recording_button.clicked.connect(self.__on_stop_clicked)
 
-        self.finished_recording_signal.connect(self.__on_recording_finished)
-
-        self.editor = None
         self.open_editor_button.clicked.connect(self.__on_open_editor_clicked)
 
         self.widget_button = QPushButton("Print All Added Widgets", self)
+        self.widget_button.setObjectName("widget_button")
         self.verticalLayout.addWidget(self.widget_button)
-        self.widget_button.clicked.connect(
-            lambda: print(
-                "----------------------------------------\n"
-                + "".join(repr(w) + "\n" for w in self.app.allWidgets())
-                + "----------------------------------------"
-            )
-        )
+        self.widget_button.clicked.connect(self.__on_widget_button_clicked)
 
+    def __on_widget_button_clicked(self):
+        print(threading.enumerate())
+        print(
+            "----------------------------------------\n"
+            + "".join(repr(w) + "\n" for w in self.app.allWidgets())
+            + "----------------------------------------"
+        )
+        # def get_signals(source):
+        #     cls = source if isinstance(source, type) else type(source)
+        #     signal = type(Signal())
+        #     for subcls in cls.mro():
+        #         clsname = f'{subcls.__module__}.{subcls.__name__}'
+        #         for key, value in sorted(vars(subcls).items()):
+        #             if isinstance(value, signal):
+        #                 print(f'{key} [{clsname}]')
 
     """Override"""
     def keyPressEvent(self, event):
@@ -60,7 +70,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().closeEvent(event)
         if self.is_recording and not self.stop_event.is_set():
             self.stop_event.set()
+        if self.__get_editor() is not None:
+            self.__get_editor().close()
 
+    def __get_editor(self):
+        for widget in self.app.allWidgets():
+            if isinstance(widget, Editor):
+                return widget
+        return None
+
+    @Slot()
     def __on_stop_clicked(self):
         if self._select_area_button_logic.recording_area_border is not None:
             self._select_area_button_logic.recording_area_border.destroy()
@@ -69,49 +88,64 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.stop_event = None
             self.is_recording = False
 
+    @Slot()
     def __on_start_clicked(self):
         if not self.is_recording:
             if self._select_area_button_logic.recording_area_border is not None:
                 self.is_recording = True
                 self.stop_event = mp.Event()
-                recorder = Recorder(
+                self.recorder = Recorder(
                     record_video=True,
                     record_loopback=True,
                     record_microphone=True,
                     stop_event=self.stop_event,
                     region=[*self._select_area_button_logic.get_area_coords()],
                     monitor=self._select_area_button_logic.get_monitor(),
-                    fps=30,
-                    recording_finished_callback=self.__recording_finished
+                    fps=30
                 )
-                recorder.start()
+                self.recorder.recorder_stop_event_set_signal.connect(
+                    self.__on_recorder_stop_event_set
+                )
+                self.recorder.file_generation_finished_signal.connect(
+                    self.__on_file_generation_finished
+                )
+                self.recorder.start()
         else:
             log.error("Recording process is already running.")
 
-    def __recording_finished(self, file_path):
-        """Callback for 'Recorder'."""
-        self.finished_recording_signal.emit(file_path)
+    @Slot()
+    def __on_recorder_stop_event_set(self, total_encoding_steps):
+        self.final_file_generation_dialog = FinalFileGenerationDialog(
+            recorder=self.recorder,
+            total_steps=total_encoding_steps,
+            parent=self
+        )
+        self.final_file_generation_dialog.show()
 
-    def __on_recording_finished(self, file_path):
-        message_box = _RecordingFinishedMessageBox(file_path)
+    @Slot()
+    def __on_file_generation_finished(self, file_path):
+        message_box = _FileGenerationCompleteMessageBox(file_path)
         user_choice = message_box.exec()
         if user_choice == QMessageBox.Yes:
-            self.editor = Editor(file_path, parent=self)
-            self.editor.show()
-        elif user_choice == QMessageBox.No:
-            pass
+            if self.__get_editor() is None:
+                self.editor = Editor(file_path)
+                self.editor.show()
+            else:
+                _EditorAlreadyOpenMessageBox(self).exec()
+        message_box.deleteLater()
 
+    @Slot()
     def __on_open_editor_clicked(self):
-        if self.editor is None:
+        if self.__get_editor() is None:
             file_dialog = _OpenFileInEditorDialog(self)
             user_choice = file_dialog.exec()
             if user_choice == QFileDialog.Accepted:
                 file_path = file_dialog.selectedFiles()[0]
-                self.editor = Editor(file_path, parent=self)
+                self.editor = Editor(file_path)
                 self.editor.show()
             file_dialog.deleteLater()
         else:
-            print("Editor is already open.")
+            _EditorAlreadyOpenMessageBox(self).exec()
 
 
 class _OpenFileInEditorDialog(QFileDialog):
@@ -122,19 +156,32 @@ class _OpenFileInEditorDialog(QFileDialog):
         self.setNameFilter("Video Files (*.mp4)")
         self.setFileMode(QFileDialog.ExistingFile)
         self.setViewMode(QFileDialog.Detail)
-        self.setDirectory(
-            "C:/Users/drema/Desktop/Programming/ClipIt/recordings"
-        )
+        self.setDirectory(Paths.RECORDINGS_DIR)
 
 
-class _RecordingFinishedMessageBox(QMessageBox):
+class _EditorAlreadyOpenMessageBox(QMessageBox):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+        self.setWindowTitle("Editor Already Open")
+        self.setText("Editor is already open.")
+        self.setStandardButtons(QMessageBox.Ok)
+        self.setDefaultButton(QMessageBox.Ok)
+        self.setIcon(QMessageBox.Information)
+
+
+class _FileGenerationCompleteMessageBox(QMessageBox):
 
     def __init__(self, file_path, parent=None):
         super().__init__(parent)
         self.file_path = file_path
-        self.setWindowTitle("Recording Finished")
-        self.setText(f"File saved to: {file_path}")
-        self.setInformativeText("Do you want to edit the recording?")
+        self.setWindowTitle("File Generation Complete")
+        self.setText(
+            "File saved to: \n"
+            f"{file_path}"
+        )
+        self.setInformativeText("Open the file in the editor?")
         self.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         self.setDefaultButton(QMessageBox.Yes)
         self.setIcon(QMessageBox.Information)

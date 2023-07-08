@@ -6,7 +6,10 @@ import multiprocessing as mp
 import os
 import threading
 
-from encoder import Encoder
+from proglog import ProgressBarLogger
+from PySide6.QtCore import Signal, QObject
+
+from utilities.video import VideoUtils
 from recorder.recorder_loopback import LoopbackRecorder
 from recorder.recorder_microphone import MicrophoneRecorder
 from recorder.recorder_video import VideoRecorder
@@ -14,23 +17,37 @@ from settings import Paths, TempFiles
 from utilities.audio import AudioUtils
 
 
-class Recorder(threading.Thread):
+class Recorder(QObject, threading.Thread):
     """Recording controller."""
+
+    # Emits number of steps the final file generation progress bar should have.
+    recorder_stop_event_set_signal = Signal(int)
+    video_reencoding_progress_signal = Signal(int)
+    video_and_audio_merging_progress_signal = Signal(int)
+    audio_merging_progress_signal = Signal(int)
+    # Emits the path to the final video file.
+    file_generation_finished_signal = Signal(str)
+
+    show_dialog = Signal()
 
     def __init__(
             self,
             record_video,
             record_loopback,
             record_microphone,
-            stop_event=None,
-            **kwargs
+            region,
+            monitor,
+            fps,
+            stop_event
         ):
         super().__init__()
         self.record_video = record_video
         self.record_loopback = record_loopback
         self.record_microphone = record_microphone
+        self.region = region
+        self.monitor = monitor
+        self.fps = fps
         self.stop_event = stop_event
-        self.__unpack_kwargs(kwargs)
         self.video_recorder = None
         self.loopback_recorder = None
         self.microphone_recorder = None
@@ -51,6 +68,8 @@ class Recorder(threading.Thread):
             recorder.barrier = barrier
 
     def run(self):
+        self.__clean_up_temp_directory()
+
         for recorder in self.__get_recorders():
             recorder.start()
 
@@ -59,19 +78,16 @@ class Recorder(threading.Thread):
         for recorder in self.__get_recorders():
             recorder.stop_event.set()
 
+        self.recorder_stop_event_set_signal.emit(len(self.__get_recorders()))
+        self.__transmit_video_reencoding_progress()
+        final_video_path = self.__generate_final_video()
+        self.file_generation_finished_signal.emit(final_video_path)
+
         for recorder in self.__get_recorders():
             recorder.join()
 
-        file_path = self.__generate_final_video()
         self.__clean_up_temp_directory()
-        self.recording_finished_callback(file_path)
-        log.info("All done!")
 
-    def __unpack_kwargs(self, kwargs):
-        self.region = kwargs.get("region")
-        self.monitor = kwargs.get("monitor")
-        self.fps = kwargs.get("fps")
-        self.recording_finished_callback = kwargs.get("recording_finished_callback")
 
     def __initialize_video_recorder(self):
         self.video_recorder_stop_event = mp.Event()
@@ -79,7 +95,8 @@ class Recorder(threading.Thread):
             region=self.region,
             monitor=self.monitor,
             fps=self.fps,
-            stop_event=self.video_recorder_stop_event
+            stop_event=self.video_recorder_stop_event,
+            reencoding_progress_queue=mp.Manager().Queue()
         )
 
     def __initialize_loopback_recorder(self):
@@ -114,30 +131,57 @@ class Recorder(threading.Thread):
         ]
         return [recorder for recorder in recorders if recorder is not None]
 
+    def __transmit_video_reencoding_progress(self):
+        while True:
+            if not self.video_recorder.is_alive():
+                break
+            elif not self.video_recorder.reencoding_progress_queue.empty():
+                self.video_reencoding_progress_signal.emit(
+                    self.video_recorder.reencoding_progress_queue.get()
+                )
+
     def __generate_final_video(self):
         """Generates the final file from recorded temporary files."""
-        if self.record_loopback and self.record_microphone:
-            Encoder.merge_audio(
-                first_clip=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}", 
-                second_clip=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}",
+        # Create loggers
+        video_and_audio_merging_logger = _MergingProgressLogger(
+            progress_signal=self.video_and_audio_merging_progress_signal
+        )
+        if len(self.__get_recorders()) == 3:
+            audio_merging_logger = _MergingProgressLogger(
+                progress_signal=self.audio_merging_progress_signal
             )
-            Encoder.merge_video_with_audio(
-                video_path=f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}",
-                audio_path=f"{Paths.TEMP_DIR}/{TempFiles.MERGED_AUDIO_FILE}"
+
+        # Merge video/audio as needed
+        if self.record_loopback and self.record_microphone:
+            VideoUtils.merge_audio(
+                first_clip_path=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}", 
+                second_clip_path=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}",
+                output_path=f"{Paths.TEMP_DIR}/{TempFiles.MERGED_AUDIO_FILE}",
+                logger=audio_merging_logger
+            )
+            VideoUtils.merge_video_with_audio(
+                video_path=f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}",
+                audio_path=f"{Paths.TEMP_DIR}/{TempFiles.MERGED_AUDIO_FILE}",
+                output_path=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}",
+                logger=video_and_audio_merging_logger
             )
         elif self.record_loopback and not self.record_microphone:
-            Encoder.merge_video_with_audio(
-                video_path=f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}",
-                audio_path=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}"
+            VideoUtils.merge_video_with_audio(
+                video_path=f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}",
+                audio_path=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}",
+                output_path=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}",
+                logger=video_and_audio_merging_logger
             )
         elif self.record_microphone and not self.record_loopback:
-            Encoder.merge_video_with_audio(
-                video_path=f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}",
-                audio_path=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}"
+            VideoUtils.merge_video_with_audio(
+                video_path=f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}",
+                audio_path=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}",
+                output_path=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}",
+                logger=video_and_audio_merging_logger
             )
         else:
             os.replace(
-                src=f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}", 
+                src=f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}", 
                 dst=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}"
             )
 
@@ -153,12 +197,24 @@ class Recorder(threading.Thread):
 
     def __clean_up_temp_directory(self):
         """Removes all temporary files from the temp directory."""
-        temp_file_names = []
+        temp_filenames = []
         for attribute in dir(TempFiles):
             if not attribute.startswith('__'):
-                temp_file_names.append(getattr(TempFiles, attribute))
+                temp_filenames.append(getattr(TempFiles, attribute))
 
         files_in_dir = os.listdir(Paths.TEMP_DIR)
         for file in files_in_dir:
-            if file in temp_file_names:
+            if file in temp_filenames:
                 os.remove(os.path.join(Paths.TEMP_DIR, file))
+
+
+class _MergingProgressLogger(ProgressBarLogger):
+
+    def __init__(self, progress_signal):
+        super().__init__()
+        self.progress_signal = progress_signal
+
+    def bars_callback(self, bar, attr, value, old_value=None):
+        if attr == "index":
+            percentage = (value / self.bars[bar]["total"]) * 100
+            self.progress_signal.emit(percentage)
