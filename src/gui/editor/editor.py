@@ -1,8 +1,5 @@
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtMultimedia import *
-from PySide6.QtMultimediaWidgets import *
+from PySide6.QtCore import Qt, Slot
+from PySide6.QtWidgets import QWidget, QVBoxLayout
 
 from .preview.preview import Preview
 from .timeline.timeline import Timeline
@@ -15,7 +12,7 @@ class Editor(QWidget):
         self.setWindowTitle("ClipIt - Editor")
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowFlag(Qt.Window)
-        self.preview = Preview(file_path)
+        self.preview = Preview(file_path, self)
         self.timeline = Timeline(self.preview.media_player.duration())
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.preview)

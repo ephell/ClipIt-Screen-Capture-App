@@ -1,26 +1,22 @@
-import os
-
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtMultimedia import *
-from PySide6.QtMultimediaWidgets import *
+from PySide6.QtWidgets import (
+    QWidget, QPushButton, QHBoxLayout, QDialog, QFileDialog, QMessageBox
+)
 
 from editor import Editor
 
 
 class MediaButtons(QWidget):
 
-    def __init__(self, media_player):
-        super().__init__()
+    def __init__(self, media_player, parent=None):
+        super().__init__(parent)
         self.media_player = media_player
-        self.play_button = QPushButton("Play")
+        self.play_button = QPushButton("Play", self)
         self.play_button.clicked.connect(self.media_player.play)
-        self.pause_button = QPushButton("Pause")
+        self.pause_button = QPushButton("Pause", self)
         self.pause_button.clicked.connect(self.media_player.pause)
-        self.stop_button = QPushButton("Reset")
+        self.stop_button = QPushButton("Reset", self)
         self.stop_button.clicked.connect(self.media_player.stop)
-        self.render_and_save_button = _RenderAndSave(self.media_player)
+        self.render_and_save_button = _RenderAndSave(self.media_player, self)
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.play_button)
         self.layout.addWidget(self.pause_button)
@@ -31,8 +27,9 @@ class MediaButtons(QWidget):
 
 class _RenderAndSave(QPushButton):
 
-    def __init__(self, media_player):
-        super().__init__("Render And Save")
+    def __init__(self, media_player, parent=None):
+        super().__init__(parent)
+        self.setText("Render and Save")
         self.media_player = media_player
         self.clicked.connect(self.on_click)
 
