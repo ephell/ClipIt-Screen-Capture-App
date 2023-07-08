@@ -9,7 +9,7 @@ import threading
 from proglog import ProgressBarLogger
 from PySide6.QtCore import Signal, QObject
 
-from merger import Merger
+from utilities.video import VideoUtils
 from recorder.recorder_loopback import LoopbackRecorder
 from recorder.recorder_microphone import MicrophoneRecorder
 from recorder.recorder_video import VideoRecorder
@@ -153,26 +153,30 @@ class Recorder(QObject, threading.Thread):
 
         # Merge video/audio as needed
         if self.record_loopback and self.record_microphone:
-            Merger.merge_audio(
-                first_clip=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}", 
-                second_clip=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}",
+            VideoUtils.merge_audio(
+                first_clip_path=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}", 
+                second_clip_path=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}",
+                output_path=f"{Paths.TEMP_DIR}/{TempFiles.MERGED_AUDIO_FILE}",
                 logger=audio_merging_logger
             )
-            Merger.merge_video_with_audio(
+            VideoUtils.merge_video_with_audio(
                 video_path=f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}",
                 audio_path=f"{Paths.TEMP_DIR}/{TempFiles.MERGED_AUDIO_FILE}",
+                output_path=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}",
                 logger=video_and_audio_merging_logger
             )
         elif self.record_loopback and not self.record_microphone:
-            Merger.merge_video_with_audio(
+            VideoUtils.merge_video_with_audio(
                 video_path=f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}",
                 audio_path=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}",
+                output_path=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}",
                 logger=video_and_audio_merging_logger
             )
         elif self.record_microphone and not self.record_loopback:
-            Merger.merge_video_with_audio(
+            VideoUtils.merge_video_with_audio(
                 video_path=f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}",
                 audio_path=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}",
+                output_path=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}",
                 logger=video_and_audio_merging_logger
             )
         else:
@@ -193,14 +197,14 @@ class Recorder(QObject, threading.Thread):
 
     def __clean_up_temp_directory(self):
         """Removes all temporary files from the temp directory."""
-        temp_file_names = []
+        temp_filenames = []
         for attribute in dir(TempFiles):
             if not attribute.startswith('__'):
-                temp_file_names.append(getattr(TempFiles, attribute))
+                temp_filenames.append(getattr(TempFiles, attribute))
 
         files_in_dir = os.listdir(Paths.TEMP_DIR)
         for file in files_in_dir:
-            if file in temp_file_names:
+            if file in temp_filenames:
                 os.remove(os.path.join(Paths.TEMP_DIR, file))
 
 

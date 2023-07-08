@@ -65,7 +65,7 @@ class Logger:
         Logic
         ----------
         - If `logger_name` already exists, get the logger with all of 
-        it's configurations (log_folder, log_file_name, log_level, 
+        it's configurations (log_folder, log_filename, log_level, 
         formatters, handlers).
         - Else initialize a new logger object using `__create_logger()`.
 
@@ -144,9 +144,9 @@ class Logger:
         if not os.path.exists(folder_path):
             os.mkdir(folder_path)
 
-        log_file_name = datetime.now().strftime("[%Y-%m-%d] %H-%M-%S") + ".log"
+        log_filename = datetime.now().strftime("[%Y-%m-%d] %H-%M-%S") + ".log"
         file_handler = logging.FileHandler(
-            filename=os.path.join(folder_path, log_file_name)
+            filename=os.path.join(folder_path, log_filename)
         )
         file_formatter = logging.Formatter(
             fmt="%(asctime)s | %(name)s | %(levelname)s | %(message)s"

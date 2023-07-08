@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QWidget, QPushButton, QHBoxLayout, QDialog, QFileDialog, QMessageBox
 )
 
-from editor import Editor
+from utilities.video import VideoUtils
 
 
 class MediaButtons(QWidget):
@@ -43,7 +43,7 @@ class _RenderAndSave(QPushButton):
                     msg_box = _CannotOverwriteSourceFileMessageBox(self)
                     msg_box.exec()
                 else:
-                    Editor.cut_and_save_video(
+                    VideoUtils.cut_and_save_video(
                         self.__get_start_time(),
                         self.__get_end_time(),
                         source_file_path,
