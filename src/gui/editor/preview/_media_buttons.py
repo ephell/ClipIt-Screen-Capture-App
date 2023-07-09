@@ -5,7 +5,8 @@ from PySide6.QtWidgets import (
 from proglog import ProgressBarLogger
 
 from utilities.video import VideoUtils
-from ..rendering_progress_dialog.rendering_progress_dialog import RenderingProgressDialog
+from .rendering_progress_dialog.rendering_progress_dialog import RenderingProgressDialog
+from settings import Paths
 
 
 class MediaButtons(QWidget):
@@ -78,7 +79,9 @@ class _RenderAndSave(QPushButton):
             self.rendering_progress_dialog.progress_bar.setValue
         )
         self.rendering_thread.finished.connect(
-            self.rendering_progress_dialog.on_rendering_complete
+            lambda: self.rendering_progress_dialog.on_rendering_complete(
+                output_file_path
+            )
         )
         self.rendering_progress_dialog.show()
         self.rendering_thread.start()
@@ -90,7 +93,7 @@ class _RenderAndSaveDialog(QFileDialog):
         super().__init__(parent)
         self.setFileMode(QFileDialog.AnyFile)
         self.setViewMode(QFileDialog.Detail)
-        self.setDirectory("C:/Users/drema/Desktop/Programming/ClipIt/recordings")
+        self.setDirectory(Paths.RECORDINGS_DIR)
         self.setDefaultSuffix("mp4")
         self.setAcceptMode(QFileDialog.AcceptSave)
 
