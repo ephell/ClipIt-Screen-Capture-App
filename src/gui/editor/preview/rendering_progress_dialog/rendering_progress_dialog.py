@@ -1,3 +1,5 @@
+import os
+
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import QDialog
 
@@ -26,7 +28,9 @@ class RenderingProgressDialog(QDialog, Ui_RenderingProgressDialog):
             super().keyPressEvent(event)
 
     @Slot()
-    def on_rendering_complete(self):
+    def on_rendering_complete(self, file_path):
         self.status_message_label.setText("File successfully rendered and saved!")
         self.close_button.setEnabled(True)
         self.is_rendering_complete = True
+        dir_path = os.path.dirname(file_path)
+        os.startfile(dir_path)

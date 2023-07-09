@@ -2,6 +2,7 @@ from logger import GlobalLogger
 log = GlobalLogger.LOGGER
 
 import multiprocessing as mp
+import os
 import threading
 
 from PySide6.QtCore import Qt, Slot
@@ -22,42 +23,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, app):
         super().__init__()
         self.setupUi(self)
-        self.setWindowTitle("ClipIt")
         self.app = app
-
+        self.first_resize_event = True
         self._select_area_button_logic = SelectAreaButtonLogic()
+        self.is_recording = False
+        self.stop_event = None
+        self.debug_button = QPushButton("Print Debug Info", self)
+        self.debug_button.setObjectName("debug_button")
+        self.central_layout.addWidget(self.debug_button)
+        self.__connect_signals_and_slots()
+
+    def __connect_signals_and_slots(self):
         self.select_area_button.clicked.connect(
             self._select_area_button_logic.on_select_area_clicked
         )
-
-        self.is_recording = False
-        self.start_recording_button.clicked.connect(self.__on_start_clicked)
-        
-        self.stop_event = None
-        self.stop_recording_button.clicked.connect(self.__on_stop_clicked)
-
-        self.open_editor_button.clicked.connect(self.__on_open_editor_clicked)
-
-        self.widget_button = QPushButton("Print All Added Widgets", self)
-        self.widget_button.setObjectName("widget_button")
-        self.verticalLayout.addWidget(self.widget_button)
-        self.widget_button.clicked.connect(self.__on_widget_button_clicked)
-
-    def __on_widget_button_clicked(self):
-        print(threading.enumerate())
-        print(
-            "----------------------------------------\n"
-            + "".join(repr(w) + "\n" for w in self.app.allWidgets())
-            + "----------------------------------------"
+        self.start_button.clicked.connect(self.__on_start_button_clicked)
+        self.stop_button.clicked.connect(self.__on_stop_button_clicked)
+        self.open_editor_button.clicked.connect(
+            self.__on_open_editor_button_clicked
         )
-        # def get_signals(source):
-        #     cls = source if isinstance(source, type) else type(source)
-        #     signal = type(Signal())
-        #     for subcls in cls.mro():
-        #         clsname = f'{subcls.__module__}.{subcls.__name__}'
-        #         for key, value in sorted(vars(subcls).items()):
-        #             if isinstance(value, signal):
-        #                 print(f'{key} [{clsname}]')
+        self.open_capture_folder_button.clicked.connect(
+            self.__on_open_capture_folder_button_clicked
+        )
+        self.debug_button.clicked.connect(self.__on_debug_button_clicked)
 
     """Override"""
     def keyPressEvent(self, event):
@@ -79,8 +67,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return widget
         return None
 
+    """Override"""
+    def resizeEvent(self, event):
+        if self.first_resize_event:
+            self.setFixedSize(event.size())
+            self.first_resize_event = False
+        super().resizeEvent(event)
+
     @Slot()
-    def __on_stop_clicked(self):
+    def __on_debug_button_clicked(self):
+        print(threading.enumerate())
+        print(
+            "----------------------------------------\n"
+            + "".join(repr(w) + "\n" for w in self.app.allWidgets())
+            + "----------------------------------------"
+        )
+        # def get_signals(source):
+        #     cls = source if isinstance(source, type) else type(source)
+        #     signal = type(Signal())
+        #     for subcls in cls.mro():
+        #         clsname = f'{subcls.__module__}.{subcls.__name__}'
+        #         for key, value in sorted(vars(subcls).items()):
+        #             if isinstance(value, signal):
+        #                 print(f'{key} [{clsname}]')
+
+    @Slot()
+    def __on_stop_button_clicked(self):
         if self._select_area_button_logic.recording_area_border is not None:
             self._select_area_button_logic.recording_area_border.destroy()
             self._select_area_button_logic.recording_area_border = None
@@ -89,7 +101,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.is_recording = False
 
     @Slot()
-    def __on_start_clicked(self):
+    def __on_start_button_clicked(self):
         if not self.is_recording:
             if self._select_area_button_logic.recording_area_border is not None:
                 self.is_recording = True
@@ -135,7 +147,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         message_box.deleteLater()
 
     @Slot()
-    def __on_open_editor_clicked(self):
+    def __on_open_editor_button_clicked(self):
         if self.__get_editor() is None:
             file_dialog = _OpenFileInEditorDialog(self)
             user_choice = file_dialog.exec()
@@ -146,6 +158,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             file_dialog.deleteLater()
         else:
             _EditorAlreadyOpenMessageBox(self).exec()
+
+    @Slot()
+    def __on_open_capture_folder_button_clicked(self):
+        os.startfile(Paths.RECORDINGS_DIR)
 
 
 class _OpenFileInEditorDialog(QFileDialog):
