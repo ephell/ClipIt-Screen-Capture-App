@@ -193,7 +193,11 @@ class Recorder(QObject, threading.Thread):
             src=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}", 
             dst=f"{Paths.RECORDINGS_DIR}/{filename}"
         )
-        return os.path.join(Paths.RECORDINGS_DIR, filename)
+
+        final_file_path = os.path.join(Paths.RECORDINGS_DIR, filename)
+        final_file_path = final_file_path.replace('\\', '/')
+
+        return final_file_path
 
     def __clean_up_temp_directory(self):
         """Removes all temporary files from the temp directory."""
