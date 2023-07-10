@@ -52,15 +52,16 @@ class LoopbackRecorder(mp.Process):
                 input=True,
                 input_device_index=self.device_index,
             ) as stream:
-                
+                # Syncing with other recording processes.
                 if isinstance(self.barrier, mp.synchronize.Barrier):
                     self.barrier.wait()
                 else:
-                    log.warning(f"Barrier not set in: {self.__class__.__name__}. " \
-                                "Final audio file might be out of sync.")
+                    log.warning(
+                        f"Barrier not set in: {self.__class__.__name__}. " \
+                        "Final file might be out of sync."
+                    )
 
                 log.info("Started recording loopback audio ... ")
-
                 start_time = perf_counter()
                 while not self.stop_event.is_set():
                     data = stream.read(
@@ -75,6 +76,7 @@ class LoopbackRecorder(mp.Process):
             )
 
             output_file.close()
+            # Letting the silence player thread know that it can stop.
             is_recording_finished.set()
             log.info("Finished recording loopback audio!")
 

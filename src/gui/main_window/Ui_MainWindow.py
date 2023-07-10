@@ -53,14 +53,14 @@ class Ui_MainWindow(object):
 
         self.video_capture_timer_frame_layout.addItem(self.video_capture_timer_left_h_spacer)
 
-        self.video_capture_time_label = QLabel(self.video_capture_timer_frame)
-        self.video_capture_time_label.setObjectName(u"video_capture_time_label")
+        self.video_capture_duration_label = QLabel(self.video_capture_timer_frame)
+        self.video_capture_duration_label.setObjectName(u"video_capture_duration_label")
         font = QFont()
         font.setPointSize(23)
         font.setBold(True)
-        self.video_capture_time_label.setFont(font)
+        self.video_capture_duration_label.setFont(font)
 
-        self.video_capture_timer_frame_layout.addWidget(self.video_capture_time_label)
+        self.video_capture_timer_frame_layout.addWidget(self.video_capture_duration_label)
 
         self.video_capture_timer_right_h_spacer = QSpacerItem(113, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
@@ -192,7 +192,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"ClipIt", None))
         self.video_capture_groupbox.setTitle(QCoreApplication.translate("MainWindow", u"Video Capture", None))
-        self.video_capture_time_label.setText(QCoreApplication.translate("MainWindow", u"00:00:000", None))
+        self.video_capture_duration_label.setText(QCoreApplication.translate("MainWindow", u"00:00", None))
         self.video_capture_controls_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Controls", None))
         self.select_area_button.setText(QCoreApplication.translate("MainWindow", u"Select Capture Area", None))
         self.start_button.setText(QCoreApplication.translate("MainWindow", u"Start", None))

@@ -43,15 +43,16 @@ class MicrophoneRecorder(mp.Process):
                 input=True,
                 input_device_index=self.device_index,
             ) as stream:
-                
+                # Syncing with other recording processes.
                 if isinstance(self.barrier, mp.synchronize.Barrier):
                     self.barrier.wait()
                 else:
-                    log.warning(f"Barrier not set in: {self.__class__.__name__}. " \
-                                "Final audio file might be out of sync.")
+                    log.warning(
+                        f"Barrier not set in: {self.__class__.__name__}. " \
+                        "Final file might be out of sync."
+                    )
 
                 log.info("Started recording microphone audio ... ")
-
                 start_time = perf_counter()
                 while not self.stop_event.is_set():
                     data = stream.read(
@@ -66,5 +67,4 @@ class MicrophoneRecorder(mp.Process):
             )
 
             output_file.close()
-
             log.info("Finished recording microphone audio!")
