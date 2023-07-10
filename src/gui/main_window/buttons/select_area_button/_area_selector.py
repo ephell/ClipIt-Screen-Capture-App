@@ -7,8 +7,8 @@ from PySide6.QtWidgets import QWidget
 
 class AreaSelector(QWidget):
     
-    def __init__(self, get_area_coords_callback):
-        super().__init__()
+    def __init__(self, get_area_coords_callback, parent=None):
+        super().__init__(parent)
         self.get_area_coords_callback = get_area_coords_callback
         self.dragging = False
         self.start_pos = None

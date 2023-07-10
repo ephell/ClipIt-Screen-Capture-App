@@ -130,7 +130,7 @@
                </property>
                <layout class="QVBoxLayout" name="video_capture_controls_group_box_layout">
                 <item>
-                 <widget class="QPushButton" name="select_area_button">
+                 <widget class="SelectAreaButton" name="select_area_button">
                   <property name="text">
                    <string>Select Capture Area</string>
                   </property>
@@ -147,6 +147,9 @@
                   </item>
                   <item>
                    <widget class="QPushButton" name="stop_button">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="text">
                      <string>Stop</string>
                     </property>
@@ -281,6 +284,13 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SelectAreaButton</class>
+   <extends>QPushButton</extends>
+   <header>.buttons.select_area_button.select_area_button</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

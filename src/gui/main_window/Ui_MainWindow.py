@@ -19,6 +19,8 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QFrame, QGroupBox,
     QHBoxLayout, QLabel, QMainWindow, QPushButton,
     QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
 
+from .buttons.select_area_button.select_area_button import SelectAreaButton
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
@@ -80,7 +82,7 @@ class Ui_MainWindow(object):
         self.video_capture_controls_group_box.setObjectName(u"video_capture_controls_group_box")
         self.video_capture_controls_group_box_layout = QVBoxLayout(self.video_capture_controls_group_box)
         self.video_capture_controls_group_box_layout.setObjectName(u"video_capture_controls_group_box_layout")
-        self.select_area_button = QPushButton(self.video_capture_controls_group_box)
+        self.select_area_button = SelectAreaButton(self.video_capture_controls_group_box)
         self.select_area_button.setObjectName(u"select_area_button")
 
         self.video_capture_controls_group_box_layout.addWidget(self.select_area_button)
@@ -94,6 +96,7 @@ class Ui_MainWindow(object):
 
         self.stop_button = QPushButton(self.video_capture_controls_group_box)
         self.stop_button.setObjectName(u"stop_button")
+        self.stop_button.setEnabled(False)
 
         self.start_stop_button_h_layout.addWidget(self.stop_button)
 
