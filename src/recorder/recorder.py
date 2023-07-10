@@ -22,13 +22,14 @@ class Recorder(QObject, threading.Thread):
 
     # Emits number of steps the final file generation progress bar should have.
     recorder_stop_event_set_signal = Signal(int)
+    # Final file generation progress signals.
     video_reencoding_progress_signal = Signal(int)
     video_and_audio_merging_progress_signal = Signal(int)
     audio_merging_progress_signal = Signal(int)
     # Emits the path to the final video file.
     file_generation_finished_signal = Signal(str)
-
-    show_dialog = Signal()
+    # Emits start time of the recording when barrier in 'VideoRecorder' is passed.
+    recording_started_signal = Signal(float)
 
     def __init__(
             self,
@@ -48,6 +49,8 @@ class Recorder(QObject, threading.Thread):
         self.monitor = monitor
         self.fps = fps
         self.stop_event = stop_event
+        self.recording_started = mp.Value("d", -1.0)
+        self.recording_stopped = mp.Value("b", False)
         self.video_recorder = None
         self.loopback_recorder = None
         self.microphone_recorder = None
@@ -68,6 +71,12 @@ class Recorder(QObject, threading.Thread):
             recorder.barrier = barrier
 
     def run(self):
+        self.recording_started_checker = _RecordingStartedChecker(
+            self.recording_started,
+            self.recording_started_signal
+        )
+        self.recording_started_checker.start()
+
         self.__clean_up_temp_directory()
 
         for recorder in self.__get_recorders():
@@ -88,7 +97,6 @@ class Recorder(QObject, threading.Thread):
 
         self.__clean_up_temp_directory()
 
-
     def __initialize_video_recorder(self):
         self.video_recorder_stop_event = mp.Event()
         self.video_recorder = VideoRecorder(
@@ -96,7 +104,8 @@ class Recorder(QObject, threading.Thread):
             monitor=self.monitor,
             fps=self.fps,
             stop_event=self.video_recorder_stop_event,
-            reencoding_progress_queue=mp.Manager().Queue()
+            reencoding_progress_queue=mp.Manager().Queue(),
+            recording_started=self.recording_started
         )
 
     def __initialize_loopback_recorder(self):
@@ -210,6 +219,21 @@ class Recorder(QObject, threading.Thread):
         for file in files_in_dir:
             if file in temp_filenames:
                 os.remove(os.path.join(Paths.TEMP_DIR, file))
+
+
+class _RecordingStartedChecker(threading.Thread):
+    """Checks whether recording in 'VideoRecorder' has started."""
+
+    def __init__(self, recording_started, recording_started_signal):
+        super().__init__()
+        self.recording_started = recording_started
+        self.recording_started_signal = recording_started_signal
+
+    def run(self):
+        while True:
+            if self.recording_started.value >= 0:
+                self.recording_started_signal.emit(self.recording_started.value)
+                break
 
 
 class _MergingProgressLogger(ProgressBarLogger):

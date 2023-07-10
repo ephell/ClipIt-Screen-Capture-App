@@ -80,7 +80,7 @@
               </spacer>
              </item>
              <item>
-              <widget class="QLabel" name="video_capture_time_label">
+              <widget class="QLabel" name="video_capture_duration_label">
                <property name="font">
                 <font>
                  <pointsize>23</pointsize>
@@ -88,7 +88,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>00:00:000</string>
+                <string>00:00</string>
                </property>
               </widget>
              </item>

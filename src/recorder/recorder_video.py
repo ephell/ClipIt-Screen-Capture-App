@@ -21,7 +21,8 @@ class VideoRecorder(mp.Process):
             fps, 
             barrier=None,
             stop_event=None,
-            reencoding_progress_queue=None
+            reencoding_progress_queue=None,
+            recording_started=None
         ):
         super().__init__()
         self.region = region
@@ -29,6 +30,7 @@ class VideoRecorder(mp.Process):
         self.fps = fps
         self.barrier = barrier
         self.stop_event = stop_event
+        self.recording_started = recording_started
         self.reencoding_progress_queue = reencoding_progress_queue
         self.captured_filename = f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}"
         self.reencoded_filename = f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}"
@@ -55,6 +57,7 @@ class VideoRecorder(mp.Process):
                 frameSize=self.frame_size
             )
 
+            # Syncing with other recording processes.
             if isinstance(self.barrier, mp.synchronize.Barrier):
                 self.barrier.wait()
             else:
@@ -64,9 +67,13 @@ class VideoRecorder(mp.Process):
                 )
 
             log.info("Started recording video ... ")
+            # Letting the main thread know that recording has started.
+            start_time = perf_counter()
+            if self.recording_started is not None:
+                self.recording_started.value = start_time
+
             fps = self.fps
             total_frames_captured = 0
-            start_time = perf_counter()
             while not self.stop_event.is_set():
                 frame_start_time = perf_counter()
                 screen = np.array(sct.grab(monitor))[:, :, :3]
@@ -80,6 +87,7 @@ class VideoRecorder(mp.Process):
             log.info("Finished recording video!")
 
         avg_fps = total_frames_captured / (perf_counter() - start_time)
+
         return avg_fps, total_frames_captured
 
     def __reencode_captured_video(self, fps, total_frames_in_input_file):

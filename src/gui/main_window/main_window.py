@@ -3,9 +3,10 @@ log = GlobalLogger.LOGGER
 
 import multiprocessing as mp
 import os
+from time import perf_counter
 import threading
 
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtCore import Qt, Slot, QThread
 from PySide6.QtWidgets import (
     QMainWindow, QMessageBox, QPushButton, QFileDialog
 )
@@ -102,26 +103,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @Slot()
     def __on_start_button_clicked(self):
-        if not self.is_recording:
-            if self._select_area_button_logic.recording_area_border is not None:
-                self.is_recording = True
-                self.stop_event = mp.Event()
-                self.recorder = Recorder(
-                    record_video=True,
-                    record_loopback=True,
-                    record_microphone=True,
-                    stop_event=self.stop_event,
-                    region=[*self._select_area_button_logic.get_area_coords()],
-                    monitor=self._select_area_button_logic.get_monitor(),
-                    fps=30
-                )
-                self.recorder.recorder_stop_event_set_signal.connect(
-                    self.__on_recorder_stop_event_set
-                )
-                self.recorder.file_generation_finished_signal.connect(
-                    self.__on_file_generation_finished
-                )
-                self.recorder.start()
+        if (
+            not self.is_recording
+            and self._select_area_button_logic.recording_area_border is not None
+        ):
+            self.video_capture_duration_label.setText("Starting ...")
+            self.is_recording = True
+            self.stop_event = mp.Event()
+            self.recorder = Recorder(
+                record_video=True,
+                record_loopback=True,
+                record_microphone=True,
+                stop_event=self.stop_event,
+                region=[*self._select_area_button_logic.get_area_coords()],
+                monitor=self._select_area_button_logic.get_monitor(),
+                fps=30
+            )
+            self.recorder.recorder_stop_event_set_signal.connect(
+                self.__on_recorder_stop_event_set
+            )
+            self.recorder.file_generation_finished_signal.connect(
+                self.__on_file_generation_finished
+            )
+            self.video_capture_duration_label_updater = _VideoCaptureDurationLabelUpdater(
+                self.video_capture_duration_label,
+                self.stop_event
+            )
+            self.recorder.recording_started_signal.connect(
+                self.video_capture_duration_label_updater.on_recording_started
+            )
+            self.video_capture_duration_label_updater.start()
+            self.recorder.start()
         else:
             log.error("Recording process is already running.")
 
@@ -162,6 +174,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @Slot()
     def __on_open_capture_folder_button_clicked(self):
         os.startfile(Paths.RECORDINGS_DIR)
+
+
+class _VideoCaptureDurationLabelUpdater(QThread):
+
+    def __init__(self, time_label, stop_event):
+        super().__init__()
+        self.time_label = time_label
+        self.stop_event = stop_event
+        self.start_time = None
+
+    def run(self):
+        while not self.stop_event.is_set():
+            if self.start_time is not None:
+                current_time = perf_counter()
+                elapsed_time = current_time - self.start_time
+                seconds = int(elapsed_time)
+                minutes = seconds // 60
+                self.time_label.setText(f"{minutes:02d}:{seconds:02d}")
+
+    @Slot()
+    def on_recording_started(self, start_time):
+        self.start_time = start_time
 
 
 class _OpenFileInEditorDialog(QFileDialog):
