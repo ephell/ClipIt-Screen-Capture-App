@@ -7,7 +7,7 @@ import wave
 
 import pyaudiowpatch as pyaudio
 
-from settings import Paths, TempFiles
+from settings.settings import Settings
 
 
 class MicrophoneRecorder(mp.Process):
@@ -33,7 +33,7 @@ class MicrophoneRecorder(mp.Process):
     def __record_microphone(self):
         with pyaudio.PyAudio() as p:
             output_file = wave.open(
-                f=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}",
+                f=Settings.get_temp_file_paths().MICROPHONE_AUDIO_FILE,
                 mode="wb"
             )
             output_file.setnchannels(self.channels)

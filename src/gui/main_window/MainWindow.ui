@@ -167,14 +167,17 @@
                </property>
                <layout class="QVBoxLayout" name="video_capture_audio_preferences_group_box_layout">
                 <item>
-                 <widget class="QCheckBox" name="record_speaker_audio_check_box">
+                 <widget class="RecordSpeakerAudioCheckBox" name="record_speaker_audio_check_box">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
                   <property name="text">
                    <string>Record Speaker Audio</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="record_microphone_audio_checkbox">
+                 <widget class="RecordMicrophoneAudioCheckBox" name="record_microphone_audio_checkbox">
                   <property name="text">
                    <string>Record Microphone Audio</string>
                   </property>
@@ -289,6 +292,16 @@
    <class>SelectAreaButton</class>
    <extends>QPushButton</extends>
    <header>.buttons.select_area_button.select_area_button</header>
+  </customwidget>
+  <customwidget>
+   <class>RecordSpeakerAudioCheckBox</class>
+   <extends>QCheckBox</extends>
+   <header>.check_boxes.record_speaker_audio_check_box</header>
+  </customwidget>
+  <customwidget>
+   <class>RecordMicrophoneAudioCheckBox</class>
+   <extends>QCheckBox</extends>
+   <header>.check_boxes.record_microphone_audio_check_box</header>
   </customwidget>
  </customwidgets>
  <resources/>

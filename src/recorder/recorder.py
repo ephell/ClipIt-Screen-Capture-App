@@ -13,7 +13,7 @@ from utilities.video import VideoUtils
 from recorder.recorder_loopback import LoopbackRecorder
 from recorder.recorder_microphone import MicrophoneRecorder
 from recorder.recorder_video import VideoRecorder
-from settings import Paths, TempFiles
+from settings.settings import Settings
 from utilities.audio import AudioUtils
 
 
@@ -160,64 +160,64 @@ class Recorder(QObject, threading.Thread):
             )
 
         # Merge video/audio as needed
+        temp_file_paths = Settings.get_temp_file_paths()
         if self.record_loopback and self.record_microphone:
             VideoUtils.merge_audio(
-                first_clip_path=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}", 
-                second_clip_path=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}",
-                output_path=f"{Paths.TEMP_DIR}/{TempFiles.MERGED_AUDIO_FILE}",
+                first_clip_path=temp_file_paths.LOOPBACK_AUDIO_FILE, 
+                second_clip_path=temp_file_paths.MICROPHONE_AUDIO_FILE,
+                output_path=temp_file_paths.MERGED_AUDIO_FILE,
                 logger=audio_merging_logger
             )
             VideoUtils.merge_video_with_audio(
-                video_path=f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}",
-                audio_path=f"{Paths.TEMP_DIR}/{TempFiles.MERGED_AUDIO_FILE}",
-                output_path=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}",
+                video_path=temp_file_paths.REENCODED_VIDEO_FILE,
+                audio_path=temp_file_paths.MERGED_AUDIO_FILE,
+                output_path=temp_file_paths.FINAL_FILE,
                 logger=video_and_audio_merging_logger
             )
         elif self.record_loopback and not self.record_microphone:
             VideoUtils.merge_video_with_audio(
-                video_path=f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}",
-                audio_path=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}",
-                output_path=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}",
+                video_path=temp_file_paths.REENCODED_VIDEO_FILE,
+                audio_path=temp_file_paths.LOOPBACK_AUDIO_FILE,
+                output_path=temp_file_paths.FINAL_FILE,
                 logger=video_and_audio_merging_logger
             )
         elif self.record_microphone and not self.record_loopback:
             VideoUtils.merge_video_with_audio(
-                video_path=f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}",
-                audio_path=f"{Paths.TEMP_DIR}/{TempFiles.MICROPHONE_AUDIO_FILE}",
-                output_path=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}",
+                video_path=temp_file_paths.REENCODED_VIDEO_FILE,
+                audio_path=temp_file_paths.MICROPHONE_AUDIO_FILE,
+                output_path=temp_file_paths.FINAL_FILE,
                 logger=video_and_audio_merging_logger
             )
         else:
             os.replace(
-                src=f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}", 
-                dst=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}"
+                src=temp_file_paths.REENCODED_VIDEO_FILE,
+                dst=temp_file_paths.FINAL_FILE
             )
 
         # Rename the final file and move it to output folder.
         now = datetime.datetime.now()
         timestamp = now.strftime("%Y-%m-%d [] %H-%M-%S")
-        filename = f"{timestamp}.mp4"
+        old_file_path = temp_file_paths.FINAL_FILE
+        new_file_path = f"{Settings.get_capture_dir_path()}/{timestamp}.mp4"
         os.rename(
-            src=f"{Paths.TEMP_DIR}/{TempFiles.FINAL_FILE}", 
-            dst=f"{Paths.RECORDINGS_DIR}/{filename}"
+            src=old_file_path,
+            dst=new_file_path
         )
 
-        final_file_path = os.path.join(Paths.RECORDINGS_DIR, filename)
-        final_file_path = final_file_path.replace('\\', '/')
+        # Replace backslashes with forward slashes so that there are no
+        # errors when opening the file in the editor after generating it.
+        new_file_path = new_file_path.replace('\\', '/')
 
-        return final_file_path
+        return new_file_path
 
     def __clean_up_temp_directory(self):
         """Removes all temporary files from the temp directory."""
-        temp_filenames = []
-        for attribute in dir(TempFiles):
+        for attribute in dir(Settings.get_temp_file_paths()):
             if not attribute.startswith('__'):
-                temp_filenames.append(getattr(TempFiles, attribute))
-
-        files_in_dir = os.listdir(Paths.TEMP_DIR)
-        for file in files_in_dir:
-            if file in temp_filenames:
-                os.remove(os.path.join(Paths.TEMP_DIR, file))
+                path = getattr(Settings.get_temp_file_paths(), attribute)
+                if not os.path.isdir(path):
+                    if os.path.exists(path):
+                        os.remove(path)
 
 
 class _RecordingStartedChecker(threading.Thread):

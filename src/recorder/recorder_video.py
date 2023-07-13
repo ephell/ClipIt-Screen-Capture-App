@@ -8,7 +8,7 @@ import cv2
 import mss
 import numpy as np
 
-from settings import Paths, TempFiles
+from settings.settings import Settings
 
 
 class VideoRecorder(mp.Process):
@@ -32,8 +32,8 @@ class VideoRecorder(mp.Process):
         self.stop_event = stop_event
         self.recording_started = recording_started
         self.reencoding_progress_queue = reencoding_progress_queue
-        self.captured_filename = f"{Paths.TEMP_DIR}/{TempFiles.CAPTURED_VIDEO_FILE}"
-        self.reencoded_filename = f"{Paths.TEMP_DIR}/{TempFiles.REENCODED_VIDEO_FILE}"
+        self.captured_filename = Settings.get_temp_file_paths().CAPTURED_VIDEO_FILE
+        self.reencoded_filename = Settings.get_temp_file_paths().REENCODED_VIDEO_FILE
         self.frame_size = (int(self.region[2]), int(self.region[3]))
         self.cv2_writer_fourcc = "mp4v"
 

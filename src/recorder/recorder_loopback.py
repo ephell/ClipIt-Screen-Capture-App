@@ -8,7 +8,7 @@ import wave
 
 import pyaudiowpatch as pyaudio
 
-from settings import Paths, TempFiles
+from settings.settings import Settings
 
 
 class LoopbackRecorder(mp.Process):
@@ -43,7 +43,7 @@ class LoopbackRecorder(mp.Process):
     def __record_loopback(self, is_recording_finished):
         with pyaudio.PyAudio() as p:
             output_file = wave.open(
-                f=f"{Paths.TEMP_DIR}/{TempFiles.LOOPBACK_AUDIO_FILE}",
+                f=Settings.get_temp_file_paths().LOOPBACK_AUDIO_FILE,
                 mode="wb"
             )
             output_file.setnchannels(self.channels)

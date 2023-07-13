@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 from gui.editor.editor import Editor
 from .final_file_generation_dialog.final_file_generation_dialog import FinalFileGenerationDialog
 from recorder.recorder import Recorder
-from settings import Paths
+from settings.settings import Settings
 from .Ui_MainWindow import Ui_MainWindow
 
 
@@ -99,16 +99,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             not self.is_recorder_running
             and self.select_area_button.recording_area_border is not None
         ):
+            self.is_recorder_running = True
             self.video_capture_duration_label.setText("Starting ...")
             self.start_button.setEnabled(False)
             self.select_area_button.setEnabled(False)
 
-            self.is_recorder_running = True
             self.recorder_stop_event = threading.Event()
             self.recorder = Recorder(
                 record_video=True,
-                record_loopback=True,
-                record_microphone=True,
+                record_loopback=Settings.get_audio_preferences().getboolean("RECORD_LOOPBACK"),
+                record_microphone=Settings.get_audio_preferences().getboolean("RECORD_MICROPHONE"),
                 stop_event=self.recorder_stop_event,
                 region=[*self.select_area_button.get_area_coords()],
                 monitor=self.select_area_button.get_monitor(),
@@ -184,7 +184,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @Slot()
     def __on_open_capture_folder_button_clicked(self):
-        os.startfile(Paths.RECORDINGS_DIR)
+        os.startfile(Settings.get_capture_dir_path())
 
 
 class _VideoCaptureDurationLabelUpdater(QThread):
@@ -216,7 +216,7 @@ class _OpenFileInEditorDialog(QFileDialog):
         self.setNameFilter("Video Files (*.mp4)")
         self.setFileMode(QFileDialog.ExistingFile)
         self.setViewMode(QFileDialog.Detail)
-        self.setDirectory(Paths.RECORDINGS_DIR)
+        self.setDirectory(Settings.get_capture_dir_path())
 
 
 class _EditorAlreadyOpenMessageBox(QMessageBox):
