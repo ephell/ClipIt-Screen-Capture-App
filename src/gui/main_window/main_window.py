@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 from gui.editor.editor import Editor
 from .final_file_generation_dialog.final_file_generation_dialog import FinalFileGenerationDialog
 from recorder.recorder import Recorder
-from settings import Paths
+from settings.settings import Settings
 from .Ui_MainWindow import Ui_MainWindow
 
 
@@ -184,7 +184,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @Slot()
     def __on_open_capture_folder_button_clicked(self):
-        os.startfile(Paths.RECORDINGS_DIR)
+        os.startfile(Settings.get_capture_dir_path())
 
 
 class _VideoCaptureDurationLabelUpdater(QThread):
@@ -216,7 +216,7 @@ class _OpenFileInEditorDialog(QFileDialog):
         self.setNameFilter("Video Files (*.mp4)")
         self.setFileMode(QFileDialog.ExistingFile)
         self.setViewMode(QFileDialog.Detail)
-        self.setDirectory(Paths.RECORDINGS_DIR)
+        self.setDirectory(Settings.get_capture_dir_path())
 
 
 class _EditorAlreadyOpenMessageBox(QMessageBox):

@@ -6,7 +6,7 @@ from proglog import ProgressBarLogger
 
 from utilities.video import VideoUtils
 from .rendering_progress_dialog.rendering_progress_dialog import RenderingProgressDialog
-from settings import Paths
+from settings.settings import Settings
 
 
 class MediaButtons(QWidget):
@@ -93,7 +93,7 @@ class _RenderAndSaveDialog(QFileDialog):
         super().__init__(parent)
         self.setFileMode(QFileDialog.AnyFile)
         self.setViewMode(QFileDialog.Detail)
-        self.setDirectory(Paths.RECORDINGS_DIR)
+        self.setDirectory(Settings.get_capture_dir_path())
         self.setDefaultSuffix("mp4")
         self.setAcceptMode(QFileDialog.AcceptSave)
 
