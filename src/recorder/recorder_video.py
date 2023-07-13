@@ -16,13 +16,13 @@ class VideoRecorder(mp.Process):
 
     def __init__(
             self, 
-            region, 
-            monitor, 
-            fps, 
-            barrier=None,
-            stop_event=None,
-            reencoding_progress_queue=None,
-            recording_started=None
+            region: list[int, int, int, int],
+            monitor: int,
+            fps: int,
+            barrier: mp.Barrier=None,
+            stop_event: mp.Event=None,
+            reencoding_progress_queue: mp.Queue=None, # Mp.Manager().Queue() is faster
+            recording_started: mp.Value=None # Float value set to -1.0
         ):
         super().__init__()
         self.region = region

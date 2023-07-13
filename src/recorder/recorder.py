@@ -33,13 +33,13 @@ class Recorder(QObject, threading.Thread):
 
     def __init__(
             self,
-            record_video,
-            record_loopback,
-            record_microphone,
-            region,
-            monitor,
-            fps,
-            stop_event
+            record_video: bool,
+            record_loopback: bool,
+            record_microphone: bool,
+            region: list[int, int, int, int],
+            monitor: int,
+            fps: int,
+            stop_event: threading.Event
         ):
         super().__init__()
         self.record_video = record_video
@@ -50,7 +50,6 @@ class Recorder(QObject, threading.Thread):
         self.fps = fps
         self.stop_event = stop_event
         self.recording_started = mp.Value("d", -1.0)
-        self.recording_stopped = mp.Value("b", False)
         self.video_recorder = None
         self.loopback_recorder = None
         self.microphone_recorder = None

@@ -1,8 +1,8 @@
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtMultimedia import *
-from PySide6.QtMultimediaWidgets import *
+from PySide6.QtCore import Qt, Slot
+from PySide6.QtGui import QFont, QPen
+from PySide6.QtWidgets import (
+    QGraphicsRectItem, QGraphicsTextItem
+)
 
 from ._media_item_left_handle import LeftHandle
 from ._media_item_right_handle import RightHandle

@@ -1,13 +1,39 @@
 """Importable widget containing all timeline related components."""
 
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtMultimedia import *
-from PySide6.QtMultimediaWidgets import *
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import (
+    QSizePolicy, QGraphicsScene, QGraphicsView, QWidget, QVBoxLayout
+)
 
-from ._ruler import Ruler
-from ._media_item import MediaItem
+from .ruler.ruler import Ruler
+from .media_item.media_item import MediaItem
+
+
+class Timeline(QWidget):
+
+    def __init__(self, media_duration, parent=None):
+        super().__init__(parent)
+        self.media_duration = media_duration
+        self.scene = _GraphicsScene(740, 160)
+        self.view = _GraphicsView(self.scene)
+        self.ruler = Ruler(self.scene, self.view, self.media_duration)
+        self.media_item = MediaItem(self.scene, self.media_duration)
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.view)
+        self.setLayout(self.layout)
+
+        self.view.resize_ruler.connect(self.ruler.on_view_resize)
+        self.view.resize_media_item.connect(self.media_item.on_view_resize)
+        
+        self.scene.ruler_handle_time_changed.connect(
+            self.media_item.on_ruler_handle_time_changed
+        )
+        self.scene.media_item_left_handle_moved.connect(
+            self.ruler.ruler_handle.on_media_item_left_handle_moved
+        )
+        self.scene.media_item_right_handle_moved.connect(
+            self.ruler.ruler_handle.on_media_item_right_handle_moved
+        )
 
 
 class _GraphicsScene(QGraphicsScene):
@@ -54,30 +80,3 @@ class _GraphicsView(QGraphicsView):
         sure the first connected slot is the ruler's 'on_view_resize'.
         """
         self.scene.setSceneRect(0, 0, new_width, self.contentsRect().height())
-
-
-class Timeline(QWidget):
-
-    def __init__(self, media_duration):
-        super().__init__()
-        self.media_duration = media_duration
-        self.scene = _GraphicsScene(740, 160)
-        self.view = _GraphicsView(self.scene)
-        self.ruler = Ruler(self.scene, self.view, self.media_duration)
-        self.media_item = MediaItem(self.scene, self.media_duration)
-        self.layout = QVBoxLayout()
-        self.layout.addWidget(self.view)
-        self.setLayout(self.layout)
-
-        self.view.resize_ruler.connect(self.ruler.on_view_resize)
-        self.view.resize_media_item.connect(self.media_item.on_view_resize)
-        
-        self.scene.ruler_handle_time_changed.connect(
-            self.media_item.on_ruler_handle_time_changed
-        )
-        self.scene.media_item_left_handle_moved.connect(
-            self.ruler.ruler_handle.on_media_item_left_handle_moved
-        )
-        self.scene.media_item_right_handle_moved.connect(
-            self.ruler.ruler_handle.on_media_item_right_handle_moved
-        )

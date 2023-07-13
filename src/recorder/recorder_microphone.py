@@ -13,7 +13,12 @@ from settings import Paths, TempFiles
 class MicrophoneRecorder(mp.Process):
     """Records audio from the default microphone."""
 
-    def __init__(self, microphone, barrier=None, stop_event=None):
+    def __init__(
+            self, 
+            microphone: dict, # AudioUtils.get_default_microphone() 
+            barrier: mp.Barrier=None,
+            stop_event: mp.Event=None
+        ):
         super().__init__()
         self.barrier = barrier
         self.stop_event = stop_event

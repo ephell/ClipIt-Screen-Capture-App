@@ -1,13 +1,15 @@
 import mss
 from PySide6.QtCore import Slot
+from PySide6.QtWidgets import QPushButton
 
 from ._area_selector import AreaSelector
 from ._area_border_creator import AreaBorderCreator
 
 
-class SelectAreaButtonLogic:
+class SelectAreaButton(QPushButton):
     
-    def __init__(self):
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self.area_selector = None
         self.recording_area_border = None
         self.recording_area_top_x = None
@@ -31,7 +33,7 @@ class SelectAreaButtonLogic:
     def on_select_area_clicked(self):
         if self.recording_area_border is not None:
             self.recording_area_border.destroy()
-        self.area_selector = AreaSelector(self.__get_area_coords)
+        self.area_selector = AreaSelector(self.__get_area_coords, self)
         self.area_selector.show()
 
     def __get_area_coords(self, x0, y0, x1, y1):

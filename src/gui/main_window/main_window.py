@@ -11,7 +11,6 @@ from PySide6.QtWidgets import (
     QMainWindow, QMessageBox, QPushButton, QFileDialog
 )
 
-from .buttons.select_area_button.main_logic import SelectAreaButtonLogic
 from gui.editor.editor import Editor
 from .final_file_generation_dialog.final_file_generation_dialog import FinalFileGenerationDialog
 from recorder.recorder import Recorder
@@ -25,10 +24,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.app = app
-        self.first_resize_event = True
-        self._select_area_button_logic = SelectAreaButtonLogic()
-        self.is_recording = False
-        self.stop_event = None
+        self.first_window_resize_event = True
+        self.is_recorder_running = False
+        self.recorder_stop_event = None
         self.debug_button = QPushButton("Print Debug Info", self)
         self.debug_button.setObjectName("debug_button")
         self.central_layout.addWidget(self.debug_button)
@@ -36,7 +34,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def __connect_signals_and_slots(self):
         self.select_area_button.clicked.connect(
-            self._select_area_button_logic.on_select_area_clicked
+            self.select_area_button.on_select_area_clicked
         )
         self.start_button.clicked.connect(self.__on_start_button_clicked)
         self.stop_button.clicked.connect(self.__on_stop_button_clicked)
@@ -51,29 +49,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     """Override"""
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
-            if self._select_area_button_logic.area_selector is not None:
-                self._select_area_button_logic.area_selector.close()
+            if self.select_area_button.area_selector is not None:
+                try:
+                    self.select_area_button.area_selector.close()
+                except RuntimeError:
+                    log.info("Area selector already closed.")
 
     """Override"""
     def closeEvent(self, event):
         super().closeEvent(event)
-        if self.is_recording and not self.stop_event.is_set():
-            self.stop_event.set()
+        if self.is_recorder_running and not self.recorder_stop_event.is_set():
+            self.recorder_stop_event.set()
         if self.__get_editor() is not None:
             self.__get_editor().close()
+
+    """Override"""
+    def resizeEvent(self, event):
+        if self.first_window_resize_event:
+            self.setFixedSize(event.size())
+            self.first_window_resize_event = False
+        super().resizeEvent(event)
 
     def __get_editor(self):
         for widget in self.app.allWidgets():
             if isinstance(widget, Editor):
                 return widget
         return None
-
-    """Override"""
-    def resizeEvent(self, event):
-        if self.first_resize_event:
-            self.setFixedSize(event.size())
-            self.first_resize_event = False
-        super().resizeEvent(event)
 
     @Slot()
     def __on_debug_button_clicked(self):
@@ -93,31 +94,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #                 print(f'{key} [{clsname}]')
 
     @Slot()
-    def __on_stop_button_clicked(self):
-        if self._select_area_button_logic.recording_area_border is not None:
-            self._select_area_button_logic.recording_area_border.destroy()
-            self._select_area_button_logic.recording_area_border = None
-            self.stop_event.set()
-            self.stop_event = None
-            self.is_recording = False
-
-    @Slot()
     def __on_start_button_clicked(self):
         if (
-            not self.is_recording
-            and self._select_area_button_logic.recording_area_border is not None
+            not self.is_recorder_running
+            and self.select_area_button.recording_area_border is not None
         ):
             self.video_capture_duration_label.setText("Starting ...")
-            self.is_recording = True
-            self.stop_event = mp.Event()
+            self.start_button.setEnabled(False)
+            self.select_area_button.setEnabled(False)
+
+            self.is_recorder_running = True
+            self.recorder_stop_event = threading.Event()
             self.recorder = Recorder(
                 record_video=True,
                 record_loopback=True,
                 record_microphone=True,
-                stop_event=self.stop_event,
-                region=[*self._select_area_button_logic.get_area_coords()],
-                monitor=self._select_area_button_logic.get_monitor(),
+                stop_event=self.recorder_stop_event,
+                region=[*self.select_area_button.get_area_coords()],
+                monitor=self.select_area_button.get_monitor(),
                 fps=30
+            )
+            self.recorder.recording_started_signal.connect(
+                self.__on_recording_started
             )
             self.recorder.recorder_stop_event_set_signal.connect(
                 self.__on_recorder_stop_event_set
@@ -127,15 +125,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             )
             self.video_capture_duration_label_updater = _VideoCaptureDurationLabelUpdater(
                 self.video_capture_duration_label,
-                self.stop_event
+                self.recorder_stop_event
             )
-            self.recorder.recording_started_signal.connect(
-                self.video_capture_duration_label_updater.on_recording_started
-            )
-            self.video_capture_duration_label_updater.start()
             self.recorder.start()
-        else:
-            log.error("Recording process is already running.")
+            self.video_capture_duration_label_updater.start()
+
+    @Slot()
+    def __on_stop_button_clicked(self):
+        if self.select_area_button.recording_area_border is not None:
+            if self.recorder_stop_event is not None:
+                self.recorder_stop_event.set()
+                self.recorder_stop_event = None
+            self.is_recorder_running = False
+            self.start_button.setEnabled(True)
+            self.stop_button.setEnabled(False)
+            self.select_area_button.setEnabled(True)
+            self.select_area_button.recording_area_border.destroy()
+            self.select_area_button.recording_area_border = None
+
+    @Slot()
+    def __on_recording_started(self, start_time):
+        self.video_capture_duration_label_updater.set_start_time(start_time)
+        self.stop_button.setEnabled(True)
 
     @Slot()
     def __on_recorder_stop_event_set(self, total_encoding_steps):
@@ -181,11 +192,11 @@ class _VideoCaptureDurationLabelUpdater(QThread):
     def __init__(self, time_label, stop_event):
         super().__init__()
         self.time_label = time_label
-        self.stop_event = stop_event
+        self.recorder_stop_event = stop_event
         self.start_time = None
 
     def run(self):
-        while not self.stop_event.is_set():
+        while not self.recorder_stop_event.is_set():
             if self.start_time is not None:
                 current_time = perf_counter()
                 elapsed_time = current_time - self.start_time
@@ -193,8 +204,7 @@ class _VideoCaptureDurationLabelUpdater(QThread):
                 minutes = seconds // 60
                 self.time_label.setText(f"{minutes:02d}:{seconds:02d}")
 
-    @Slot()
-    def on_recording_started(self, start_time):
+    def set_start_time(self, start_time):
         self.start_time = start_time
 
 
