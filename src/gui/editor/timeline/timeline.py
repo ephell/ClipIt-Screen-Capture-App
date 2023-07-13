@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QSizePolicy, QGraphicsScene, QGraphicsView, QWidget, QVBoxLayout
 )
 
-from ._ruler import Ruler
+from .ruler.ruler import Ruler
 from .media_item.media_item import MediaItem
 
 

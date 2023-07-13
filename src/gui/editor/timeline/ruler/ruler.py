@@ -1,6 +1,8 @@
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
-from PySide6.QtGui import *
+from PySide6.QtCore import Qt, Slot, QRectF
+from PySide6.QtGui import QPen
+from PySide6.QtWidgets import (
+    QGraphicsItem
+)
 
 from ._ruler_handle import RulerHandle
 

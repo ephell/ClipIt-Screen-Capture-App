@@ -1,8 +1,8 @@
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtMultimedia import *
-from PySide6.QtMultimediaWidgets import *
+from PySide6.QtCore import Qt, Slot, QRectF
+from PySide6.QtGui import QPen, QFont, QPainterPath, QBrush
+from PySide6.QtWidgets import (
+    QGraphicsItem, QGraphicsWidget, QGraphicsTextItem
+)
 
 
 class RulerHandle(QGraphicsItem):
@@ -146,7 +146,6 @@ class _RulerHandleTimeLabel(QGraphicsTextItem):
         self.parent.scene.addItem(self)
         self.setPos(
             self.parent.scene.sceneRect().x() + 23,
-
             self.parent.scene.sceneRect().y() + 120
         )
         font = self.font()

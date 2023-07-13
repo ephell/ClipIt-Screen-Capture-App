@@ -7,10 +7,10 @@ from PySide6.QtWidgets import (
 
 class RightHandle(QGraphicsRectItem):
 
-    def __init__(self, parent):
+    def __init__(self, media_item):
         super().__init__()
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.parent = parent
+        self.parent = media_item
         self.parent.scene.addItem(self)
         self.handle_width = 20
         self.handle_height = self.parent.initial_height
