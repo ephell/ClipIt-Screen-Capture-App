@@ -13,7 +13,7 @@ class Editor(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowFlag(Qt.Window)
         self.preview = Preview(file_path, self)
-        self.timeline = Timeline(self.preview.media_player.duration())
+        self.timeline = Timeline(self.preview.media_player.duration(), self)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.preview)
         self.layout.addWidget(self.timeline)

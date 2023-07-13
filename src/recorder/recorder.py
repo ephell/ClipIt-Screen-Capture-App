@@ -50,7 +50,6 @@ class Recorder(QObject, threading.Thread):
         self.fps = fps
         self.stop_event = stop_event
         self.recording_started = mp.Value("d", -1.0)
-        self.recording_stopped = mp.Value("b", False)
         self.video_recorder = None
         self.loopback_recorder = None
         self.microphone_recorder = None
