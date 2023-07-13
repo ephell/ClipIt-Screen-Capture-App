@@ -4,10 +4,12 @@ import os
 
 class Settings:
 
-    @staticmethod
-    def get_capture_dir_path():
+    SETTINGS_FILE = "src/settings/settings.ini"
+
+    @classmethod
+    def get_capture_dir_path(cls):
         parser = ConfigParser()
-        parser.read("src/settings/settings.ini")
+        parser.read(cls.SETTINGS_FILE)
         return parser["PATHS"]["CAPTURE_DIR_PATH"]
     
     @staticmethod
@@ -17,6 +19,20 @@ class Settings:
     @staticmethod
     def get_temp_file_paths():
         return _TempFilePaths
+    
+    @classmethod
+    def get_audio_preferences(cls):
+        parser = ConfigParser()
+        parser.read(cls.SETTINGS_FILE)
+        return parser["AUDIO_PREFERENCES"]
+    
+    @classmethod
+    def set_audio_preference(cls, preference_name, preference_value):
+        parser = ConfigParser()
+        parser.read(cls.SETTINGS_FILE)
+        parser["AUDIO_PREFERENCES"][preference_name] = preference_value
+        with open(cls.SETTINGS_FILE, "w") as configfile:
+            parser.write(configfile)
 
 
 class _TempFilePaths:
