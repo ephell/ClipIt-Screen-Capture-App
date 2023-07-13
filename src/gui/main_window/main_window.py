@@ -50,7 +50,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
             if self.select_area_button.area_selector is not None:
-                self.select_area_button.area_selector.close()
+                try:
+                    self.select_area_button.area_selector.close()
+                except RuntimeError:
+                    log.info("Area selector already closed.")
 
     """Override"""
     def closeEvent(self, event):
