@@ -101,7 +101,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.select_area_button.setEnabled(False)
 
             self.is_recorder_running = True
-            self.recorder_stop_event = mp.Event()
+            self.recorder_stop_event = threading.Event()
             self.recorder = Recorder(
                 record_video=True,
                 record_loopback=True,

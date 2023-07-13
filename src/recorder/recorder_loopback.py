@@ -14,7 +14,12 @@ from settings import Paths, TempFiles
 class LoopbackRecorder(mp.Process):
     """Records audio from the default loopback device."""
 
-    def __init__(self, loopback_device, barrier=None, stop_event=None):
+    def __init__(
+            self, 
+            loopback_device: dict, # AudioUtils.get_default_loopback_device() 
+            barrier: mp.Barrier=None, 
+            stop_event: mp.Event=None
+        ):
         super().__init__()
         self.barrier = barrier
         self.stop_event = stop_event
