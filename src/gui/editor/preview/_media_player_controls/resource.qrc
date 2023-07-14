@@ -1,0 +1,9 @@
+<RCC>
+  <qresource>
+    <file>icons/pause.png</file>
+    <file>icons/play.png</file>
+    <file>icons/reset.png</file>
+    <file>icons/save.png</file>
+    <file>icons/volume_slider_icon.png</file>
+  </qresource>
+</RCC>

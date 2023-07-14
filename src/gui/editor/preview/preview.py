@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
 )
 
 from ._media_player import MediaPlayer
-from ._media_buttons import MediaButtons
+from ._media_player_controls.media_player_controls import MediaPlayerControls
 
 
 class Preview(QWidget):
@@ -18,10 +18,10 @@ class Preview(QWidget):
         self.scene = _GraphicsScene(740, 400, self)
         self.view = _GraphicsView(self.scene, self)
         self.media_player = MediaPlayer(self.scene, file_path, self)
-        self.media_buttons = MediaButtons(self.media_player, self)
+        self.media_player_controls = MediaPlayerControls(self.media_player, self)
         self.layoutas = QVBoxLayout()
         self.layoutas.addWidget(self.view)
-        self.layoutas.addWidget(self.media_buttons)
+        self.layoutas.addWidget(self.media_player_controls)
         self.setLayout(self.layoutas)
 
         self.view.view_resized.connect(self.__stretch_video_output)
