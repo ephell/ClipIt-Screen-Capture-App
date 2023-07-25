@@ -1,4 +1,5 @@
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, QRect
+from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QPushButton
 
 from ._volume_slider_container import VolumeSliderContainer
@@ -26,13 +27,18 @@ class VolumeButton(QPushButton):
         super().showEvent(event)
 
     """Override"""
-    def moveEvent(self, event):
-        self.volume_slider_container.update_position(
-            self.__get_position(),
-            self.__get_width(),
-            self.__get_height()
+    def leaveEvent(self, event):
+        local_container_rect = self.volume_slider_container.rect()
+        global_top_left = self.volume_slider_container.mapToGlobal(
+            local_container_rect.topLeft()
         )
-        super().moveEvent(event)
+        global_bottom_right = self.volume_slider_container.mapToGlobal(
+            local_container_rect.bottomRight()
+        )
+        global_container_rect = QRect(global_top_left, global_bottom_right)
+        global_cursor_pos = QCursor.pos()
+        if not global_container_rect.contains(global_cursor_pos):
+            self.volume_slider_container.hide()
 
     @Slot()
     def on_click(self):
@@ -43,6 +49,14 @@ class VolumeButton(QPushButton):
 
     @Slot()
     def on_editor_position_changed(self):
+        self.volume_slider_container.update_position(
+            self.__get_position(),
+            self.__get_width(),
+            self.__get_height()
+        )
+
+    @Slot()
+    def on_editor_resized(self):
         self.volume_slider_container.update_position(
             self.__get_position(),
             self.__get_width(),

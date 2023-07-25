@@ -8,6 +8,7 @@ from .timeline.timeline import Timeline
 class Editor(QWidget):
 
     editor_position_changed_signal = Signal()
+    editor_resized_signal = Signal()
 
     def __init__(self, file_path, parent=None):
         super().__init__(parent)
@@ -41,6 +42,9 @@ class Editor(QWidget):
         self.editor_position_changed_signal.connect(
             self.preview.media_player_controls.volume_button.on_editor_position_changed
         )
+        self.editor_resized_signal.connect(
+            self.preview.media_player_controls.volume_button.on_editor_resized
+        )
 
     """Override"""
     def closeEvent(self, event):
@@ -55,6 +59,11 @@ class Editor(QWidget):
     def moveEvent(self, event):
         super().moveEvent(event)
         self.editor_position_changed_signal.emit()
+
+    """Override"""
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.editor_resized_signal.emit()
 
     @Slot()
     def __on_ruler_handle_time_changed(self, time_ms):
