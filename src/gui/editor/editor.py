@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtCore import Qt, Slot, Signal
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 
 from .preview.preview import Preview
@@ -6,6 +6,8 @@ from .timeline.timeline import Timeline
 
 
 class Editor(QWidget):
+
+    editor_position_changed_signal = Signal()
 
     def __init__(self, file_path, parent=None):
         super().__init__(parent)
@@ -36,6 +38,9 @@ class Editor(QWidget):
         self.timeline.scene.media_item_end_time_changed.connect(
             self.__on_media_item_end_time_changed
         )
+        self.editor_position_changed_signal.connect(
+            self.preview.media_player_controls.volume_button.on_editor_position_changed
+        )
 
     """Override"""
     def closeEvent(self, event):
@@ -45,6 +50,11 @@ class Editor(QWidget):
                 if isinstance(attr_value, Editor):
                     setattr(self.parent(), attr_name, None)
                     break
+
+    """Override"""
+    def moveEvent(self, event):
+        super().moveEvent(event)
+        self.editor_position_changed_signal.emit()
 
     @Slot()
     def __on_ruler_handle_time_changed(self, time_ms):

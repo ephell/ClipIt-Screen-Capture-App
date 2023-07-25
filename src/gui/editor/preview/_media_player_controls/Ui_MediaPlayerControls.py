@@ -15,11 +15,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton,
-    QSizePolicy, QSlider, QSpacerItem, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QPushButton, QSizePolicy,
+    QSpacerItem, QWidget)
 
-from ._render_and_save_button import RenderAndSaveButton
+from ._render_and_save_button.render_and_save_button import RenderAndSaveButton
+from ._volume_button.volume_button import VolumeButton
 from . import resource_rc
 from . import resource_rc
 
@@ -27,19 +27,9 @@ class Ui_MediaPlayerControls(object):
     def setupUi(self, MediaPlayerControls):
         if not MediaPlayerControls.objectName():
             MediaPlayerControls.setObjectName(u"MediaPlayerControls")
-        MediaPlayerControls.resize(362, 160)
-        self.central_layout = QVBoxLayout(MediaPlayerControls)
-        self.central_layout.setObjectName(u"central_layout")
-        self.verticalLayout_2 = QVBoxLayout()
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.horizontalLayout_2 = QHBoxLayout()
+        MediaPlayerControls.resize(589, 285)
+        self.horizontalLayout_2 = QHBoxLayout(MediaPlayerControls)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_2.addItem(self.horizontalSpacer_3)
-
-        self.verticalLayout = QVBoxLayout()
-        self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
@@ -73,11 +63,20 @@ class Ui_MediaPlayerControls(object):
 
         self.horizontalLayout.addWidget(self.reset_button)
 
+        self.volume_button = VolumeButton(MediaPlayerControls)
+        self.volume_button.setObjectName(u"volume_button")
+        icon3 = QIcon()
+        icon3.addFile(u":/icons/volume_slider_icon.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.volume_button.setIcon(icon3)
+        self.volume_button.setIconSize(QSize(30, 30))
+
+        self.horizontalLayout.addWidget(self.volume_button)
+
         self.render_and_save_button = RenderAndSaveButton(MediaPlayerControls)
         self.render_and_save_button.setObjectName(u"render_and_save_button")
-        icon3 = QIcon()
-        icon3.addFile(u":/icons/save.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.render_and_save_button.setIcon(icon3)
+        icon4 = QIcon()
+        icon4.addFile(u":/icons/save.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.render_and_save_button.setIcon(icon4)
         self.render_and_save_button.setIconSize(QSize(30, 30))
 
         self.horizontalLayout.addWidget(self.render_and_save_button)
@@ -87,56 +86,7 @@ class Ui_MediaPlayerControls(object):
         self.horizontalLayout.addItem(self.horizontalSpacer_5)
 
 
-        self.verticalLayout.addLayout(self.horizontalLayout)
-
-        self.horizontalLayout_3 = QHBoxLayout()
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_3.addItem(self.horizontalSpacer)
-
-        self.volume_slider_icon_label = QLabel(MediaPlayerControls)
-        self.volume_slider_icon_label.setObjectName(u"volume_slider_icon_label")
-        self.volume_slider_icon_label.setMinimumSize(QSize(30, 30))
-        self.volume_slider_icon_label.setMaximumSize(QSize(30, 30))
-        self.volume_slider_icon_label.setPixmap(QPixmap(u":/icons/volume_slider_icon.png"))
-        self.volume_slider_icon_label.setScaledContents(True)
-
-        self.horizontalLayout_3.addWidget(self.volume_slider_icon_label)
-
-        self.volume_slider = QSlider(MediaPlayerControls)
-        self.volume_slider.setObjectName(u"volume_slider")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.volume_slider.sizePolicy().hasHeightForWidth())
-        self.volume_slider.setSizePolicy(sizePolicy)
-        self.volume_slider.setMinimumSize(QSize(135, 0))
-        self.volume_slider.setMaximum(100)
-        self.volume_slider.setValue(100)
-        self.volume_slider.setOrientation(Qt.Horizontal)
-
-        self.horizontalLayout_3.addWidget(self.volume_slider)
-
-        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_3.addItem(self.horizontalSpacer_2)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_3)
-
-
-        self.horizontalLayout_2.addLayout(self.verticalLayout)
-
-        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_2.addItem(self.horizontalSpacer_6)
-
-
-        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
-
-
-        self.central_layout.addLayout(self.verticalLayout_2)
+        self.horizontalLayout_2.addLayout(self.horizontalLayout)
 
 
         self.retranslateUi(MediaPlayerControls)
@@ -149,7 +99,7 @@ class Ui_MediaPlayerControls(object):
         self.play_button.setText("")
         self.pause_button.setText("")
         self.reset_button.setText("")
+        self.volume_button.setText("")
         self.render_and_save_button.setText("")
-        self.volume_slider_icon_label.setText("")
     # retranslateUi
 
