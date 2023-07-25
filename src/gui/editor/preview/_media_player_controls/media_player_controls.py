@@ -12,8 +12,7 @@ class MediaPlayerControls(Ui_MediaPlayerControls, QWidget):
         self.media_player = media_player
         self.render_and_save_button.set_media_player(self.media_player)
         if not self.media_player.hasAudio():
-            self.volume_button.volume_slider_container.slider.setValue(0)
-            self.volume_button.volume_slider_container.slider.setEnabled(False)
+            self.volume_button.setEnabled(False)
         self.__connect_signals_and_slots()
 
     def __connect_signals_and_slots(self):
