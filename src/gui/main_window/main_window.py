@@ -200,8 +200,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @Slot()
     def __on_editor_source_file_changed(self, path):
-        if self.__get_editor() is not None:
-            self.__get_editor().close()
         self.editor = Editor(path)
         self.editor.source_file_changed_signal.connect(
             self.__on_editor_source_file_changed

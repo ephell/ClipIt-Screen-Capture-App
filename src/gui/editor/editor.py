@@ -73,6 +73,7 @@ class Editor(QWidget):
             else:
                 event.ignore()
 
+        # Delete the editor object from the parent if parent exists.
         if self.parent() is not None:
             for attr_name, attr_value in vars(self.parent()).items():
                 if isinstance(attr_value, Editor):
@@ -121,7 +122,19 @@ class Editor(QWidget):
         widgets, because the update() calls don't provide the expected
         results.
         """
-        self.source_file_changed_signal.emit(path)
+        if self.__has_file_been_edited():
+            user_choice = QMessageBox.question(
+                self,
+                "Confirm Upload",
+                "Unsaved changes detected. \n"
+                "Are you sure you want to upload another file without saving?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            if user_choice == QMessageBox.Yes:
+                self.source_file_changed_signal.emit(path)
+        else:
+            self.source_file_changed_signal.emit(path)
 
     @Slot()
     def __on_file_rendered_signal(self):
