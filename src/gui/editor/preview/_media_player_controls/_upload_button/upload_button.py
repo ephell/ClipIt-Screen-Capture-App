@@ -1,5 +1,5 @@
 from PySide6.QtCore import Slot, Signal
-from PySide6.QtWidgets import QPushButton, QFileDialog
+from PySide6.QtWidgets import QPushButton, QFileDialog, QMessageBox
 
 from settings.settings import Settings
 
@@ -14,10 +14,20 @@ class UploadButton(QPushButton):
     @Slot()
     def on_click(self):
         file_dialog = _UploadFileDialog(self)
-        user_choice = file_dialog.exec()
-        if user_choice == QFileDialog.Accepted:
-            file_path = file_dialog.selectedFiles()[0]
-            self.upload_file_signal.emit(file_path)
+        while True:
+            if file_dialog.exec() == QFileDialog.Accepted:
+                file_path = file_dialog.selectedFiles()[0]
+                if file_path.lower().endswith(".mp4"):
+                    self.upload_file_signal.emit(file_path)
+                    break
+                else:
+                    QMessageBox.critical(
+                        self, 
+                        "Invalid File Type", 
+                        "Please select a file with '.mp4' extension."
+                    )
+            else:
+                break
 
 
 class _UploadFileDialog(QFileDialog):
