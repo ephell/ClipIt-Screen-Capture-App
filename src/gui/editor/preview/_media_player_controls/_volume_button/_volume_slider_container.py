@@ -23,6 +23,16 @@ class VolumeSliderContainer(QDialog):
         self.slider = VolumeSlider(self)
         self.layout.addWidget(self.slider)
 
+    def update_position(self, button_position, button_width, button_height):
+        self.button_position = button_position
+        self.button_width = button_width
+        self.button_height = button_height
+        slider_x = self.button_position.x() \
+                   + (self.button_width - self.rect().width()) \
+                   // 2
+        slider_y = self.button_position.y() - self.rect().height()
+        self.move(slider_x, slider_y)
+
     """Override"""
     def showEvent(self, event):
         self.update_position(
@@ -36,13 +46,3 @@ class VolumeSliderContainer(QDialog):
     def leaveEvent(self, event):
         if not self.isHidden():
             self.hide()
-
-    def update_position(self, button_position, button_width, button_height):
-        self.button_position = button_position
-        self.button_width = button_width
-        self.button_height = button_height
-        slider_x = self.button_position.x() \
-                   + (self.button_width - self.rect().width()) \
-                   // 2
-        slider_y = self.button_position.y() - self.rect().height()
-        self.move(slider_x, slider_y)

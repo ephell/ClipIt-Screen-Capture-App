@@ -19,8 +19,8 @@ from PySide6.QtWidgets import (QApplication, QHBoxLayout, QPushButton, QSizePoli
     QSpacerItem, QWidget)
 
 from ._render_and_save_button.render_and_save_button import RenderAndSaveButton
+from ._upload_button.upload_button import UploadButton
 from ._volume_button.volume_button import VolumeButton
-from . import resource_rc
 from . import resource_rc
 
 class Ui_MediaPlayerControls(object):
@@ -28,11 +28,9 @@ class Ui_MediaPlayerControls(object):
         if not MediaPlayerControls.objectName():
             MediaPlayerControls.setObjectName(u"MediaPlayerControls")
         MediaPlayerControls.resize(589, 285)
-        self.horizontalLayout_2 = QHBoxLayout(MediaPlayerControls)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout = QHBoxLayout(MediaPlayerControls)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer_4 = QSpacerItem(136, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer_4)
 
@@ -81,12 +79,18 @@ class Ui_MediaPlayerControls(object):
 
         self.horizontalLayout.addWidget(self.render_and_save_button)
 
-        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.upload_button = UploadButton(MediaPlayerControls)
+        self.upload_button.setObjectName(u"upload_button")
+        icon5 = QIcon()
+        icon5.addFile(u":/icons/upload.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.upload_button.setIcon(icon5)
+        self.upload_button.setIconSize(QSize(30, 30))
+
+        self.horizontalLayout.addWidget(self.upload_button)
+
+        self.horizontalSpacer_5 = QSpacerItem(135, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer_5)
-
-
-        self.horizontalLayout_2.addLayout(self.horizontalLayout)
 
 
         self.retranslateUi(MediaPlayerControls)
@@ -101,5 +105,6 @@ class Ui_MediaPlayerControls(object):
         self.reset_button.setText("")
         self.volume_button.setText("")
         self.render_and_save_button.setText("")
+        self.upload_button.setText("")
     # retranslateUi
 

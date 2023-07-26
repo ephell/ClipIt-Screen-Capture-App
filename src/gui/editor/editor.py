@@ -9,6 +9,7 @@ class Editor(QWidget):
 
     editor_position_changed_signal = Signal()
     editor_resized_signal = Signal()
+    source_file_changed_signal = Signal(str)
 
     def __init__(self, file_path, parent=None):
         super().__init__(parent)
@@ -45,6 +46,18 @@ class Editor(QWidget):
         self.editor_resized_signal.connect(
             self.preview.media_player_controls.volume_button.on_editor_resized
         )
+        self.preview.media_player_controls.upload_button.upload_file_signal.connect(
+            self.on_upload_file_signal
+        )
+    
+    @Slot()
+    def on_upload_file_signal(self, path):
+        """
+        Emitting a signal to main window instead of updating all editor's
+        widgets, because the update() calls don't provide the expected
+        results.
+        """
+        self.source_file_changed_signal.emit(path)
 
     """Override"""
     def closeEvent(self, event):

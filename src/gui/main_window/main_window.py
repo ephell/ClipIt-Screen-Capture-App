@@ -164,6 +164,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if user_choice == QMessageBox.Yes:
             if self.__get_editor() is None:
                 self.editor = Editor(file_path)
+                self.editor.source_file_changed_signal.connect(
+                    self.__on_editor_source_file_changed
+                )
                 self.editor.show()
             else:
                 _EditorAlreadyOpenMessageBox(self).exec()
@@ -177,10 +180,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if user_choice == QFileDialog.Accepted:
                 file_path = file_dialog.selectedFiles()[0]
                 self.editor = Editor(file_path)
+                self.editor.source_file_changed_signal.connect(
+                    self.__on_editor_source_file_changed
+                )
                 self.editor.show()
             file_dialog.deleteLater()
         else:
             _EditorAlreadyOpenMessageBox(self).exec()
+
+    @Slot()
+    def __on_editor_source_file_changed(self, path):
+        print("source file changed")
+        print(path)
+        if self.__get_editor() is not None:
+            self.__get_editor().close()
+        self.editor = Editor(path)
+        self.editor.source_file_changed_signal.connect(
+            self.__on_editor_source_file_changed
+        )
+        self.editor.show()            
 
     @Slot()
     def __on_open_capture_folder_button_clicked(self):

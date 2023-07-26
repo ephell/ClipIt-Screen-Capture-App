@@ -25,6 +25,7 @@ class MediaPlayerControls(Ui_MediaPlayerControls, QWidget):
         self.volume_button.volume_slider_container.slider.valueChanged.connect(
             self.__on_volume_slider_value_changed
         )
+        self.upload_button.clicked.connect(self.upload_button.on_click)
         
     @Slot()
     def __on_volume_slider_value_changed(self, value):

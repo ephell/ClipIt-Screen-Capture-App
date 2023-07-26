@@ -23,7 +23,6 @@ class Preview(QWidget):
         self.layoutas.addWidget(self.view)
         self.layoutas.addWidget(self.media_player_controls)
         self.setLayout(self.layoutas)
-
         self.view.view_resized.connect(self.__stretch_video_output)
         self.media_player.pause()
 
