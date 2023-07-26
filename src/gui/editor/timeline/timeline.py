@@ -36,6 +36,7 @@ class Timeline(QWidget):
             self.ruler.ruler_handle.on_media_item_right_handle_moved
         )
 
+
 class _GraphicsScene(QGraphicsScene):
 
     ruler_handle_time_changed = Signal(int)

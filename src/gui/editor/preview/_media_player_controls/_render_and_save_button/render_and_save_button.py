@@ -12,6 +12,7 @@ from settings.settings import Settings
 class RenderAndSaveButton(QPushButton):
 
     rendering_progress_signal = Signal(int)
+    file_rendered_signal = Signal()
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -32,6 +33,7 @@ class RenderAndSaveButton(QPushButton):
                     msg_box.exec()
                 else:
                     self.__render_and_save(source_file_path, new_file_path)
+                    self.file_rendered_signal.emit()
                     break
             else:
                 break
