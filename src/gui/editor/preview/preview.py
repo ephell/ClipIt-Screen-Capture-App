@@ -1,13 +1,13 @@
 """Importable widget containing all video preview related components."""
 
 from PySide6.QtCore import Qt, Slot, QSize, Signal
-from PySide6.QtGui import QPainter
+from PySide6.QtGui import QPainter, QColor
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QGraphicsScene, QGraphicsView, QSizePolicy
 )
 
 from ._media_player import MediaPlayer
-from ._media_buttons import MediaButtons
+from ._media_player_controls.media_player_controls import MediaPlayerControls
 
 
 class Preview(QWidget):
@@ -18,12 +18,11 @@ class Preview(QWidget):
         self.scene = _GraphicsScene(740, 400, self)
         self.view = _GraphicsView(self.scene, self)
         self.media_player = MediaPlayer(self.scene, file_path, self)
-        self.media_buttons = MediaButtons(self.media_player, self)
+        self.media_player_controls = MediaPlayerControls(self.media_player, self)
         self.layoutas = QVBoxLayout()
         self.layoutas.addWidget(self.view)
-        self.layoutas.addWidget(self.media_buttons)
+        self.layoutas.addWidget(self.media_player_controls)
         self.setLayout(self.layoutas)
-
         self.view.view_resized.connect(self.__stretch_video_output)
         self.media_player.pause()
 
@@ -42,6 +41,7 @@ class _GraphicsScene(QGraphicsScene):
         self.setSceneRect(0, 0, width, height)
         self.initial_width = width
         self.initial_height = height
+        self.setBackgroundBrush(QColor(70, 70, 70))
 
 
 class _GraphicsView(QGraphicsView):

@@ -1,11 +1,15 @@
-from PySide6.QtCore import Qt, Slot
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide6.QtCore import Qt, Slot, Signal
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QMessageBox
 
 from .preview.preview import Preview
 from .timeline.timeline import Timeline
 
 
 class Editor(QWidget):
+
+    editor_position_changed_signal = Signal()
+    editor_resized_signal = Signal()
+    source_file_changed_signal = Signal(str)
 
     def __init__(self, file_path, parent=None):
         super().__init__(parent)
@@ -19,6 +23,9 @@ class Editor(QWidget):
         self.layout.addWidget(self.timeline)
         self.setLayout(self.layout)
         self.__connect_signals_and_slots()
+        # Used to track changes done to the uploaded file.
+        self.__initial_start_time = 0
+        self.__initial_end_time = self.preview.media_player.duration()
 
     def __connect_signals_and_slots(self):
         self.timeline.scene.ruler_handle_time_changed.connect(
@@ -36,15 +43,52 @@ class Editor(QWidget):
         self.timeline.scene.media_item_end_time_changed.connect(
             self.__on_media_item_end_time_changed
         )
+        self.editor_position_changed_signal.connect(
+            self.preview.media_player_controls.volume_button.on_editor_position_changed
+        )
+        self.editor_resized_signal.connect(
+            self.preview.media_player_controls.volume_button.on_editor_resized
+        )
+        self.preview.media_player_controls.upload_button.upload_file_signal.connect(
+            self.__on_upload_file_signal
+        )
+        self.preview.media_player_controls.render_and_save_button.file_rendered_signal.connect(
+            self.__on_file_rendered_signal
+        )
 
     """Override"""
     def closeEvent(self, event):
-        super().closeEvent(event)
+        if self.__has_file_been_edited():
+            user_choice = QMessageBox.question(
+                self,
+                "Confirm Close",
+                "Unsaved changes detected. \n"
+                "Are you sure you want to close the editor without saving?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            if user_choice == QMessageBox.Yes:
+                event.accept()
+                super().closeEvent(event)
+            else:
+                event.ignore()
+
+        # Delete the editor object from the parent if parent exists.
         if self.parent() is not None:
             for attr_name, attr_value in vars(self.parent()).items():
                 if isinstance(attr_value, Editor):
                     setattr(self.parent(), attr_name, None)
                     break
+
+    """Override"""
+    def moveEvent(self, event):
+        super().moveEvent(event)
+        self.editor_position_changed_signal.emit()
+
+    """Override"""
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.editor_resized_signal.emit()
 
     @Slot()
     def __on_ruler_handle_time_changed(self, time_ms):
@@ -70,3 +114,40 @@ class Editor(QWidget):
     @Slot()
     def __on_media_item_end_time_changed(self, new_end_time):
         self.preview.media_player.update_end_time(new_end_time)
+
+    @Slot()
+    def __on_upload_file_signal(self, path):
+        """
+        Emitting a signal to main window instead of redrawing all editor's
+        widgets, because the update() calls don't provide the expected
+        results.
+        """
+        if self.__has_file_been_edited():
+            user_choice = QMessageBox.question(
+                self,
+                "Confirm Upload",
+                "Unsaved changes detected. \n"
+                "Are you sure you want to upload another file without saving?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            if user_choice == QMessageBox.Yes:
+                self.source_file_changed_signal.emit(path)
+        else:
+            self.source_file_changed_signal.emit(path)
+
+    @Slot()
+    def __on_file_rendered_signal(self):
+        """Update initial values of media item to ones after rendering."""
+        self.__initial_start_time = self.timeline.media_item.start_time
+        self.__initial_end_time = self.timeline.media_item.end_time
+
+    def __has_file_been_edited(self):
+        if self.__has_duration_changed():
+            return True
+
+    def __has_duration_changed(self):
+        return (
+            self.timeline.media_item.start_time != self.__initial_start_time
+            or self.timeline.media_item.end_time != self.__initial_end_time
+        )

@@ -1,43 +1,25 @@
 from PySide6.QtCore import Signal, Slot, QThread
 from PySide6.QtWidgets import (
-    QWidget, QPushButton, QHBoxLayout, QDialog, QFileDialog, QMessageBox
+    QPushButton, QDialog, QFileDialog, QMessageBox
 )
 from proglog import ProgressBarLogger
 
 from utilities.video import VideoUtils
-from .rendering_progress_dialog.rendering_progress_dialog import RenderingProgressDialog
+from ._rendering_progress_dialog.rendering_progress_dialog import RenderingProgressDialog
 from settings.settings import Settings
 
 
-class MediaButtons(QWidget):
-
-    def __init__(self, media_player, parent=None):
-        super().__init__(parent)
-        self.media_player = media_player
-        self.play_button = QPushButton("Play", self)
-        self.play_button.clicked.connect(self.media_player.play)
-        self.pause_button = QPushButton("Pause", self)
-        self.pause_button.clicked.connect(self.media_player.pause)
-        self.stop_button = QPushButton("Reset", self)
-        self.stop_button.clicked.connect(self.media_player.stop)
-        self.render_and_save_button = _RenderAndSave(self.media_player, self)
-        self.layout = QHBoxLayout()
-        self.layout.addWidget(self.play_button)
-        self.layout.addWidget(self.pause_button)
-        self.layout.addWidget(self.stop_button)
-        self.layout.addWidget(self.render_and_save_button)
-        self.setLayout(self.layout)
-
-
-class _RenderAndSave(QPushButton):
+class RenderAndSaveButton(QPushButton):
 
     rendering_progress_signal = Signal(int)
+    file_rendered_signal = Signal()
 
-    def __init__(self, media_player, parent=None):
+    def __init__(self, parent):
         super().__init__(parent)
-        self.setText("Render and Save")
+        self.media_player = None
+
+    def set_media_player(self, media_player):
         self.media_player = media_player
-        self.clicked.connect(self.on_click)
 
     @Slot()
     def on_click(self):
@@ -51,6 +33,7 @@ class _RenderAndSave(QPushButton):
                     msg_box.exec()
                 else:
                     self.__render_and_save(source_file_path, new_file_path)
+                    self.file_rendered_signal.emit()
                     break
             else:
                 break
@@ -64,6 +47,9 @@ class _RenderAndSave(QPushButton):
     
     def __get_source_file_path(self):
         return self.media_player.file_path
+    
+    def __get_volume(self):
+        return self.media_player.audio_output.volume()
 
     def __render_and_save(self, input_file_path, output_file_path):
         self.logger = _RenderingProgressLogger(self.rendering_progress_signal)
@@ -72,6 +58,7 @@ class _RenderAndSave(QPushButton):
             self.__get_end_time(),
             input_file_path,
             output_file_path,
+            self.__get_volume(),
             self.logger
         )
         self.rendering_progress_dialog = RenderingProgressDialog(self)
@@ -121,6 +108,7 @@ class _RenderingThread(QThread):
             cut_end,
             input_file_path,
             output_file_path,
+            volume,
             logger
         ):
         super().__init__()
@@ -128,6 +116,7 @@ class _RenderingThread(QThread):
         self.cut_end = cut_end
         self.input_file_path = input_file_path
         self.output_file_path = output_file_path
+        self.volume = volume
         self.logger = logger
 
     def run(self):
@@ -136,6 +125,7 @@ class _RenderingThread(QThread):
             self.cut_end,
             self.input_file_path,
             self.output_file_path,
+            self.volume,
             self.logger
         )
 

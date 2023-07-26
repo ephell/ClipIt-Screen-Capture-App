@@ -21,10 +21,11 @@ class Timeline(QWidget):
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.view)
         self.setLayout(self.layout)
+        self.__connect_signals_and_slots()
 
+    def __connect_signals_and_slots(self):
         self.view.resize_ruler.connect(self.ruler.on_view_resize)
         self.view.resize_media_item.connect(self.media_item.on_view_resize)
-        
         self.scene.ruler_handle_time_changed.connect(
             self.media_item.on_ruler_handle_time_changed
         )

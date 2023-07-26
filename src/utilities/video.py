@@ -11,9 +11,12 @@ class VideoUtils:
         cut_end, 
         input_file_path,
         output_file_path,
+        volume: float=None, # 1.0 is 100% 
         logger=None
     ):
         clip = VideoFileClip(input_file_path)
+        if volume is not None:
+            clip = clip.volumex(volume)
         inner_clip = clip.subclip(cut_begin, cut_end)
         inner_clip.write_videofile(
             output_file_path,

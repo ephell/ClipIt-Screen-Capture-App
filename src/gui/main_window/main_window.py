@@ -164,6 +164,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if user_choice == QMessageBox.Yes:
             if self.__get_editor() is None:
                 self.editor = Editor(file_path)
+                self.editor.source_file_changed_signal.connect(
+                    self.__on_editor_source_file_changed
+                )
                 self.editor.show()
             else:
                 _EditorAlreadyOpenMessageBox(self).exec()
@@ -173,14 +176,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __on_open_editor_button_clicked(self):
         if self.__get_editor() is None:
             file_dialog = _OpenFileInEditorDialog(self)
-            user_choice = file_dialog.exec()
-            if user_choice == QFileDialog.Accepted:
-                file_path = file_dialog.selectedFiles()[0]
-                self.editor = Editor(file_path)
-                self.editor.show()
+            while True:
+                if file_dialog.exec() == QFileDialog.Accepted:
+                    file_path = file_dialog.selectedFiles()[0]
+                    if file_path.lower().endswith(".mp4"):
+                        self.editor = Editor(file_path)
+                        self.editor.source_file_changed_signal.connect(
+                            self.__on_editor_source_file_changed
+                        )
+                        self.editor.show()
+                        break
+                    else:
+                        QMessageBox.critical(
+                            self, 
+                            "Invalid File Type", 
+                            "Please select a file with '.mp4' extension."
+                        )
+                else:
+                    break
             file_dialog.deleteLater()
         else:
             _EditorAlreadyOpenMessageBox(self).exec()
+
+    @Slot()
+    def __on_editor_source_file_changed(self, path):
+        self.editor = Editor(path)
+        self.editor.source_file_changed_signal.connect(
+            self.__on_editor_source_file_changed
+        )
+        self.editor.show()            
 
     @Slot()
     def __on_open_capture_folder_button_clicked(self):
