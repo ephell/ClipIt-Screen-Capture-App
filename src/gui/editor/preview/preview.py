@@ -1,7 +1,7 @@
 """Importable widget containing all video preview related components."""
 
 from PySide6.QtCore import Qt, Slot, QSize, Signal
-from PySide6.QtGui import QPainter
+from PySide6.QtGui import QPainter, QColor
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QGraphicsScene, QGraphicsView, QSizePolicy
 )
@@ -41,6 +41,7 @@ class _GraphicsScene(QGraphicsScene):
         self.setSceneRect(0, 0, width, height)
         self.initial_width = width
         self.initial_height = height
+        self.setBackgroundBrush(QColor(70, 70, 70))
 
 
 class _GraphicsView(QGraphicsView):
