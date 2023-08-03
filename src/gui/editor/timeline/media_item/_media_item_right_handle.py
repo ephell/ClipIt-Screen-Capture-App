@@ -10,6 +10,7 @@ class RightHandle(QGraphicsRectItem):
     def __init__(self, media_item):
         super().__init__()
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
         self.parent = media_item
         self.parent.scene.addItem(self)
         self.handle_width = 20
@@ -72,6 +73,44 @@ class RightHandle(QGraphicsRectItem):
                 self.scene().media_item_right_handle_moved.emit(self.__get_current_time())
 
             self.previous_scene_pos = event.scenePos()
+
+    """Override"""
+    def keyPressEvent(self, event):
+        if self.hasFocus():
+            if event.key() == Qt.Key_Left:
+                self.__move_by_key(-1)
+            elif event.key() == Qt.Key_Right:
+                self.__move_by_key(1)
+    
+    def __move_by_key(self, move_by_amount_px):
+        new_parent_rect_x = self.parent.rect().x()
+        new_parent_rect_y = self.parent.rect().y()
+        new_parent_rect_width = self.parent.rect().width()
+        new_parent_rect_height = self.parent.rect().height()
+        new_handle_x = self.pos().x()
+        new_handle_y = self.pos().y()
+
+        if move_by_amount_px < 0:
+            new_parent_rect_width -= abs(move_by_amount_px)
+            new_handle_x -= abs(move_by_amount_px)
+        elif move_by_amount_px > 0:
+            new_parent_rect_width += abs(move_by_amount_px)
+            new_handle_x += abs(move_by_amount_px)
+
+        if (
+            new_parent_rect_width > 0
+            and new_handle_x >= self.__get_min_possible_x()
+            and new_handle_x <= self.__get_max_possible_x()
+        ):
+            self.parent.setRect(
+                new_parent_rect_x,
+                new_parent_rect_y,
+                new_parent_rect_width,
+                new_parent_rect_height
+            )
+            self.setPos(new_handle_x, new_handle_y)
+            self.parent.update_end_time(self.__get_current_time())
+            self.scene().media_item_right_handle_moved.emit(self.__get_current_time())
 
     def __is_within_increase_bounds(self, scene_pos):
         x = self.scenePos().x() + self.handle_width

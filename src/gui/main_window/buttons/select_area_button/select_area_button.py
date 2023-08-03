@@ -1,6 +1,6 @@
 import mss
 from PySide6.QtCore import Slot
-from PySide6.QtWidgets import QPushButton
+from PySide6.QtWidgets import QPushButton, QMessageBox
 
 from ._area_selector import AreaSelector
 from ._area_border_creator import AreaBorderCreator
@@ -40,6 +40,11 @@ class SelectAreaButton(QPushButton):
         """Callback function for the area selector."""
         if not self.__is_within_single_monitor_bounds(x0, y0, x1, y1):
             self.area_selector.close()
+            QMessageBox.critical(
+                self, 
+                "Invalid Area", 
+                "Selected area must not overlap multiple monitors."
+            )
             return
         
         self.__draw_recording_area_border(x0, y0, x1, y1)

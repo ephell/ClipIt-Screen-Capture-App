@@ -5,8 +5,8 @@ from PySide6.QtWidgets import (
     QSizePolicy, QGraphicsScene, QGraphicsView, QWidget, QVBoxLayout
 )
 
-from .ruler.ruler import Ruler
 from .media_item.media_item import MediaItem
+from .ruler.ruler import Ruler
 
 
 class Timeline(QWidget):
@@ -34,6 +34,12 @@ class Timeline(QWidget):
         )
         self.scene.media_item_right_handle_moved.connect(
             self.ruler.ruler_handle.on_media_item_right_handle_moved
+        )
+        self.scene.media_item_start_time_changed.connect(
+            self.ruler.ruler_handle.on_media_item_start_time_changed
+        )
+        self.scene.media_item_end_time_changed.connect(
+            self.ruler.ruler_handle.on_media_item_end_time_changed
         )
 
 

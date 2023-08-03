@@ -223,9 +223,9 @@ class _VideoCaptureDurationLabelUpdater(QThread):
         while not self.recorder_stop_event.is_set():
             if self.start_time is not None:
                 current_time = perf_counter()
-                elapsed_time = current_time - self.start_time
-                seconds = int(elapsed_time)
-                minutes = seconds // 60
+                elapsed_time = int(current_time - self.start_time)
+                minutes = elapsed_time // 60
+                seconds = elapsed_time % 60
                 self.time_label.setText(f"{minutes:02d}:{seconds:02d}")
 
     def set_start_time(self, start_time):

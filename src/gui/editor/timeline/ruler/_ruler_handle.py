@@ -1,8 +1,8 @@
 from PySide6.QtCore import Qt, Slot, QRectF
-from PySide6.QtGui import QPen, QFont, QPainterPath, QBrush
-from PySide6.QtWidgets import (
-    QGraphicsItem, QGraphicsWidget, QGraphicsTextItem
-)
+from PySide6.QtGui import QPen, QPainterPath, QBrush
+from PySide6.QtWidgets import QGraphicsItem, QGraphicsWidget
+
+from ._ruler_handle_time_edit import RulerHandleTimeEdit
 
 
 class RulerHandle(QGraphicsItem):
@@ -13,6 +13,7 @@ class RulerHandle(QGraphicsItem):
         self.scene = self.ruler.scene
         self.scene.addItem(self)
         self.setFlag(QGraphicsWidget.ItemIsMovable, True)
+        self.setFlag(QGraphicsWidget.ItemIsFocusable, True)
         self.media_duration = media_duration
         self.width = 10
         self.height = 70 + self.scene.media_item_y
@@ -28,7 +29,10 @@ class RulerHandle(QGraphicsItem):
         self.needle_height = self.height - self.head_height
         self.needle_x = (self.width - self.needle_width) / 2
         self.needle_y = self.head_height
-        self.time_label = _RulerHandleTimeLabel(self)
+        self.time_edit = RulerHandleTimeEdit(self.scene, self.media_duration)
+        self.time_edit.time_changed_signal.connect(
+            self.__on_ruler_handle_time_changed
+        )
 
     """Override"""
     def boundingRect(self):
@@ -62,7 +66,15 @@ class RulerHandle(QGraphicsItem):
     """Override"""
     def mouseMoveEvent(self, event):
         if self.dragging:
-            self.__move(event.scenePos())
+            self.__move_by_mouse(event.scenePos())
+
+    """Override"""
+    def keyPressEvent(self, event):
+        if self.hasFocus():
+            if event.key() == Qt.Key_Left:
+                self.__move_by_key(-1)
+            elif event.key() == Qt.Key_Right:
+                self.__move_by_key(1)
 
     @Slot()
     def on_media_player_position_changed(self, time):
@@ -70,47 +82,88 @@ class RulerHandle(QGraphicsItem):
             self.__get_x_pos_from_time(time), 
             self.scenePos().y()
         )   
-        self.time_label.update_label(time)
+        self.time_edit.update_time(time)
 
     @Slot()
     def on_media_item_left_handle_moved(self, time):
-        if time > self.time_label.get_time():
+        if time > self.time_edit.get_time():
             self.setPos(
                 self.__get_x_pos_from_time(time),
                 self.scenePos().y()
             )
-            self.time_label.update_label(time)
+            self.time_edit.update_time(time)
             self.scene.ruler_handle_time_changed.emit(time)
 
     @Slot()
     def on_media_item_right_handle_moved(self, time):
-        if time < self.time_label.get_time():
+        if time < self.time_edit.get_time():
             self.setPos(
                 self.__get_x_pos_from_time(time),
                 self.scenePos().y()
             )
-            self.time_label.update_label(time)
+            self.time_edit.update_time(time)
             self.scene.ruler_handle_time_changed.emit(time)
+
+    @Slot()
+    def on_media_item_start_time_changed(self, time):
+        if time > self.time_edit.get_time():
+            self.setPos(
+                self.__get_x_pos_from_time(time),
+                self.scenePos().y()
+            )
+            self.time_edit.update_time(time)
+            self.scene.ruler_handle_time_changed.emit(time)
+
+    @Slot()
+    def on_media_item_end_time_changed(self, time):
+        if time < self.time_edit.get_time():
+            self.setPos(
+                self.__get_x_pos_from_time(time),
+                self.scenePos().y()
+            )
+            self.time_edit.update_time(time)
+            self.scene.ruler_handle_time_changed.emit(time)
+
+    @Slot()
+    def __on_ruler_handle_time_changed(self, time):
+        self.setPos(
+            self.__get_x_pos_from_time(time),
+            self.scenePos().y()
+        )
+        self.update()
+        self.scene.ruler_handle_time_changed.emit(self.__get_current_time())
 
     def on_view_resize(self):
         """Not a slot. Called in 'Ruler' object."""
         self.setPos(
-            self.__get_x_pos_from_time(self.time_label.get_time()), 
+            self.__get_x_pos_from_time(self.time_edit.get_time()), 
             self.scenePos().y()
         )
 
     def on_ruler_left_mouse_clicked(self, click_pos):
         """Not a slot. Called in 'Ruler' object."""
-        self.__move(click_pos)
+        self.setFocus()
+        self.__move_by_mouse(click_pos)
 
-    def __move(self, position):
+    def __move_by_mouse(self, position):
         new_x = position.x() - self.width / 2
         if new_x <= self.__get_min_possible_x():
             new_x = self.__get_min_possible_x()
         elif new_x >= self.__get_max_possible_x():
             new_x = self.__get_max_possible_x()
         self.setPos(new_x, self.scenePos().y())
-        self.time_label.update_label(self.__get_current_time())
+        self.time_edit.update_time(self.__get_current_time())
+        self.scene.ruler_handle_time_changed.emit(self.__get_current_time())
+
+    def __move_by_key(self, move_by_amount_px):
+        current_pos = self.scenePos()
+        new_x = current_pos.x() + move_by_amount_px
+        if new_x <= self.__get_min_possible_x():
+            new_x = self.__get_min_possible_x()
+        elif new_x >= self.__get_max_possible_x():
+            new_x = self.__get_max_possible_x()
+        self.setPos(new_x, current_pos.y())
+        self.time_edit.update_time(self.__get_current_time())
         self.scene.ruler_handle_time_changed.emit(self.__get_current_time())
 
     def __get_max_possible_width(self):
@@ -136,38 +189,3 @@ class RulerHandle(QGraphicsItem):
 
     def __convert_pixels_to_time(self, pixels):
         return round(pixels * self.__get_one_pixel_time_value())
-
-
-class _RulerHandleTimeLabel(QGraphicsTextItem):
-    
-    def __init__(self, parent):
-        super().__init__()
-        self.parent = parent
-        self.parent.scene.addItem(self)
-        self.setPos(
-            self.parent.scene.sceneRect().x() + 23,
-            self.parent.scene.sceneRect().y() + 120
-        )
-        font = self.font()
-        font.setPointSize(16)
-        font.setWeight(QFont.Bold)
-        self.setFont(font)
-        self.time = 0
-        self.timestamp = ""
-        self.update_label(0)
-
-    def update_label(self, time):
-        self.time = time
-        self.timestamp = self.format_time(time)
-        self.setPlainText(self.timestamp)
-
-    def get_time(self):
-        return self.time
-
-    @staticmethod
-    def format_time(time):
-        """Formats a time in milliseconds to a string."""
-        milliseconds = int(time)
-        seconds, milliseconds = divmod(milliseconds, 1000)
-        minutes, seconds = divmod(seconds, 60)
-        return f"{minutes:02d}:{seconds:02d}:{milliseconds:03d}"
