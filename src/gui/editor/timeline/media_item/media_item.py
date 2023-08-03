@@ -1,11 +1,10 @@
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtGui import QFont, QPen
-from PySide6.QtWidgets import (
-    QGraphicsRectItem, QGraphicsTextItem
-)
+from PySide6.QtWidgets import QGraphicsRectItem
 
 from ._media_item_left_handle import LeftHandle
 from ._media_item_right_handle import RightHandle
+from ._media_item_time_edits.media_item_time_edits import TimeEdits
 
 
 class MediaItem(QGraphicsRectItem):
@@ -30,7 +29,16 @@ class MediaItem(QGraphicsRectItem):
         self.setRect(0, 0, self.initial_width, self.initial_height)
         self.left_handle = LeftHandle(self)
         self.right_handle = RightHandle(self)
-        self.time_label = _TimeLabel(self)
+        self.time_edits = TimeEdits(scene, media_duration)
+        self.__connect_signals_and_slots()
+
+    def __connect_signals_and_slots(self):
+        self.time_edits.left_handle_time_edit_time_changed_signal.connect(
+            self.__on_left_handle_time_edit_time_changed_signal
+        )
+        self.time_edits.right_handle_time_edit_time_changed_signal.connect(
+            self.__on_right_handle_time_edit_time_changed_signal
+        )
 
     """Override"""
     def paint(self, painter, option, widget):
@@ -49,7 +57,7 @@ class MediaItem(QGraphicsRectItem):
             self.scenePos().x() + self.rect().width(),
             self.scenePos().y()
         )
-        self.time_label.on_view_resize()
+        self.time_edits.on_view_resize()
         self.update()
 
     @Slot()
@@ -70,14 +78,35 @@ class MediaItem(QGraphicsRectItem):
                 self.scenePos().y()
             )
 
+    @Slot()
+    def __on_left_handle_time_edit_time_changed_signal(self, time):
+        self.update_start_time(time)
+        self.__resize_based_on_time_interval(time, self.end_time)
+        self.__move_to_x_based_on_time(time)
+        self.left_handle.setPos(
+            self.scenePos().x() - self.left_handle.handle_width,
+            self.scenePos().y()
+        )
+        self.scene.media_item_start_time_changed.emit(time)
+    
+    @Slot()
+    def __on_right_handle_time_edit_time_changed_signal(self, time):
+        self.update_end_time(time)
+        self.__resize_based_on_time_interval(self.start_time, time)
+        self.right_handle.setPos(
+            self.scenePos().x() + self.rect().width(),
+            self.scenePos().y()
+        )
+        self.scene.media_item_end_time_changed.emit(time)
+
     def update_start_time(self, time):
         self.start_time = time
-        self.time_label.update_start_time(time)
+        self.time_edits.update_start_time(time)
         self.scene.media_item_start_time_changed.emit(time)
 
     def update_end_time(self, time):
         self.end_time = time
-        self.time_label.update_end_time(time)
+        self.time_edits.update_end_time(time)
         self.scene.media_item_end_time_changed.emit(time)
 
     def __get_max_possible_width(self):
@@ -103,47 +132,3 @@ class MediaItem(QGraphicsRectItem):
             self.__get_width_from_time_interval(start_time, end_time), 
             self.initial_height
         )
-
-
-class _TimeLabel(QGraphicsTextItem):
-
-    def __init__(self, parent):
-        super().__init__()
-        self.parent = parent
-        self.parent.scene.addItem(self)
-        self.setPos(
-            self.parent.scene.width() - 257,
-            self.parent.scene.sceneRect().y() + 120
-        )
-        font = self.font()
-        font.setPointSize(16)
-        font.setWeight(QFont.Bold)
-        self.setFont(font)
-        self.start_time = self.format_time(self.parent.start_time)
-        self.end_time = self.format_time(self.parent.end_time)
-        self.__update_label()
-
-    def update_start_time(self, time):
-        self.start_time = self.format_time(time)
-        self.__update_label()
-
-    def update_end_time(self, time):
-        self.end_time = self.format_time(time)
-        self.__update_label()
-
-    def on_view_resize(self):
-        self.setPos(
-            self.parent.scene.width() - 257,
-            self.parent.scene.sceneRect().y() + 120
-        )
-
-    def __update_label(self):
-        self.setPlainText(f"{self.start_time} to {self.end_time}")
-
-    @staticmethod
-    def format_time(time):
-        """Formats a time in milliseconds to a string."""
-        milliseconds = int(time)
-        seconds, milliseconds = divmod(milliseconds, 1000)
-        minutes, seconds = divmod(seconds, 60)
-        return f"{minutes:02d}:{seconds:02d}:{milliseconds:03d}"

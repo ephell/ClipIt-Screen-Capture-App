@@ -96,6 +96,26 @@ class RulerHandle(QGraphicsItem):
             self.scene.ruler_handle_time_changed.emit(time)
 
     @Slot()
+    def on_media_item_start_time_changed(self, time):
+        if time > self.time_edit.get_time():
+            self.setPos(
+                self.__get_x_pos_from_time(time),
+                self.scenePos().y()
+            )
+            self.time_edit.update_time(time)
+            self.scene.ruler_handle_time_changed.emit(time)
+
+    @Slot()
+    def on_media_item_end_time_changed(self, time):
+        if time < self.time_edit.get_time():
+            self.setPos(
+                self.__get_x_pos_from_time(time),
+                self.scenePos().y()
+            )
+            self.time_edit.update_time(time)
+            self.scene.ruler_handle_time_changed.emit(time)
+
+    @Slot()
     def __on_ruler_handle_time_changed(self, time):
         self.setPos(
             self.__get_x_pos_from_time(time),

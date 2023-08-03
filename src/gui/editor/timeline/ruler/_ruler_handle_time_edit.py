@@ -6,8 +6,8 @@ class RulerHandleTimeEdit(QTimeEdit):
 
     time_changed_signal = Signal(int)
 
-    def __init__(self, scene, media_duration, parent=None):
-        super().__init__(parent)
+    def __init__(self, scene, media_duration):
+        super().__init__(None)
         self.scene = scene
         self.__proxy = QGraphicsProxyWidget()
         self.__proxy.setWidget(self)
@@ -24,7 +24,7 @@ class RulerHandleTimeEdit(QTimeEdit):
         self.__set_time_in_ms(self.__get_time_in_ms() + steps)
 
     @Slot()
-    def __on_time_changed(self, time):
+    def __on_time_changed(self):
         self.time_changed_signal.emit(self.__get_time_in_ms())
 
     def update_time(self, time_ms):

@@ -35,6 +35,12 @@ class Timeline(QWidget):
         self.scene.media_item_right_handle_moved.connect(
             self.ruler.ruler_handle.on_media_item_right_handle_moved
         )
+        self.scene.media_item_start_time_changed.connect(
+            self.ruler.ruler_handle.on_media_item_start_time_changed
+        )
+        self.scene.media_item_end_time_changed.connect(
+            self.ruler.ruler_handle.on_media_item_end_time_changed
+        )
 
 
 class _GraphicsScene(QGraphicsScene):
