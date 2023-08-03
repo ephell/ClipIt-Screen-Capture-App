@@ -13,6 +13,7 @@ class RulerHandle(QGraphicsItem):
         self.scene = self.ruler.scene
         self.scene.addItem(self)
         self.setFlag(QGraphicsWidget.ItemIsMovable, True)
+        self.setFlag(QGraphicsWidget.ItemIsFocusable, True)
         self.media_duration = media_duration
         self.width = 10
         self.height = 70 + self.scene.media_item_y
@@ -65,7 +66,15 @@ class RulerHandle(QGraphicsItem):
     """Override"""
     def mouseMoveEvent(self, event):
         if self.dragging:
-            self.__move(event.scenePos())
+            self.__move_by_mouse(event.scenePos())
+
+    """Override"""
+    def keyPressEvent(self, event):
+        if self.hasFocus():
+            if event.key() == Qt.Key_Left:
+                self.__move_by_key(-1)
+            elif event.key() == Qt.Key_Right:
+                self.__move_by_key(1)
 
     @Slot()
     def on_media_player_position_changed(self, time):
@@ -133,15 +142,27 @@ class RulerHandle(QGraphicsItem):
 
     def on_ruler_left_mouse_clicked(self, click_pos):
         """Not a slot. Called in 'Ruler' object."""
-        self.__move(click_pos)
+        self.setFocus()
+        self.__move_by_mouse(click_pos)
 
-    def __move(self, position):
+    def __move_by_mouse(self, position):
         new_x = position.x() - self.width / 2
         if new_x <= self.__get_min_possible_x():
             new_x = self.__get_min_possible_x()
         elif new_x >= self.__get_max_possible_x():
             new_x = self.__get_max_possible_x()
         self.setPos(new_x, self.scenePos().y())
+        self.time_edit.update_time(self.__get_current_time())
+        self.scene.ruler_handle_time_changed.emit(self.__get_current_time())
+
+    def __move_by_key(self, move_by_amount_px):
+        current_pos = self.scenePos()
+        new_x = current_pos.x() + move_by_amount_px
+        if new_x <= self.__get_min_possible_x():
+            new_x = self.__get_min_possible_x()
+        elif new_x >= self.__get_max_possible_x():
+            new_x = self.__get_max_possible_x()
+        self.setPos(new_x, current_pos.y())
         self.time_edit.update_time(self.__get_current_time())
         self.scene.ruler_handle_time_changed.emit(self.__get_current_time())
 
