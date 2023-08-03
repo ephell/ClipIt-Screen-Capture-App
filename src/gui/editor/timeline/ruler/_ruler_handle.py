@@ -122,6 +122,7 @@ class RulerHandle(QGraphicsItem):
             self.scenePos().y()
         )
         self.update()
+        self.scene.ruler_handle_time_changed.emit(self.__get_current_time())
 
     def on_view_resize(self):
         """Not a slot. Called in 'Ruler' object."""
