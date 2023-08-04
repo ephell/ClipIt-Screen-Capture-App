@@ -77,10 +77,11 @@ class RightHandle(QGraphicsRectItem):
     """Override"""
     def keyPressEvent(self, event):
         if self.hasFocus():
+            move_by_amount_px = self.__get_one_ms_pixel_value()
             if event.key() == Qt.Key_Left:
-                self.__move_by_key(-1)
+                self.__move_by_key(-move_by_amount_px)
             elif event.key() == Qt.Key_Right:
-                self.__move_by_key(1)
+                self.__move_by_key(move_by_amount_px)
     
     def __move_by_key(self, move_by_amount_px):
         new_parent_rect_x = self.parent.rect().x()
@@ -138,6 +139,9 @@ class RightHandle(QGraphicsRectItem):
     def __get_one_pixel_time_value(self):
         return self.media_duration / self.__get_max_possible_width()
     
+    def __get_one_ms_pixel_value(self):
+        return self.__get_max_possible_width() / self.media_duration
+
     def __get_current_time(self):
         current_position = self.scenePos().x() - self.__get_min_possible_x()
         return self.__convert_pixels_to_time(current_position)
