@@ -59,13 +59,9 @@ class _VideoOutput(QGraphicsVideoItem):
 
     """Override"""
     def paint(self, painter, option, widget):
-        rectas = QRectF(
-            self.top_l_x, 
-            self.top_l_y,
-            self.width,
-            self.height
+        painter.setClipRect(
+            QRectF(self.top_l_x, self.top_l_y, self.width, self.height)
         )
-        painter.setClipRect(rectas)
         super().paint(painter, option, widget)
 
     @Slot()
@@ -97,6 +93,13 @@ class _VideoOutput(QGraphicsVideoItem):
         x_pos = (scene_width - video_width) / 2
         y_pos = (scene_height - video_height) / 2
         self.setPos(x_pos, y_pos)
+
+    def get_clip_rect(self):
+        """
+        Returns the rectangle that represents the currently visible part
+        of the video output.
+        """
+        return (self.top_l_x, self.top_l_y, self.width, self.height)
 
 
 class _AudioOutput(QAudioOutput):

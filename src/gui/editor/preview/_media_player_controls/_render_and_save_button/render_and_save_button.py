@@ -50,15 +50,25 @@ class RenderAndSaveButton(QPushButton):
     
     def __get_volume(self):
         return self.media_player.audio_output.volume()
+    
+    def __get_crop_area(self):
+        area = self.media_player.video_output.get_clip_rect()
+        top_l_x = area[0]
+        top_l_y = area[1]
+        bot_r_x = area[0] + area[2]
+        bot_r_y = area[1] + area[3]
+        return (top_l_x, top_l_y, bot_r_x, bot_r_y)
 
     def __render_and_save(self, input_file_path, output_file_path):
         self.logger = _RenderingProgressLogger(self.rendering_progress_signal)
+        print(self.__get_crop_area())
         self.rendering_thread = _RenderingThread(
             self.__get_start_time(),
             self.__get_end_time(),
             input_file_path,
             output_file_path,
             self.__get_volume(),
+            self.__get_crop_area(),
             self.logger
         )
         self.rendering_progress_dialog = RenderingProgressDialog(self)
@@ -109,6 +119,7 @@ class _RenderingThread(QThread):
             input_file_path,
             output_file_path,
             volume,
+            crop_area,
             logger
         ):
         super().__init__()
@@ -117,6 +128,7 @@ class _RenderingThread(QThread):
         self.input_file_path = input_file_path
         self.output_file_path = output_file_path
         self.volume = volume
+        self.crop_area = crop_area
         self.logger = logger
 
     def run(self):
@@ -126,6 +138,7 @@ class _RenderingThread(QThread):
             self.input_file_path,
             self.output_file_path,
             self.volume,
+            self.crop_area,
             self.logger
         )
 

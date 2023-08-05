@@ -132,6 +132,7 @@ class Cropper(QGraphicsRectItem):
         boundingRect = self.boundingRect()
         rect = self.rect()
         diff = QPointF(0, 0)
+        min_size = 25
 
         self.prepareGeometryChange()
 
@@ -148,9 +149,9 @@ class Cropper(QGraphicsRectItem):
             rect.setTop(boundingRect.top() + offset)
             # Prevent overlapping.
             if rect.left() >= rect.right():
-                rect.setLeft(rect.right() - 1)
+                rect.setLeft(rect.right() - min_size)
             if rect.top() >= rect.bottom():
-                rect.setTop(rect.bottom() - 1)
+                rect.setTop(rect.bottom() - min_size)
 
         elif self.handleSelected == self.handleTopMiddle:
             fromY = self.mousePressRect.top()
@@ -160,7 +161,7 @@ class Cropper(QGraphicsRectItem):
             rect.setTop(boundingRect.top() + offset)
             # Prevent overlapping.
             if rect.top() >= rect.bottom():
-                rect.setTop(rect.bottom() - 1)
+                rect.setTop(rect.bottom() - min_size)
 
         elif self.handleSelected == self.handleTopRight:
             fromX = self.mousePressRect.right()
@@ -175,9 +176,9 @@ class Cropper(QGraphicsRectItem):
             rect.setTop(boundingRect.top() + offset)
             # Prevent overlapping.
             if rect.right() <= rect.left():
-                rect.setRight(rect.left() + 1)
+                rect.setRight(rect.left() + min_size)
             if rect.top() >= rect.bottom():
-                rect.setTop(rect.bottom() - 1)
+                rect.setTop(rect.bottom() - min_size)
 
         elif self.handleSelected == self.handleMiddleLeft:
             fromX = self.mousePressRect.left()
@@ -187,7 +188,7 @@ class Cropper(QGraphicsRectItem):
             rect.setLeft(boundingRect.left() + offset)
             # Prevent overlapping.
             if rect.left() >= rect.right():
-                rect.setLeft(rect.right() - 1)
+                rect.setLeft(rect.right() - min_size)
 
         elif self.handleSelected == self.handleMiddleRight:
             fromX = self.mousePressRect.right()
@@ -197,7 +198,7 @@ class Cropper(QGraphicsRectItem):
             rect.setRight(boundingRect.right() - offset)
             # Prevent overlapping.
             if rect.right() <= rect.left():
-                rect.setRight(rect.left() + 1)
+                rect.setRight(rect.left() + min_size)
 
         elif self.handleSelected == self.handleBottomLeft:
             fromX = self.mousePressRect.left()
@@ -212,9 +213,9 @@ class Cropper(QGraphicsRectItem):
             rect.setBottom(boundingRect.bottom() - offset)
             # Prevent overlapping.
             if rect.left() >= rect.right():
-                rect.setLeft(rect.right() - 1)
+                rect.setLeft(rect.right() - min_size)
             if rect.bottom() <= rect.top():
-                rect.setBottom(rect.top() + 1)
+                rect.setBottom(rect.top() + min_size)
 
         elif self.handleSelected == self.handleBottomMiddle:
             fromY = self.mousePressRect.bottom()
@@ -224,7 +225,7 @@ class Cropper(QGraphicsRectItem):
             rect.setBottom(boundingRect.bottom() - offset)
             # Prevent overlapping.
             if rect.bottom() <= rect.top():
-                rect.setBottom(rect.top() + 1)
+                rect.setBottom(rect.top() + min_size)
 
         elif self.handleSelected == self.handleBottomRight:
             fromX = self.mousePressRect.right()
@@ -239,9 +240,9 @@ class Cropper(QGraphicsRectItem):
             rect.setBottom(boundingRect.bottom() - offset)
             # Prevent overlapping.
             if rect.right() <= rect.left():
-                rect.setRight(rect.left() + 1)
+                rect.setRight(rect.left() + min_size)
             if rect.bottom() <= rect.top():
-                rect.setBottom(rect.top() + 1)
+                rect.setBottom(rect.top() + min_size)
 
         # Make sure it's not possible to resize past 'max_rect' bounds.
         rect = rect.intersected(self.max_rect)
@@ -254,13 +255,6 @@ class Cropper(QGraphicsRectItem):
         height = round(self.rect().height())
 
         self.scene.cropper_resized_signal.emit(top_l_x, top_l_y, width, height)
-
-    def set_max_rect(self, max_rect: QRectF):
-        self.max_rect = max_rect
-        self.setRect(self.max_rect)
-        print(self.rect())
-        print("A")
-        self.update()
 
     def shape(self):
         """
