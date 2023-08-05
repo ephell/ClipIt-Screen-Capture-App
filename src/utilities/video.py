@@ -1,5 +1,6 @@
 from moviepy.editor import VideoFileClip
 from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
+from moviepy.video.fx.all import crop
 
 
 class VideoUtils:
@@ -12,13 +13,22 @@ class VideoUtils:
         input_file_path,
         output_file_path,
         volume: float=None, # 1.0 is 100% 
+        crop_area: tuple=None,
         logger=None
     ):
         clip = VideoFileClip(input_file_path)
         if volume is not None:
             clip = clip.volumex(volume)
-        inner_clip = clip.subclip(cut_begin, cut_end)
-        inner_clip.write_videofile(
+        if crop_area is not None:
+            clip = crop(
+                clip, 
+                x1=crop_area[0],
+                y1=crop_area[1],
+                x2=crop_area[2],
+                y2=crop_area[3]
+            )
+        final_clip = clip.subclip(cut_begin, cut_end)
+        final_clip.write_videofile(
             output_file_path,
             preset="ultrafast",
             logger=logger

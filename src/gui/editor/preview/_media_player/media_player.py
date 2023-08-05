@@ -1,6 +1,8 @@
-from PySide6.QtCore import Qt, QUrl
-from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
-from PySide6.QtMultimediaWidgets import QGraphicsVideoItem
+from PySide6.QtCore import QUrl
+from PySide6.QtMultimedia import QMediaPlayer
+
+from ._audio_output import AudioOutput
+from ._video_output import VideoOutput
 
 
 class MediaPlayer(QMediaPlayer):
@@ -11,10 +13,10 @@ class MediaPlayer(QMediaPlayer):
         self.file_path = file_path
         self.source_file = QUrl.fromLocalFile(self.file_path)
         self.setSource(self.source_file)
-        self.video_output = _VideoOutput(self.scene)
-        self.setVideoOutput(self.video_output)
-        self.audio_output = _AudioOutput(self)
+        self.audio_output = AudioOutput(self)
         self.setAudioOutput(self.audio_output)
+        self.video_output = VideoOutput(self.scene)
+        self.setVideoOutput(self.video_output)
         self.start_time = 0
         self.end_time = self.duration()
 
@@ -42,18 +44,3 @@ class MediaPlayer(QMediaPlayer):
             super().play()
         else:
             super().play()
-
-
-class _VideoOutput(QGraphicsVideoItem):
-
-    def __init__(self, scene, parent=None):
-        super().__init__(parent)
-        self.scene = scene
-        self.scene.addItem(self)
-        self.setAspectRatioMode(Qt.KeepAspectRatio)
-
-
-class _AudioOutput(QAudioOutput):
-
-    def __init__(self, parent=None):
-        super().__init__(parent)

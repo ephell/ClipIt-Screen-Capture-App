@@ -30,8 +30,14 @@ class RulerHandle(QGraphicsItem):
         self.needle_x = (self.width - self.needle_width) / 2
         self.needle_y = self.head_height
         self.time_edit = RulerHandleTimeEdit(self.scene, self.media_duration)
-        self.time_edit.time_changed_signal.connect(
-            self.__on_ruler_handle_time_changed
+        self.__connect_signals_and_slots()
+
+    def __connect_signals_and_slots(self):
+        self.time_edit.time_changed_via_ui_signal.connect(
+            self.__on_ruler_handle_time_edit_time_changed_via_ui
+        )
+        self.time_edit.time_changed_via_code_signal.connect(
+            self.__on_ruler_handle_time_edit_time_changed_via_code
         )
 
     """Override"""
@@ -125,13 +131,21 @@ class RulerHandle(QGraphicsItem):
             self.scene.ruler_handle_time_changed.emit(time)
 
     @Slot()
-    def __on_ruler_handle_time_changed(self, time):
+    def __on_ruler_handle_time_edit_time_changed_via_ui(self, time):
         self.setPos(
             self.__get_x_pos_from_time(time),
             self.scenePos().y()
         )
         self.update()
         self.scene.ruler_handle_time_changed.emit(self.__get_current_time())
+
+    @Slot()
+    def __on_ruler_handle_time_edit_time_changed_via_code(self, time):
+        self.setPos(
+            self.__get_x_pos_from_time(time),
+            self.scenePos().y()
+        )
+        self.update()
 
     def on_view_resize(self):
         """Not a slot. Called in 'Ruler' object."""

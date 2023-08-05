@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'MediaPlayerControls.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.1
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -18,6 +18,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QPushButton, QSizePolicy,
     QSpacerItem, QWidget)
 
+from ._crop_button.crop_button import CropButton
 from ._render_and_save_button.render_and_save_button import RenderAndSaveButton
 from ._upload_button.upload_button import UploadButton
 from ._volume_button.volume_button import VolumeButton
@@ -27,7 +28,7 @@ class Ui_MediaPlayerControls(object):
     def setupUi(self, MediaPlayerControls):
         if not MediaPlayerControls.objectName():
             MediaPlayerControls.setObjectName(u"MediaPlayerControls")
-        MediaPlayerControls.resize(589, 285)
+        MediaPlayerControls.resize(494, 190)
         self.horizontalLayout = QHBoxLayout(MediaPlayerControls)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalSpacer_4 = QSpacerItem(136, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
@@ -70,20 +71,30 @@ class Ui_MediaPlayerControls(object):
 
         self.horizontalLayout.addWidget(self.volume_button)
 
+        self.crop_button = CropButton(MediaPlayerControls)
+        self.crop_button.setObjectName(u"crop_button")
+        icon4 = QIcon()
+        icon4.addFile(u":/icons/crop.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.crop_button.setIcon(icon4)
+        self.crop_button.setIconSize(QSize(30, 30))
+        self.crop_button.setCheckable(True)
+
+        self.horizontalLayout.addWidget(self.crop_button)
+
         self.render_and_save_button = RenderAndSaveButton(MediaPlayerControls)
         self.render_and_save_button.setObjectName(u"render_and_save_button")
-        icon4 = QIcon()
-        icon4.addFile(u":/icons/save.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.render_and_save_button.setIcon(icon4)
+        icon5 = QIcon()
+        icon5.addFile(u":/icons/save.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.render_and_save_button.setIcon(icon5)
         self.render_and_save_button.setIconSize(QSize(30, 30))
 
         self.horizontalLayout.addWidget(self.render_and_save_button)
 
         self.upload_button = UploadButton(MediaPlayerControls)
         self.upload_button.setObjectName(u"upload_button")
-        icon5 = QIcon()
-        icon5.addFile(u":/icons/upload.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.upload_button.setIcon(icon5)
+        icon6 = QIcon()
+        icon6.addFile(u":/icons/upload.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.upload_button.setIcon(icon6)
         self.upload_button.setIconSize(QSize(30, 30))
 
         self.horizontalLayout.addWidget(self.upload_button)
@@ -104,6 +115,7 @@ class Ui_MediaPlayerControls(object):
         self.pause_button.setText("")
         self.reset_button.setText("")
         self.volume_button.setText("")
+        self.crop_button.setText("")
         self.render_and_save_button.setText("")
         self.upload_button.setText("")
     # retranslateUi
