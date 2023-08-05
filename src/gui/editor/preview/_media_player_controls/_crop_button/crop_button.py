@@ -28,6 +28,8 @@ class CropButton(QPushButton):
     @Slot()
     def __on_click(self):
         if not self.cropper.isVisible():
+            self.setChecked(True)
             self.cropper.show()
         else:
+            self.setChecked(False)
             self.cropper.hide()

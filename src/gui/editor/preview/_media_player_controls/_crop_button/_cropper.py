@@ -48,10 +48,9 @@ class Cropper(QGraphicsRectItem):
         """
         Executed when the mouse moves over the shape (NOT PRESSED).
         """
-        if self.isSelected():
-            handle = self.__handle_at(moveEvent.pos())
-            cursor = Qt.ArrowCursor if handle is None else self.handle_cursors[handle]
-            self.setCursor(cursor)
+        handle = self.__handle_at(moveEvent.pos())
+        cursor = Qt.ArrowCursor if handle is None else self.handle_cursors[handle]
+        self.setCursor(cursor)
         super().hoverMoveEvent(moveEvent)
 
     """Override"""
@@ -109,9 +108,8 @@ class Cropper(QGraphicsRectItem):
         """
         path = QPainterPath()
         path.addRect(self.rect())
-        if self.isSelected():
-            for shape in self.handles.values():
-                path.addEllipse(shape)
+        for shape in self.handles.values():
+            path.addEllipse(shape)
         return path
 
     """Override"""

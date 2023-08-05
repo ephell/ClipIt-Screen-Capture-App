@@ -77,6 +77,7 @@ class Ui_MediaPlayerControls(object):
         icon4.addFile(u":/icons/crop.png", QSize(), QIcon.Normal, QIcon.Off)
         self.crop_button.setIcon(icon4)
         self.crop_button.setIconSize(QSize(30, 30))
+        self.crop_button.setCheckable(True)
 
         self.horizontalLayout.addWidget(self.crop_button)
 

@@ -61,7 +61,6 @@ class RenderAndSaveButton(QPushButton):
 
     def __render_and_save(self, input_file_path, output_file_path):
         self.logger = _RenderingProgressLogger(self.rendering_progress_signal)
-        print(self.__get_crop_area())
         self.rendering_thread = _RenderingThread(
             self.__get_start_time(),
             self.__get_end_time(),
