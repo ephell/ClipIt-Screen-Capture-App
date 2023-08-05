@@ -26,6 +26,8 @@ class Editor(QWidget):
         # Used to track changes done to the uploaded file.
         self.__initial_start_time = 0
         self.__initial_end_time = self.preview.media_player.duration()
+        self.__initial_video_width = 0
+        self.__initial_video_height = 0
 
     def __connect_signals_and_slots(self):
         self.timeline.scene.ruler_handle_time_changed.connect(
@@ -54,6 +56,9 @@ class Editor(QWidget):
         )
         self.preview.media_player_controls.render_and_save_button.file_rendered_signal.connect(
             self.__on_file_rendered_signal
+        )
+        self.preview.scene.video_output_native_size_changed_signal.connect(
+            self.__on_video_output_native_size_changed
         )
 
     """Override"""
@@ -137,17 +142,33 @@ class Editor(QWidget):
             self.source_file_changed_signal.emit(path)
 
     @Slot()
+    def __on_video_output_native_size_changed(self, width, height):
+        """Set the video resolution values when it's first loaded."""
+        self.__initial_video_width = width
+        self.__initial_video_height = height
+
+    @Slot()
     def __on_file_rendered_signal(self):
         """Update initial values of media item to ones after rendering."""
         self.__initial_start_time = self.timeline.media_item.start_time
         self.__initial_end_time = self.timeline.media_item.end_time
+        self.__initial_video_width = self.preview.media_player.video_output.width
+        self.__initial_video_height = self.preview.media_player.video_output.height
 
     def __has_file_been_edited(self):
         if self.__has_duration_changed():
+            return True
+        if self.__has_resolution_changed():
             return True
 
     def __has_duration_changed(self):
         return (
             self.timeline.media_item.start_time != self.__initial_start_time
             or self.timeline.media_item.end_time != self.__initial_end_time
+        )
+    
+    def __has_resolution_changed(self):
+        return (
+            self.preview.media_player.video_output.width != self.__initial_video_width
+            or self.preview.media_player.video_output.height != self.__initial_video_height
         )

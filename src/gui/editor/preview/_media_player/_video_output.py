@@ -36,8 +36,6 @@ class VideoOutput(QGraphicsVideoItem):
 
     @Slot()
     def __on_native_size_changed(self):
-        self.initial_width = self.nativeSize().width()
-        self.initial_height = self.nativeSize().height()
         self.width = self.nativeSize().width()
         self.height = self.nativeSize().height()
         self.setSize(QSizeF(self.width, self.height))
