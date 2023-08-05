@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QGraphicsScene, QGraphicsView, QSizePolicy
 )
 
-from ._media_player import MediaPlayer
+from ._media_player.media_player import MediaPlayer
 from ._media_player_controls.media_player_controls import MediaPlayerControls
 
 
