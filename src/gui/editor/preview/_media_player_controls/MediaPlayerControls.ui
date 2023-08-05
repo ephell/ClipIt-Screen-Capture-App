@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>589</width>
-    <height>285</height>
+    <width>494</width>
+    <height>190</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -96,6 +96,23 @@
     </widget>
    </item>
    <item>
+    <widget class="CropButton" name="crop_button">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resource.qrc">
+       <normaloff>:/icons/crop.png</normaloff>:/icons/crop.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="RenderAndSaveButton" name="render_and_save_button">
      <property name="text">
       <string/>
@@ -159,6 +176,11 @@
    <class>UploadButton</class>
    <extends>QPushButton</extends>
    <header>._upload_button.upload_button</header>
+  </customwidget>
+  <customwidget>
+   <class>CropButton</class>
+   <extends>QPushButton</extends>
+   <header>._crop_button.crop_button</header>
   </customwidget>
  </customwidgets>
  <resources>

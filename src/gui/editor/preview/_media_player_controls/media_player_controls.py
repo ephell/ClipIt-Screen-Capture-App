@@ -11,6 +11,7 @@ class MediaPlayerControls(Ui_MediaPlayerControls, QWidget):
         self.setupUi(self)
         self.media_player = media_player
         self.render_and_save_button.set_media_player(self.media_player)
+        self.crop_button.set_media_player(self.media_player)
         if not self.media_player.hasAudio():
             self.volume_button.setEnabled(False)
         self.__connect_signals_and_slots()
