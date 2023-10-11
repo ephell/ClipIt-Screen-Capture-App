@@ -1,7 +1,6 @@
 from logger import GlobalLogger
 log = GlobalLogger.LOGGER
 
-import multiprocessing as mp
 import os
 from time import perf_counter
 import threading
@@ -44,6 +43,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.open_capture_folder_button.clicked.connect(
             self.__on_open_capture_folder_button_clicked
         )
+        self.screenshot_button.clicked.connect(
+            self.screenshot_button.on_screenshot_button_clicked
+        )
         self.debug_button.clicked.connect(self.__on_debug_button_clicked)
 
     """Override"""
@@ -79,9 +81,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @Slot()
     def __on_debug_button_clicked(self):
         print(threading.enumerate())
+        
+        # Check if specific widget exists
+        widgets = [
+            w for w in self.app.allWidgets() if w.objectName() == "ScreenshotButton"
+        ]
         print(
             "----------------------------------------\n"
-            + "".join(repr(w) + "\n" for w in self.app.allWidgets())
+            + "".join(repr(w) + "\n" for w in widgets)
             + "----------------------------------------"
         )
         # def get_signals(source):
