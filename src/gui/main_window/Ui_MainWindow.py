@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'MainWindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.1
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGroupBox, QHBoxLayout,
     QLabel, QMainWindow, QPushButton, QSizePolicy,
     QSpacerItem, QVBoxLayout, QWidget)
 
+from .buttons.screenchot_button.screenshot_button import ScreenshotButton
 from .buttons.select_area_button.select_area_button import SelectAreaButton
 from .check_boxes.record_microphone_audio_check_box import RecordMicrophoneAudioCheckBox
 from .check_boxes.record_speaker_audio_check_box import RecordSpeakerAudioCheckBox
@@ -146,10 +147,10 @@ class Ui_MainWindow(object):
         self.other_capture_group_box.setObjectName(u"other_capture_group_box")
         self.other_capture_group_box_layout = QVBoxLayout(self.other_capture_group_box)
         self.other_capture_group_box_layout.setObjectName(u"other_capture_group_box_layout")
-        self.take_a_screenshot_button = QPushButton(self.other_capture_group_box)
-        self.take_a_screenshot_button.setObjectName(u"take_a_screenshot_button")
+        self.screenshot_button = ScreenshotButton(self.other_capture_group_box)
+        self.screenshot_button.setObjectName(u"screenshot_button")
 
-        self.other_capture_group_box_layout.addWidget(self.take_a_screenshot_button)
+        self.other_capture_group_box_layout.addWidget(self.screenshot_button)
 
         self.make_a_gif_button = QPushButton(self.other_capture_group_box)
         self.make_a_gif_button.setObjectName(u"make_a_gif_button")
@@ -207,7 +208,7 @@ class Ui_MainWindow(object):
         self.record_speaker_audio_check_box.setText(QCoreApplication.translate("MainWindow", u"Record Speaker Audio", None))
         self.record_microphone_audio_checkbox.setText(QCoreApplication.translate("MainWindow", u"Record Microphone Audio", None))
         self.other_capture_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Other Capture", None))
-        self.take_a_screenshot_button.setText(QCoreApplication.translate("MainWindow", u"Take a Screenshot", None))
+        self.screenshot_button.setText(QCoreApplication.translate("MainWindow", u"Screenshot", None))
         self.make_a_gif_button.setText(QCoreApplication.translate("MainWindow", u"Make a GIF", None))
         self.miscellaneous_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Miscellaneous", None))
         self.open_editor_button.setText(QCoreApplication.translate("MainWindow", u"Open Editor", None))
