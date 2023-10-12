@@ -173,10 +173,10 @@ class Ui_MainWindow(object):
 
         self.miscellaneous_group_box_layout.addWidget(self.open_capture_folder_button)
 
-        self.open_settings_button = QPushButton(self.miscellaneous_group_box)
-        self.open_settings_button.setObjectName(u"open_settings_button")
+        self.settings_button = QPushButton(self.miscellaneous_group_box)
+        self.settings_button.setObjectName(u"settings_button")
 
-        self.miscellaneous_group_box_layout.addWidget(self.open_settings_button)
+        self.miscellaneous_group_box_layout.addWidget(self.settings_button)
 
 
         self.other_capture_and_miscellaneous_h_layout.addWidget(self.miscellaneous_group_box)
@@ -207,6 +207,6 @@ class Ui_MainWindow(object):
         self.miscellaneous_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Miscellaneous", None))
         self.open_editor_button.setText(QCoreApplication.translate("MainWindow", u"Open Editor", None))
         self.open_capture_folder_button.setText(QCoreApplication.translate("MainWindow", u"Open Capture Folder", None))
-        self.open_settings_button.setText(QCoreApplication.translate("MainWindow", u"Open Settings", None))
+        self.settings_button.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
     # retranslateUi
 
