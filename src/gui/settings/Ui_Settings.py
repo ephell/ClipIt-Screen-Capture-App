@@ -22,14 +22,14 @@ class Ui_Settings(object):
     def setupUi(self, Settings):
         if not Settings.objectName():
             Settings.setObjectName(u"Settings")
-        Settings.resize(400, 100)
+        Settings.resize(450, 100)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Settings.sizePolicy().hasHeightForWidth())
         Settings.setSizePolicy(sizePolicy)
-        Settings.setMinimumSize(QSize(400, 100))
-        Settings.setMaximumSize(QSize(400, 100))
+        Settings.setMinimumSize(QSize(450, 100))
+        Settings.setMaximumSize(QSize(450, 100))
         self.verticalLayout = QVBoxLayout(Settings)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.captures_dir_path_group_box = QGroupBox(Settings)
@@ -38,6 +38,8 @@ class Ui_Settings(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.dir_path_line_edit = QLineEdit(self.captures_dir_path_group_box)
         self.dir_path_line_edit.setObjectName(u"dir_path_line_edit")
+        self.dir_path_line_edit.setFocusPolicy(Qt.NoFocus)
+        self.dir_path_line_edit.setReadOnly(True)
 
         self.horizontalLayout.addWidget(self.dir_path_line_edit)
 
