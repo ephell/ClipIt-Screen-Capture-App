@@ -1,16 +1,13 @@
 from logger import GlobalLogger
 log = GlobalLogger.LOGGER
 
-import os
 from time import perf_counter
-import threading
 
 from PySide6.QtCore import Qt, Slot, QThread
-from PySide6.QtWidgets import QMainWindow, QMessageBox, QPushButton, QFileDialog
+from PySide6.QtWidgets import QMainWindow
 
-from gui.main_window.buttons.open_editor_button.editor_window.editor_window import EditorWindow
-from settings.settings import Settings
 from .Ui_MainWindow import Ui_MainWindow
+from gui.main_window.buttons.debug_button.debug_button import DebugButton
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -20,10 +17,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.app = app
         self.first_window_resize_event = True
-        self.debug_button = QPushButton("Print Debug Info", self)
-        self.debug_button.setObjectName("debug_button")
-        self.central_layout.addWidget(self.debug_button)
         self.__connect_signals_and_slots()
+        # Debug button for various prints to console (not in MainWindow.ui)
+        self.debug_button = DebugButton(self)
+        self.central_layout.addWidget(self.debug_button)
+        self.debug_button.clicked.connect(self.debug_button.on_debug_button_clicked)
 
     def __connect_signals_and_slots(self):
         self.record_button.clicked.connect(
@@ -50,7 +48,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.settings_button.clicked.connect(
             self.settings_button.on_settings_button_clicked
         )
-        self.debug_button.clicked.connect(self.__on_debug_button_clicked)
 
     """Override"""
     def keyPressEvent(self, event):
@@ -71,8 +68,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.record_button.recorder_stop_event.set()
             if self.record_button.recording_area_selector.recording_area_border is not None:
                 self.record_button.recording_area_selector.recording_area_border.destroy()
-        if self.__get_editor() is not None:
-            self.__get_editor().close()
+        if self.open_editor_button.get_editor_window_widget() is not None:
+            self.open_editor_button.get_editor_window_widget().close()
 
     """Override"""
     def resizeEvent(self, event):
@@ -80,35 +77,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.setFixedSize(event.size())
             self.first_window_resize_event = False
         super().resizeEvent(event)
-
-    def __get_editor(self):
-        for widget in self.app.allWidgets():
-            if isinstance(widget, EditorWindow):
-                return widget
-        return None
-
-    @Slot()
-    def __on_debug_button_clicked(self):
-        print(threading.enumerate())
-        
-        # Check if specific widget exists
-        widgets = [
-            w for w in self.app.allWidgets() if w.objectName() == "Settings"
-        ]
-        print(
-            "----------------------------------------\n"
-            + "".join(repr(w) + "\n" for w in widgets)
-            + "----------------------------------------"
-        )
-
-        # def get_signals(source):
-        #     cls = source if isinstance(source, type) else type(source)
-        #     signal = type(Signal())
-        #     for subcls in cls.mro():
-        #         clsname = f'{subcls.__module__}.{subcls.__name__}'
-        #         for key, value in sorted(vars(subcls).items()):
-        #             if isinstance(value, signal):
-        #                 print(f'{key} [{clsname}]')
  
     @Slot()
     def __on_recording_starting(self):

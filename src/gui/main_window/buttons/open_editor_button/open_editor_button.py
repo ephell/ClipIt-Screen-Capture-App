@@ -10,8 +10,23 @@ class OpenEditorButton(QPushButton):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+    def get_editor_window_widget(self):
+        for widget in self.__get_main_window_widget().app.allWidgets():
+            if isinstance(widget, EditorWindow):
+                return widget
+        return None
+
+    def __get_main_window_widget(self):
+        widget = self.parent()
+        while widget is not None and not isinstance(widget, QMainWindow):
+            widget = widget.parent()
+        if widget is not None:
+            return widget
+        return None
+
+    @Slot()
     def on_open_editor_button_clicked(self):
-        if self.__get_editor_window_widget() is None:
+        if self.get_editor_window_widget() is None:
             file_dialog = _OpenFileInEditorDialog(self)
             while True:
                 if file_dialog.exec() == QFileDialog.Accepted:
@@ -35,23 +50,9 @@ class OpenEditorButton(QPushButton):
         else:
             _EditorAlreadyOpenMessageBox(self).exec()
 
-    def __get_main_window_widget(self):
-        widget = self.parent()
-        while widget is not None and not isinstance(widget, QMainWindow):
-            widget = widget.parent()
-        if widget is not None:
-            return widget
-        return None
-
-    def __get_editor_window_widget(self):
-        for widget in self.__get_main_window_widget().app.allWidgets():
-            if isinstance(widget, EditorWindow):
-                return widget
-        return None
-
     @Slot()
     def on_file_generation_finished(self, file_path):
-        if self.__get_editor_window_widget() is None:
+        if self.get_editor_window_widget() is None:
             self.editor = EditorWindow(file_path)
             self.editor.source_file_changed_signal.connect(
                 self.__on_editor_source_file_changed
