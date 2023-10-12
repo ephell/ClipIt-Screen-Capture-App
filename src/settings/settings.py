@@ -34,6 +34,13 @@ class Settings:
         with open(cls.SETTINGS_FILE, "w") as configfile:
             parser.write(configfile)
 
+    @classmethod
+    def set_capture_dir_path(cls, path):
+        parser = ConfigParser()
+        parser.read(cls.SETTINGS_FILE)
+        parser["PATHS"]["CAPTURE_DIR_PATH"] = path
+        with open(cls.SETTINGS_FILE, "w") as configfile:
+            parser.write(configfile)
 
 class _TempFilePaths:
 

@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
 )
 
 from gui.editor.editor import Editor
+from gui.settings.settings import Settings as SettingsWindow
 from .final_file_generation_dialog.final_file_generation_dialog import FinalFileGenerationDialog
 from recorder.recorder import Recorder
 from settings.settings import Settings
@@ -46,6 +47,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.screenshot_button.clicked.connect(
             self.screenshot_button.on_screenshot_button_clicked
         )
+        self.settings_button.clicked.connect(self.__on_settings_button_clicked)
         self.debug_button.clicked.connect(self.__on_debug_button_clicked)
 
     """Override"""
@@ -84,7 +86,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Check if specific widget exists
         widgets = [
-            w for w in self.app.allWidgets() if w.objectName() == "ScreenshotButton"
+            w for w in self.app.allWidgets() if w.objectName() == "Settings"
         ]
         print(
             "----------------------------------------\n"
@@ -217,6 +219,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __on_open_capture_folder_button_clicked(self):
         os.startfile(Settings.get_capture_dir_path())
 
+    @Slot()
+    def __on_settings_button_clicked(self):
+        self.settings_window = SettingsWindow(self)
+        self.settings_window.show()
 
 class _VideoCaptureDurationLabelUpdater(QThread):
 

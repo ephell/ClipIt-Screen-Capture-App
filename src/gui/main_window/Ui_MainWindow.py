@@ -19,10 +19,8 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGroupBox, QHBoxLayout,
     QLabel, QMainWindow, QPushButton, QSizePolicy,
     QSpacerItem, QVBoxLayout, QWidget)
 
-from .buttons.screenchot_button.screenshot_button import ScreenshotButton
+from .buttons.screenshot_button.screenshot_button import ScreenshotButton
 from .buttons.select_area_button.select_area_button import SelectAreaButton
-from .check_boxes.record_microphone_audio_check_box import RecordMicrophoneAudioCheckBox
-from .check_boxes.record_speaker_audio_check_box import RecordSpeakerAudioCheckBox
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -109,24 +107,6 @@ class Ui_MainWindow(object):
 
         self.video_capture_controls_and_settings_container_frame_layout.addWidget(self.video_capture_controls_group_box)
 
-        self.video_capture_audio_preferences_group_box = QGroupBox(self.video_capture_controls_and_settings_container_frame)
-        self.video_capture_audio_preferences_group_box.setObjectName(u"video_capture_audio_preferences_group_box")
-        self.video_capture_audio_preferences_group_box_layout = QVBoxLayout(self.video_capture_audio_preferences_group_box)
-        self.video_capture_audio_preferences_group_box_layout.setObjectName(u"video_capture_audio_preferences_group_box_layout")
-        self.record_speaker_audio_check_box = RecordSpeakerAudioCheckBox(self.video_capture_audio_preferences_group_box)
-        self.record_speaker_audio_check_box.setObjectName(u"record_speaker_audio_check_box")
-        self.record_speaker_audio_check_box.setEnabled(True)
-
-        self.video_capture_audio_preferences_group_box_layout.addWidget(self.record_speaker_audio_check_box)
-
-        self.record_microphone_audio_checkbox = RecordMicrophoneAudioCheckBox(self.video_capture_audio_preferences_group_box)
-        self.record_microphone_audio_checkbox.setObjectName(u"record_microphone_audio_checkbox")
-
-        self.video_capture_audio_preferences_group_box_layout.addWidget(self.record_microphone_audio_checkbox)
-
-
-        self.video_capture_controls_and_settings_container_frame_layout.addWidget(self.video_capture_audio_preferences_group_box)
-
 
         self.viceo_capture_main_frame_layout.addWidget(self.video_capture_controls_and_settings_container_frame)
 
@@ -152,11 +132,6 @@ class Ui_MainWindow(object):
 
         self.other_capture_group_box_layout.addWidget(self.screenshot_button)
 
-        self.make_a_gif_button = QPushButton(self.other_capture_group_box)
-        self.make_a_gif_button.setObjectName(u"make_a_gif_button")
-
-        self.other_capture_group_box_layout.addWidget(self.make_a_gif_button)
-
         self.other_capture_group_box_v_spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.other_capture_group_box_layout.addItem(self.other_capture_group_box_v_spacer)
@@ -178,10 +153,10 @@ class Ui_MainWindow(object):
 
         self.miscellaneous_group_box_layout.addWidget(self.open_capture_folder_button)
 
-        self.open_settings_button = QPushButton(self.miscellaneous_group_box)
-        self.open_settings_button.setObjectName(u"open_settings_button")
+        self.settings_button = QPushButton(self.miscellaneous_group_box)
+        self.settings_button.setObjectName(u"settings_button")
 
-        self.miscellaneous_group_box_layout.addWidget(self.open_settings_button)
+        self.miscellaneous_group_box_layout.addWidget(self.settings_button)
 
 
         self.other_capture_and_miscellaneous_h_layout.addWidget(self.miscellaneous_group_box)
@@ -204,15 +179,11 @@ class Ui_MainWindow(object):
         self.select_area_button.setText(QCoreApplication.translate("MainWindow", u"Select Capture Area", None))
         self.start_button.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.stop_button.setText(QCoreApplication.translate("MainWindow", u"Stop", None))
-        self.video_capture_audio_preferences_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Audio Preferences", None))
-        self.record_speaker_audio_check_box.setText(QCoreApplication.translate("MainWindow", u"Record Speaker Audio", None))
-        self.record_microphone_audio_checkbox.setText(QCoreApplication.translate("MainWindow", u"Record Microphone Audio", None))
         self.other_capture_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Other Capture", None))
         self.screenshot_button.setText(QCoreApplication.translate("MainWindow", u"Screenshot", None))
-        self.make_a_gif_button.setText(QCoreApplication.translate("MainWindow", u"Make a GIF", None))
         self.miscellaneous_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Miscellaneous", None))
         self.open_editor_button.setText(QCoreApplication.translate("MainWindow", u"Open Editor", None))
         self.open_capture_folder_button.setText(QCoreApplication.translate("MainWindow", u"Open Capture Folder", None))
-        self.open_settings_button.setText(QCoreApplication.translate("MainWindow", u"Open Settings", None))
+        self.settings_button.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
     # retranslateUi
 
