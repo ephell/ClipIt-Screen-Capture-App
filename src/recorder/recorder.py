@@ -20,16 +20,18 @@ from utilities.audio import AudioUtils
 class Recorder(QObject, threading.Thread):
     """Recording controller."""
 
+    # Emits start time of the recording process.
+    recording_started_signal = Signal(float)
+    # Emits a signal to notify that recording has stopped.
+    recorder_stop_event_set_signal = Signal()
     # Emits number of steps the final file generation progress bar should have.
-    recorder_stop_event_set_signal = Signal(int)
+    file_generation_started_signal = Signal(int)
     # Final file generation progress signals.
     video_reencoding_progress_signal = Signal(int)
     video_and_audio_merging_progress_signal = Signal(int)
     audio_merging_progress_signal = Signal(int)
     # Emits the path to the final video file.
     file_generation_finished_signal = Signal(str)
-    # Emits start time of the recording when barrier in 'VideoRecorder' is passed.
-    recording_started_signal = Signal(float)
 
     def __init__(
             self,
@@ -39,7 +41,8 @@ class Recorder(QObject, threading.Thread):
             region: list[int, int, int, int],
             monitor: int,
             fps: int,
-            stop_event: threading.Event
+            stop_event: threading.Event,
+            file_generation_choice_event: threading.Event=None
         ):
         super().__init__()
         self.record_video = record_video
@@ -49,11 +52,15 @@ class Recorder(QObject, threading.Thread):
         self.monitor = monitor
         self.fps = fps
         self.stop_event = stop_event
+        self.file_generation_choice_event = file_generation_choice_event
+        self.generate_final_file = True
         self.recording_started = mp.Value("d", -1.0)
         self.video_recorder = None
         self.loopback_recorder = None
         self.microphone_recorder = None
         self.video_recorder_stop_event = None
+        self.video_recorder_file_generation_choice_event = None
+        self.video_recorder_file_generation_choice_value = None
         self.loopback_recorder_stop_event = None
         self.microphone_recorder_stop_event = None
     
@@ -86,10 +93,25 @@ class Recorder(QObject, threading.Thread):
         for recorder in self.__get_recorders():
             recorder.stop_event.set()
 
-        self.recorder_stop_event_set_signal.emit(len(self.__get_recorders()))
-        self.__transmit_video_reencoding_progress()
-        final_video_path = self.__generate_final_video()
-        self.file_generation_finished_signal.emit(final_video_path)
+        self.recorder_stop_event_set_signal.emit()
+
+        # Wait for users' choice
+        if self.file_generation_choice_event is not None:
+            self.file_generation_choice_event.wait()
+
+        # Final file generation based on users' choice
+        if self.video_recorder_file_generation_choice_event:
+            if self.generate_final_file:
+                self.video_recorder_file_generation_choice_value.value = True
+            else:
+                self.video_recorder_file_generation_choice_value.value = False
+            self.video_recorder_file_generation_choice_event.set()
+
+        if self.generate_final_file:
+            self.file_generation_started_signal.emit(len(self.__get_recorders()))
+            self.__transmit_video_reencoding_progress()
+            final_video_path = self.__generate_final_video()
+            self.file_generation_finished_signal.emit(final_video_path)
 
         for recorder in self.__get_recorders():
             recorder.join()
@@ -98,11 +120,15 @@ class Recorder(QObject, threading.Thread):
 
     def __initialize_video_recorder(self):
         self.video_recorder_stop_event = mp.Event()
+        self.video_recorder_file_generation_choice_event = mp.Event()
+        self.video_recorder_file_generation_choice_value = mp.Value("b", True)
         self.video_recorder = VideoRecorder(
             region=self.region,
             monitor=self.monitor,
             fps=self.fps,
             stop_event=self.video_recorder_stop_event,
+            file_generation_choice_event=self.video_recorder_file_generation_choice_event,
+            file_generation_choice_value=self.video_recorder_file_generation_choice_value,
             reencoding_progress_queue=mp.Manager().Queue(),
             recording_started=self.recording_started
         )

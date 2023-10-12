@@ -1,15 +1,17 @@
 import mss
-from PySide6.QtCore import Slot
-from PySide6.QtWidgets import QPushButton, QMessageBox
+from PySide6.QtCore import Signal, QObject
+from PySide6.QtWidgets import QMessageBox
 
-from ._area_selector import AreaSelector
-from ._area_border_creator import AreaBorderCreator
+from gui.area_widgets.area_selector import AreaSelector
+from gui.area_widgets.area_border_creator import AreaBorderCreator
 
 
-class SelectAreaButton(QPushButton):
+class RecordingAreaSelector(QObject):
     
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    area_selection_finished_signal = Signal()
+
+    def __init__(self):
+        super().__init__()
         self.area_selector = None
         self.recording_area_border = None
         self.recording_area_top_x = None
@@ -17,6 +19,12 @@ class SelectAreaButton(QPushButton):
         self.recording_area_bottom_x = None
         self.recording_area_bottom_y = None
         self.recording_area_monitor = None
+
+    def start_selection(self):
+        if self.recording_area_border is not None:
+            self.recording_area_border.destroy()
+        self.area_selector = AreaSelector(self.__get_area_coords)
+        self.area_selector.show()
 
     def get_area_coords(self):
         return (
@@ -29,13 +37,6 @@ class SelectAreaButton(QPushButton):
     def get_monitor(self):
         return self.recording_area_monitor
 
-    @Slot()
-    def on_select_area_clicked(self):
-        if self.recording_area_border is not None:
-            self.recording_area_border.destroy()
-        self.area_selector = AreaSelector(self.__get_area_coords, self)
-        self.area_selector.show()
-
     def __get_area_coords(self, x0, y0, x1, y1):
         """Callback function for the area selector."""
         if not self.__is_within_single_monitor_bounds(x0, y0, x1, y1):
@@ -47,7 +48,7 @@ class SelectAreaButton(QPushButton):
             )
             return
         
-        self.__draw_recording_area_border(x0, y0, x1, y1)
+        self.__draw_recording_area_border(x0, y0, x1, y1, (30, 200, 30))
         self.area_selector.close()
 
         self.recording_area_monitor = self.__get_monitor_by_point(x0, y0)
@@ -60,8 +61,10 @@ class SelectAreaButton(QPushButton):
         self.recording_area_bottom_x = coords[2]
         self.recording_area_bottom_y = coords[3]
 
-    def __draw_recording_area_border(self, x0, y0, x1, y1):
-        self.recording_area_border = AreaBorderCreator(x0, y0, x1, y1)
+        self.area_selection_finished_signal.emit()
+
+    def __draw_recording_area_border(self, x0, y0, x1, y1, color):
+        self.recording_area_border = AreaBorderCreator(x0, y0, x1, y1, color)
         self.recording_area_border.start()
 
     def __is_within_single_monitor_bounds(self, x0, y0, x1, y1):

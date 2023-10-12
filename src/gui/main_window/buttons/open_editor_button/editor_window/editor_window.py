@@ -5,7 +5,7 @@ from .preview.preview import Preview
 from .timeline.timeline import Timeline
 
 
-class Editor(QWidget):
+class EditorWindow(QWidget):
 
     editor_position_changed_signal = Signal()
     editor_resized_signal = Signal()

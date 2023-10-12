@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Settings</class>
- <widget class="QWidget" name="Settings">
+ <class>SettingsWindow</class>
+ <widget class="QWidget" name="SettingsWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Settings</string>
+   <string>SettingsWindow</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

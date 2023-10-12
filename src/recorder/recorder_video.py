@@ -22,7 +22,9 @@ class VideoRecorder(mp.Process):
             barrier: mp.Barrier=None,
             stop_event: mp.Event=None,
             reencoding_progress_queue: mp.Queue=None, # Mp.Manager().Queue() is faster
-            recording_started: mp.Value=None # Float value set to -1.0
+            recording_started: mp.Value=None, # Float value set to -1.0
+            file_generation_choice_event: mp.Event=None,
+            file_generation_choice_value: mp.Value=None
         ):
         super().__init__()
         self.region = region
@@ -30,8 +32,10 @@ class VideoRecorder(mp.Process):
         self.fps = fps
         self.barrier = barrier
         self.stop_event = stop_event
-        self.recording_started = recording_started
         self.reencoding_progress_queue = reencoding_progress_queue
+        self.recording_started = recording_started
+        self.file_generation_choice_event = file_generation_choice_event
+        self.file_generation_choice_value = file_generation_choice_value
         self.captured_filename = Settings.get_temp_file_paths().CAPTURED_VIDEO_FILE
         self.reencoded_filename = Settings.get_temp_file_paths().REENCODED_VIDEO_FILE
         self.frame_size = (int(self.region[2]), int(self.region[3]))
@@ -39,7 +43,13 @@ class VideoRecorder(mp.Process):
 
     def run(self):
         fps, total_frames_captured = self.__capture_and_save_video()
-        self.__reencode_captured_video(fps, total_frames_captured)
+        if self.file_generation_choice_event is not None:
+            self.file_generation_choice_event.wait()
+        if (
+            self.file_generation_choice_value is None
+            or self.file_generation_choice_value.value == True
+        ):
+            self.__reencode_captured_video(fps, total_frames_captured)
 
     def __capture_and_save_video(self):
         with mss.mss() as sct:

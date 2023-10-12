@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'Settings.ui'
+## Form generated from reading UI file 'SettingsWindow.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.5.2
 ##
@@ -21,21 +21,21 @@ from PySide6.QtWidgets import (QApplication, QGroupBox, QHBoxLayout, QLineEdit,
 from .check_boxes.record_microphone_audio_check_box import RecordMicrophoneAudioCheckBox
 from .check_boxes.record_speaker_audio_check_box import RecordSpeakerAudioCheckBox
 
-class Ui_Settings(object):
-    def setupUi(self, Settings):
-        if not Settings.objectName():
-            Settings.setObjectName(u"Settings")
-        Settings.resize(450, 140)
+class Ui_SettingsWindow(object):
+    def setupUi(self, SettingsWindow):
+        if not SettingsWindow.objectName():
+            SettingsWindow.setObjectName(u"SettingsWindow")
+        SettingsWindow.resize(450, 140)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(Settings.sizePolicy().hasHeightForWidth())
-        Settings.setSizePolicy(sizePolicy)
-        Settings.setMinimumSize(QSize(450, 140))
-        Settings.setMaximumSize(QSize(450, 140))
-        self.verticalLayout = QVBoxLayout(Settings)
+        sizePolicy.setHeightForWidth(SettingsWindow.sizePolicy().hasHeightForWidth())
+        SettingsWindow.setSizePolicy(sizePolicy)
+        SettingsWindow.setMinimumSize(QSize(450, 140))
+        SettingsWindow.setMaximumSize(QSize(450, 140))
+        self.verticalLayout = QVBoxLayout(SettingsWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.captures_dir_path_group_box = QGroupBox(Settings)
+        self.captures_dir_path_group_box = QGroupBox(SettingsWindow)
         self.captures_dir_path_group_box.setObjectName(u"captures_dir_path_group_box")
         self.horizontalLayout = QHBoxLayout(self.captures_dir_path_group_box)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -54,7 +54,7 @@ class Ui_Settings(object):
 
         self.verticalLayout.addWidget(self.captures_dir_path_group_box)
 
-        self.audio_preferences_group_box = QGroupBox(Settings)
+        self.audio_preferences_group_box = QGroupBox(SettingsWindow)
         self.audio_preferences_group_box.setObjectName(u"audio_preferences_group_box")
         self.horizontalLayout_2 = QHBoxLayout(self.audio_preferences_group_box)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
@@ -73,17 +73,17 @@ class Ui_Settings(object):
         self.verticalLayout.addWidget(self.audio_preferences_group_box)
 
 
-        self.retranslateUi(Settings)
+        self.retranslateUi(SettingsWindow)
 
-        QMetaObject.connectSlotsByName(Settings)
+        QMetaObject.connectSlotsByName(SettingsWindow)
     # setupUi
 
-    def retranslateUi(self, Settings):
-        Settings.setWindowTitle(QCoreApplication.translate("Settings", u"Settings", None))
-        self.captures_dir_path_group_box.setTitle(QCoreApplication.translate("Settings", u"Captures Directory Path", None))
-        self.browse_button.setText(QCoreApplication.translate("Settings", u"Browse", None))
-        self.audio_preferences_group_box.setTitle(QCoreApplication.translate("Settings", u"Audio Preferences", None))
-        self.record_speaker_audio_check_box.setText(QCoreApplication.translate("Settings", u"Record Speaker Audio", None))
-        self.record_microphone_audio_checkbox.setText(QCoreApplication.translate("Settings", u"Record Microphone Audio", None))
+    def retranslateUi(self, SettingsWindow):
+        SettingsWindow.setWindowTitle(QCoreApplication.translate("SettingsWindow", u"SettingsWindow", None))
+        self.captures_dir_path_group_box.setTitle(QCoreApplication.translate("SettingsWindow", u"Captures Directory Path", None))
+        self.browse_button.setText(QCoreApplication.translate("SettingsWindow", u"Browse", None))
+        self.audio_preferences_group_box.setTitle(QCoreApplication.translate("SettingsWindow", u"Audio Preferences", None))
+        self.record_speaker_audio_check_box.setText(QCoreApplication.translate("SettingsWindow", u"Record Speaker Audio", None))
+        self.record_microphone_audio_checkbox.setText(QCoreApplication.translate("SettingsWindow", u"Record Microphone Audio", None))
     # retranslateUi
 

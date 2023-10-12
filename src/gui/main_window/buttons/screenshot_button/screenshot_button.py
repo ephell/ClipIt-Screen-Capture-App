@@ -4,7 +4,7 @@ import mss
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QPushButton
 
-from gui.main_window.buttons.select_area_button._area_selector import AreaSelector
+from gui.area_widgets.area_selector import AreaSelector
 from settings.settings import Settings
 
 
@@ -14,11 +14,6 @@ class ScreenshotButton(QPushButton):
         super().__init__(parent)
         self.area_selector = None
 
-    @Slot()
-    def on_screenshot_button_clicked(self):
-        self.area_selector = AreaSelector(self.__take_screenshot, self)
-        self.area_selector.show()
-        
     def __take_screenshot(self, x0, y0, x1, y1):
         """Callback function for the area selector."""
         # Calling close() early prevents the drawn dotted lines around
@@ -38,3 +33,8 @@ class ScreenshotButton(QPushButton):
         now = datetime.datetime.now()
         timestamp = now.strftime("%Y-%m-%d [] %H-%M-%S")
         return f"{Settings.get_capture_dir_path()}/{timestamp}.png"
+
+    @Slot()
+    def on_screenshot_button_clicked(self):
+        self.area_selector = AreaSelector(self.__take_screenshot, self)
+        self.area_selector.show()
