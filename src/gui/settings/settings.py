@@ -2,7 +2,7 @@ from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import QWidget, QFileDialog
 
 from .Ui_Settings import Ui_Settings
-
+from settings.settings import Settings as SettingsConfig
 
 class Settings(QWidget, Ui_Settings):
 
@@ -14,9 +14,13 @@ class Settings(QWidget, Ui_Settings):
         self.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self.setWindowModality(Qt.ApplicationModal)
         self.__connect_signals_and_slots()
+        self.__load_capture_dir_path_to_line_edit()
 
     def __connect_signals_and_slots(self):
         self.browse_button.clicked.connect(self.__on_browse_button_clicked)
+
+    def __load_capture_dir_path_to_line_edit(self):
+        self.dir_path_line_edit.setText(SettingsConfig.get_capture_dir_path())
 
     @Slot()
     def __on_browse_button_clicked(self):
