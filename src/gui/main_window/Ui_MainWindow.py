@@ -89,12 +89,6 @@ class Ui_MainWindow(object):
 
         self.start_stop_button_h_layout.addWidget(self.record_button)
 
-        self.stop_button = QPushButton(self.video_capture_controls_group_box)
-        self.stop_button.setObjectName(u"stop_button")
-        self.stop_button.setEnabled(False)
-
-        self.start_stop_button_h_layout.addWidget(self.stop_button)
-
 
         self.video_capture_controls_group_box_layout.addLayout(self.start_stop_button_h_layout)
 
@@ -171,7 +165,6 @@ class Ui_MainWindow(object):
         self.video_capture_duration_label.setText(QCoreApplication.translate("MainWindow", u"00:00", None))
         self.video_capture_controls_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Controls", None))
         self.record_button.setText(QCoreApplication.translate("MainWindow", u"Record", None))
-        self.stop_button.setText(QCoreApplication.translate("MainWindow", u"Stop", None))
         self.other_capture_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Other Capture", None))
         self.screenshot_button.setText(QCoreApplication.translate("MainWindow", u"Screenshot", None))
         self.miscellaneous_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Miscellaneous", None))

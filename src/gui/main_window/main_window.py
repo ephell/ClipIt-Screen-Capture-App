@@ -35,7 +35,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def __connect_signals_and_slots(self):
         self.record_button.clicked.connect(self.__on_record_button_clicked)
-        self.stop_button.clicked.connect(self.__on_stop_button_clicked)
         self.open_editor_button.clicked.connect(
             self.__on_open_editor_button_clicked
         )
@@ -109,15 +108,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.__on_area_selection_finished
             )
             self.recording_area_selector.start_selection()
+        if self.is_recorder_running:
+            self.__stop_recording()
 
     @Slot()
     def __on_area_selection_finished(self):
         self.__start_recording()
 
     def __start_recording(self):
+        self.record_button.setEnabled(False)
         self.is_recorder_running = True
         self.video_capture_duration_label.setText("Starting ...")
-        self.record_button.setEnabled(False)
 
         self.recorder_stop_event = threading.Event()
         self.recorder = Recorder(
@@ -145,22 +146,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.recorder.start()
         self.video_capture_duration_label_updater.start()
 
-    @Slot()
-    def __on_stop_button_clicked(self):
+    def __stop_recording(self):
         if self.recording_area_selector.recording_area_border is not None:
             if self.recorder_stop_event is not None:
                 self.recorder_stop_event.set()
                 self.recorder_stop_event = None
             self.is_recorder_running = False
-            self.record_button.setEnabled(True)
-            self.stop_button.setEnabled(False)
             self.recording_area_selector.recording_area_border.destroy()
             self.recording_area_selector.recording_area_border = None
 
     @Slot()
     def __on_recording_started(self, start_time):
+        self.record_button.setEnabled(True)
         self.video_capture_duration_label_updater.set_start_time(start_time)
-        self.stop_button.setEnabled(True)
         if self.recording_area_selector.recording_area_border is not None:
             self.recording_area_selector.recording_area_border.update_color((255, 0, 0))
 
