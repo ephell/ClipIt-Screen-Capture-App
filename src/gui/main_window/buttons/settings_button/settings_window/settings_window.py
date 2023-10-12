@@ -1,11 +1,11 @@
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import QWidget, QFileDialog
 
-from .Ui_Settings import Ui_Settings
+from .Ui_SettingsWindow import Ui_SettingsWindow
 from settings.settings import Settings as SettingsConfig
 
 
-class Settings(QWidget, Ui_Settings):
+class SettingsWindow(QWidget, Ui_SettingsWindow):
 
     def __init__(self, parent=None):
         super().__init__(parent)

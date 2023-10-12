@@ -6,12 +6,9 @@ from time import perf_counter
 import threading
 
 from PySide6.QtCore import Qt, Slot, QThread
-from PySide6.QtWidgets import (
-    QMainWindow, QMessageBox, QPushButton, QFileDialog
-)
+from PySide6.QtWidgets import QMainWindow, QMessageBox, QPushButton, QFileDialog
 
 from gui.editor.editor import Editor
-from gui.settings.settings import Settings as SettingsWindow
 from settings.settings import Settings
 from .Ui_MainWindow import Ui_MainWindow
 
@@ -50,7 +47,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.screenshot_button.clicked.connect(
             self.screenshot_button.on_screenshot_button_clicked
         )
-        self.settings_button.clicked.connect(self.__on_settings_button_clicked)
+        self.settings_button.clicked.connect(
+            self.settings_button.on_settings_button_clicked
+        )
         self.debug_button.clicked.connect(self.__on_debug_button_clicked)
 
     """Override"""
@@ -161,11 +160,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @Slot()
     def __on_open_capture_folder_button_clicked(self):
         os.startfile(Settings.get_capture_dir_path())
-
-    @Slot()
-    def __on_settings_button_clicked(self):
-        self.settings_window = SettingsWindow(self)
-        self.settings_window.show()
 
     @Slot()
     def __on_file_generation_finished(self, file_path):

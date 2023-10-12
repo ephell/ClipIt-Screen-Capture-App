@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGroupBox, QHBoxLayout,
 
 from .buttons.record_button.record_button import RecordButton
 from .buttons.screenshot_button.screenshot_button import ScreenshotButton
+from .buttons.settings_button.settings_button import SettingsButton
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -142,7 +143,7 @@ class Ui_MainWindow(object):
 
         self.miscellaneous_group_box_layout.addWidget(self.open_capture_folder_button)
 
-        self.settings_button = QPushButton(self.miscellaneous_group_box)
+        self.settings_button = SettingsButton(self.miscellaneous_group_box)
         self.settings_button.setObjectName(u"settings_button")
 
         self.miscellaneous_group_box_layout.addWidget(self.settings_button)

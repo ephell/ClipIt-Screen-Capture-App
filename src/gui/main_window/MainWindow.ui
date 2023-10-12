@@ -223,7 +223,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="settings_button">
+          <widget class="SettingsButton" name="settings_button">
            <property name="text">
             <string>Settings</string>
            </property>
@@ -247,6 +247,11 @@
    <class>RecordButton</class>
    <extends>QPushButton</extends>
    <header>.buttons.record_button.record_button</header>
+  </customwidget>
+  <customwidget>
+   <class>SettingsButton</class>
+   <extends>QPushButton</extends>
+   <header>.buttons.settings_button.settings_button</header>
   </customwidget>
  </customwidgets>
  <resources/>
