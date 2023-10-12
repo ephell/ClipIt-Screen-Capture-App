@@ -52,7 +52,7 @@
            <number>9</number>
           </property>
           <item>
-           <widget class="QFrame" name="video_capture_timer_frame">
+           <widget class="QFrame" name="capture_timer_frame">
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
             </property>
@@ -67,7 +67,7 @@
               <number>9</number>
              </property>
              <item>
-              <spacer name="video_capture_timer_left_h_spacer">
+              <spacer name="capture_timer_left_h_spacer">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -80,7 +80,7 @@
               </spacer>
              </item>
              <item>
-              <widget class="QLabel" name="video_capture_duration_label">
+              <widget class="QLabel" name="capture_duration_label">
                <property name="font">
                 <font>
                  <pointsize>23</pointsize>
@@ -93,7 +93,7 @@
               </widget>
              </item>
              <item>
-              <spacer name="video_capture_timer_right_h_spacer">
+              <spacer name="capture_timer_right_h_spacer">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>

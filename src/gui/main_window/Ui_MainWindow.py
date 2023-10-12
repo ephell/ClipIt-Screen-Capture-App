@@ -48,32 +48,32 @@ class Ui_MainWindow(object):
         self.viceo_capture_main_frame_layout.setSpacing(0)
         self.viceo_capture_main_frame_layout.setObjectName(u"viceo_capture_main_frame_layout")
         self.viceo_capture_main_frame_layout.setContentsMargins(9, -1, -1, -1)
-        self.video_capture_timer_frame = QFrame(self.video_capture_main_frame)
-        self.video_capture_timer_frame.setObjectName(u"video_capture_timer_frame")
-        self.video_capture_timer_frame.setFrameShape(QFrame.StyledPanel)
-        self.video_capture_timer_frame.setFrameShadow(QFrame.Raised)
-        self.video_capture_timer_frame_layout = QHBoxLayout(self.video_capture_timer_frame)
+        self.capture_timer_frame = QFrame(self.video_capture_main_frame)
+        self.capture_timer_frame.setObjectName(u"capture_timer_frame")
+        self.capture_timer_frame.setFrameShape(QFrame.StyledPanel)
+        self.capture_timer_frame.setFrameShadow(QFrame.Raised)
+        self.video_capture_timer_frame_layout = QHBoxLayout(self.capture_timer_frame)
         self.video_capture_timer_frame_layout.setObjectName(u"video_capture_timer_frame_layout")
         self.video_capture_timer_frame_layout.setContentsMargins(-1, 9, -1, 9)
-        self.video_capture_timer_left_h_spacer = QSpacerItem(113, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.capture_timer_left_h_spacer = QSpacerItem(113, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.video_capture_timer_frame_layout.addItem(self.video_capture_timer_left_h_spacer)
+        self.video_capture_timer_frame_layout.addItem(self.capture_timer_left_h_spacer)
 
-        self.video_capture_duration_label = QLabel(self.video_capture_timer_frame)
-        self.video_capture_duration_label.setObjectName(u"video_capture_duration_label")
+        self.capture_duration_label = QLabel(self.capture_timer_frame)
+        self.capture_duration_label.setObjectName(u"capture_duration_label")
         font = QFont()
         font.setPointSize(23)
         font.setBold(True)
-        self.video_capture_duration_label.setFont(font)
+        self.capture_duration_label.setFont(font)
 
-        self.video_capture_timer_frame_layout.addWidget(self.video_capture_duration_label)
+        self.video_capture_timer_frame_layout.addWidget(self.capture_duration_label)
 
-        self.video_capture_timer_right_h_spacer = QSpacerItem(113, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.capture_timer_right_h_spacer = QSpacerItem(113, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.video_capture_timer_frame_layout.addItem(self.video_capture_timer_right_h_spacer)
+        self.video_capture_timer_frame_layout.addItem(self.capture_timer_right_h_spacer)
 
 
-        self.viceo_capture_main_frame_layout.addWidget(self.video_capture_timer_frame)
+        self.viceo_capture_main_frame_layout.addWidget(self.capture_timer_frame)
 
         self.video_capture_controls_and_settings_container_frame = QFrame(self.video_capture_main_frame)
         self.video_capture_controls_and_settings_container_frame.setObjectName(u"video_capture_controls_and_settings_container_frame")
@@ -166,7 +166,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"ClipIt", None))
         self.video_capture_groupbox.setTitle(QCoreApplication.translate("MainWindow", u"Video Capture", None))
-        self.video_capture_duration_label.setText(QCoreApplication.translate("MainWindow", u"00:00", None))
+        self.capture_duration_label.setText(QCoreApplication.translate("MainWindow", u"00:00", None))
         self.video_capture_controls_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Controls", None))
         self.record_button.setText(QCoreApplication.translate("MainWindow", u"Record", None))
         self.other_capture_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Other Capture", None))

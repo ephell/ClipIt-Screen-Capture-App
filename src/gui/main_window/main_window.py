@@ -1,9 +1,7 @@
 from logger import GlobalLogger
 log = GlobalLogger.LOGGER
 
-from time import perf_counter
-
-from PySide6.QtCore import Qt, Slot, QThread
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow
 
 from .Ui_MainWindow import Ui_MainWindow
@@ -29,12 +27,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         )
         self.record_button.open_editor_after_file_generation_finished_signal.connect(
             self.open_editor_button.on_file_generation_finished
-        )
-        self.record_button.recording_starting_signal.connect(
-            self.__on_recording_starting
-        )
-        self.record_button.recording_started_signal.connect(
-            self.__on_recording_started
         )
         self.open_editor_button.clicked.connect(
             self.open_editor_button.on_open_editor_button_clicked
@@ -77,37 +69,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.setFixedSize(event.size())
             self.first_window_resize_event = False
         super().resizeEvent(event)
- 
-    @Slot()
-    def __on_recording_starting(self):
-        self.video_capture_duration_label.setText("Starting...")
-
-    @Slot()
-    def __on_recording_started(self, start_time, recorder_stop_event):
-        self.video_capture_duration_label_updater = _VideoCaptureDurationLabelUpdater(
-            self.video_capture_duration_label,
-            recorder_stop_event
-        )
-        self.video_capture_duration_label_updater.set_start_time(start_time)
-        self.video_capture_duration_label_updater.start()
-
-
-class _VideoCaptureDurationLabelUpdater(QThread):
-
-    def __init__(self, time_label, stop_event):
-        super().__init__()
-        self.time_label = time_label
-        self.recorder_stop_event = stop_event
-        self.start_time = None
-
-    def run(self):
-        while not self.recorder_stop_event.is_set():
-            if self.start_time is not None:
-                current_time = perf_counter()
-                elapsed_time = int(current_time - self.start_time)
-                minutes = elapsed_time // 60
-                seconds = elapsed_time % 60
-                self.time_label.setText(f"{minutes:02d}:{seconds:02d}")
-
-    def set_start_time(self, start_time):
-        self.start_time = start_time

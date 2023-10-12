@@ -1,5 +1,7 @@
-from PySide6.QtCore import Slot, Signal
-from PySide6.QtWidgets import QPushButton, QMessageBox
+from time import perf_counter
+
+from PySide6.QtCore import Slot, Signal, QThread
+from PySide6.QtWidgets import QPushButton, QMessageBox, QMainWindow, QLabel
 
 import threading
 
@@ -12,8 +14,6 @@ from ._recording_area_selector import RecordingAreaSelector
 class RecordButton(QPushButton):
 
     open_editor_after_file_generation_finished_signal = Signal(str)
-    recording_starting_signal = Signal()
-    recording_started_signal = Signal(float, threading.Event)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -21,10 +21,9 @@ class RecordButton(QPushButton):
         self.recorder_stop_event = None
 
     def __start_recording(self):
-        self.recording_starting_signal.emit()
+        self.__get_capture_duration_label_widget().setText("Starting...")
         self.setEnabled(False)
         self.is_recorder_running = True
-
         self.recorder_stop_event = threading.Event()
         self.recorder = Recorder(
             record_video=True,
@@ -55,6 +54,20 @@ class RecordButton(QPushButton):
             self.recording_area_selector.recording_area_border.destroy()
             self.recording_area_selector.recording_area_border = None
 
+    def __get_main_window_widget(self):
+        widget = self.parent()
+        while widget is not None and not isinstance(widget, QMainWindow):
+            widget = widget.parent()
+        if widget is not None:
+            return widget
+        return None
+
+    def __get_capture_duration_label_widget(self):
+        for w in self.__get_main_window_widget().app.allWidgets():
+            if isinstance(w, QLabel) and w.objectName() == "capture_duration_label":
+                return w
+        return None
+
     @Slot()
     def on_record_button_clicked(self):
         if not self.is_recorder_running:
@@ -72,8 +85,13 @@ class RecordButton(QPushButton):
 
     @Slot()
     def __on_recording_started(self, start_time):
-        self.recording_started_signal.emit(start_time, self.recorder_stop_event)
         self.setEnabled(True)
+        self.duration_label_updater = _CaptureDurationLabelUpdater(
+            self.__get_capture_duration_label_widget(),
+            self.recorder_stop_event
+        )
+        self.duration_label_updater.set_start_time(start_time)
+        self.duration_label_updater.start()
         if self.recording_area_selector.recording_area_border is not None:
             self.recording_area_selector.recording_area_border.update_color((255, 0, 0))
 
@@ -109,3 +127,24 @@ class _FileGenerationCompleteMessageBox(QMessageBox):
         self.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         self.setDefaultButton(QMessageBox.Yes)
         self.setIcon(QMessageBox.Information)
+
+
+class _CaptureDurationLabelUpdater(QThread):
+
+    def __init__(self, time_label, stop_event):
+        super().__init__()
+        self.time_label = time_label
+        self.recorder_stop_event = stop_event
+        self.start_time = None
+
+    def run(self):
+        while not self.recorder_stop_event.is_set():
+            if self.start_time is not None:
+                current_time = perf_counter()
+                elapsed_time = int(current_time - self.start_time)
+                minutes = elapsed_time // 60
+                seconds = elapsed_time % 60
+                self.time_label.setText(f"{minutes:02d}:{seconds:02d}")
+
+    def set_start_time(self, start_time):
+        self.start_time = start_time
