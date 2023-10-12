@@ -4,7 +4,7 @@ import mss
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QPushButton
 
-from gui.main_window.buttons.select_area_button._area_selector import AreaSelector
+from gui.main_window.buttons.recording_area_selector._area_selector import AreaSelector
 from settings.settings import Settings
 
 

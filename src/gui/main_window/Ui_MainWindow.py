@@ -20,7 +20,6 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGroupBox, QHBoxLayout,
     QSpacerItem, QVBoxLayout, QWidget)
 
 from .buttons.screenshot_button.screenshot_button import ScreenshotButton
-from .buttons.select_area_button.select_area_button import SelectAreaButton
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -83,17 +82,12 @@ class Ui_MainWindow(object):
         self.video_capture_controls_group_box.setObjectName(u"video_capture_controls_group_box")
         self.video_capture_controls_group_box_layout = QVBoxLayout(self.video_capture_controls_group_box)
         self.video_capture_controls_group_box_layout.setObjectName(u"video_capture_controls_group_box_layout")
-        self.select_area_button = SelectAreaButton(self.video_capture_controls_group_box)
-        self.select_area_button.setObjectName(u"select_area_button")
-
-        self.video_capture_controls_group_box_layout.addWidget(self.select_area_button)
-
         self.start_stop_button_h_layout = QHBoxLayout()
         self.start_stop_button_h_layout.setObjectName(u"start_stop_button_h_layout")
-        self.start_button = QPushButton(self.video_capture_controls_group_box)
-        self.start_button.setObjectName(u"start_button")
+        self.record_button = QPushButton(self.video_capture_controls_group_box)
+        self.record_button.setObjectName(u"record_button")
 
-        self.start_stop_button_h_layout.addWidget(self.start_button)
+        self.start_stop_button_h_layout.addWidget(self.record_button)
 
         self.stop_button = QPushButton(self.video_capture_controls_group_box)
         self.stop_button.setObjectName(u"stop_button")
@@ -176,8 +170,7 @@ class Ui_MainWindow(object):
         self.video_capture_groupbox.setTitle(QCoreApplication.translate("MainWindow", u"Video Capture", None))
         self.video_capture_duration_label.setText(QCoreApplication.translate("MainWindow", u"00:00", None))
         self.video_capture_controls_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Controls", None))
-        self.select_area_button.setText(QCoreApplication.translate("MainWindow", u"Select Capture Area", None))
-        self.start_button.setText(QCoreApplication.translate("MainWindow", u"Start", None))
+        self.record_button.setText(QCoreApplication.translate("MainWindow", u"Record", None))
         self.stop_button.setText(QCoreApplication.translate("MainWindow", u"Stop", None))
         self.other_capture_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Other Capture", None))
         self.screenshot_button.setText(QCoreApplication.translate("MainWindow", u"Screenshot", None))

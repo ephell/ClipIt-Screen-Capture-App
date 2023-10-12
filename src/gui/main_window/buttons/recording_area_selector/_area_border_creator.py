@@ -7,7 +7,14 @@ import win32api, win32con, win32gui
 
 class AreaBorderCreator(threading.Thread):
 
-    def __init__(self, top_left_x, top_left_y, bottom_right_x, bottom_right_y):
+    def __init__(
+            self, 
+            top_left_x, 
+            top_left_y,
+            bottom_right_x, 
+            bottom_right_y,
+            color: tuple
+        ):
         super().__init__()
         self.daemon = True
         self.hwnd = None
@@ -16,6 +23,7 @@ class AreaBorderCreator(threading.Thread):
         self.top_left_y = int(top_left_y) - self.border_width
         self.bottom_right_x = int(bottom_right_x) + self.border_width + 1
         self.bottom_right_y = int(bottom_right_y) + self.border_width + 1
+        self.color = color
 
     def run(self):
         """
@@ -43,6 +51,11 @@ class AreaBorderCreator(threading.Thread):
     def destroy(self):
         win32gui.SendMessage(self.hwnd, win32con.WM_QUIT, 0, 0)
         return True
+
+    def update_color(self, color):
+        win32gui.InvalidateRect(self.hwnd, None, True)
+        self.color = color
+        self.__set_color(self.hwnd)
 
     def __generate_class_name(self):
         chars = string.ascii_letters + string.digits
@@ -122,7 +135,7 @@ class AreaBorderCreator(threading.Thread):
         """Callback for the WM_PAINT message."""
         hdc, paint_struct = win32gui.BeginPaint(hwnd)
         left, top, right, bottom = win32gui.GetClientRect(hwnd)
-        brush = win32gui.CreateSolidBrush(win32api.RGB(30, 200, 30))
+        brush = win32gui.CreateSolidBrush(win32api.RGB(*self.color))
         win32gui.FillRect(hdc, (left, top, right, bottom), brush)
         win32gui.EndPaint(hwnd, paint_struct)
         return 0

@@ -14,6 +14,7 @@ from gui.editor.editor import Editor
 from gui.settings.settings import Settings as SettingsWindow
 from .final_file_generation_dialog.final_file_generation_dialog import FinalFileGenerationDialog
 from recorder.recorder import Recorder
+from .buttons.recording_area_selector.recording_area_selector import RecordingAreaSelector
 from settings.settings import Settings
 from .Ui_MainWindow import Ui_MainWindow
 
@@ -33,10 +34,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.__connect_signals_and_slots()
 
     def __connect_signals_and_slots(self):
-        self.select_area_button.clicked.connect(
-            self.select_area_button.on_select_area_clicked
-        )
-        self.start_button.clicked.connect(self.__on_start_button_clicked)
+        self.record_button.clicked.connect(self.__on_record_button_clicked)
         self.stop_button.clicked.connect(self.__on_stop_button_clicked)
         self.open_editor_button.clicked.connect(
             self.__on_open_editor_button_clicked
@@ -93,6 +91,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             + "".join(repr(w) + "\n" for w in widgets)
             + "----------------------------------------"
         )
+
         # def get_signals(source):
         #     cls = source if isinstance(source, type) else type(source)
         #     signal = type(Signal())
@@ -101,61 +100,69 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #         for key, value in sorted(vars(subcls).items()):
         #             if isinstance(value, signal):
         #                 print(f'{key} [{clsname}]')
+ 
+    @Slot()
+    def __on_record_button_clicked(self):
+        if not self.is_recorder_running:
+            self.recording_area_selector = RecordingAreaSelector()
+            self.recording_area_selector.area_selection_finished_signal.connect(
+                self.__on_area_selection_finished
+            )
+            self.recording_area_selector.start_selection()
 
     @Slot()
-    def __on_start_button_clicked(self):
-        if (
-            not self.is_recorder_running
-            and self.select_area_button.recording_area_border is not None
-        ):
-            self.is_recorder_running = True
-            self.video_capture_duration_label.setText("Starting ...")
-            self.start_button.setEnabled(False)
-            self.select_area_button.setEnabled(False)
+    def __on_area_selection_finished(self):
+        self.__start_recording()
 
-            self.recorder_stop_event = threading.Event()
-            self.recorder = Recorder(
-                record_video=True,
-                record_loopback=Settings.get_audio_preferences().getboolean("RECORD_LOOPBACK"),
-                record_microphone=Settings.get_audio_preferences().getboolean("RECORD_MICROPHONE"),
-                stop_event=self.recorder_stop_event,
-                region=[*self.select_area_button.get_area_coords()],
-                monitor=self.select_area_button.get_monitor(),
-                fps=30
-            )
-            self.recorder.recording_started_signal.connect(
-                self.__on_recording_started
-            )
-            self.recorder.recorder_stop_event_set_signal.connect(
-                self.__on_recorder_stop_event_set
-            )
-            self.recorder.file_generation_finished_signal.connect(
-                self.__on_file_generation_finished
-            )
-            self.video_capture_duration_label_updater = _VideoCaptureDurationLabelUpdater(
-                self.video_capture_duration_label,
-                self.recorder_stop_event
-            )
-            self.recorder.start()
-            self.video_capture_duration_label_updater.start()
+    def __start_recording(self):
+        self.is_recorder_running = True
+        self.video_capture_duration_label.setText("Starting ...")
+        self.record_button.setEnabled(False)
+
+        self.recorder_stop_event = threading.Event()
+        self.recorder = Recorder(
+            record_video=True,
+            record_loopback=Settings.get_audio_preferences().getboolean("RECORD_LOOPBACK"),
+            record_microphone=Settings.get_audio_preferences().getboolean("RECORD_MICROPHONE"),
+            stop_event=self.recorder_stop_event,
+            region=[*self.recording_area_selector.get_area_coords()],
+            monitor=self.recording_area_selector.get_monitor(),
+            fps=30
+        )
+        self.recorder.recording_started_signal.connect(
+            self.__on_recording_started
+        )
+        self.recorder.recorder_stop_event_set_signal.connect(
+            self.__on_recorder_stop_event_set
+        )
+        self.recorder.file_generation_finished_signal.connect(
+            self.__on_file_generation_finished
+        )
+        self.video_capture_duration_label_updater = _VideoCaptureDurationLabelUpdater(
+            self.video_capture_duration_label,
+            self.recorder_stop_event
+        )
+        self.recorder.start()
+        self.video_capture_duration_label_updater.start()
 
     @Slot()
     def __on_stop_button_clicked(self):
-        if self.select_area_button.recording_area_border is not None:
+        if self.recording_area_selector.recording_area_border is not None:
             if self.recorder_stop_event is not None:
                 self.recorder_stop_event.set()
                 self.recorder_stop_event = None
             self.is_recorder_running = False
-            self.start_button.setEnabled(True)
+            self.record_button.setEnabled(True)
             self.stop_button.setEnabled(False)
-            self.select_area_button.setEnabled(True)
-            self.select_area_button.recording_area_border.destroy()
-            self.select_area_button.recording_area_border = None
+            self.recording_area_selector.recording_area_border.destroy()
+            self.recording_area_selector.recording_area_border = None
 
     @Slot()
     def __on_recording_started(self, start_time):
         self.video_capture_duration_label_updater.set_start_time(start_time)
         self.stop_button.setEnabled(True)
+        if self.recording_area_selector.recording_area_border is not None:
+            self.recording_area_selector.recording_area_border.update_color((255, 0, 0))
 
     @Slot()
     def __on_recorder_stop_event_set(self, total_encoding_steps):
@@ -223,6 +230,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __on_settings_button_clicked(self):
         self.settings_window = SettingsWindow(self)
         self.settings_window.show()
+
 
 class _VideoCaptureDurationLabelUpdater(QThread):
 
