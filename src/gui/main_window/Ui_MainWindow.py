@@ -152,11 +152,6 @@ class Ui_MainWindow(object):
 
         self.other_capture_group_box_layout.addWidget(self.screenshot_button)
 
-        self.make_a_gif_button = QPushButton(self.other_capture_group_box)
-        self.make_a_gif_button.setObjectName(u"make_a_gif_button")
-
-        self.other_capture_group_box_layout.addWidget(self.make_a_gif_button)
-
         self.other_capture_group_box_v_spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.other_capture_group_box_layout.addItem(self.other_capture_group_box_v_spacer)
@@ -209,7 +204,6 @@ class Ui_MainWindow(object):
         self.record_microphone_audio_checkbox.setText(QCoreApplication.translate("MainWindow", u"Record Microphone Audio", None))
         self.other_capture_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Other Capture", None))
         self.screenshot_button.setText(QCoreApplication.translate("MainWindow", u"Screenshot", None))
-        self.make_a_gif_button.setText(QCoreApplication.translate("MainWindow", u"Make a GIF", None))
         self.miscellaneous_group_box.setTitle(QCoreApplication.translate("MainWindow", u"Miscellaneous", None))
         self.open_editor_button.setText(QCoreApplication.translate("MainWindow", u"Open Editor", None))
         self.open_capture_folder_button.setText(QCoreApplication.translate("MainWindow", u"Open Capture Folder", None))

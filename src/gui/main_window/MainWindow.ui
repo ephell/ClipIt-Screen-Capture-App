@@ -230,13 +230,6 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="make_a_gif_button">
-           <property name="text">
-            <string>Make a GIF</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <spacer name="other_capture_group_box_v_spacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
