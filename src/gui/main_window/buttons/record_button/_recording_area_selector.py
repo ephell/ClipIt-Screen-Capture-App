@@ -2,8 +2,8 @@ import mss
 from PySide6.QtCore import Signal, QObject
 from PySide6.QtWidgets import QMessageBox
 
-from ._area_selector import AreaSelector
-from ._area_border_creator import AreaBorderCreator
+from gui.area_widgets.area_selector import AreaSelector
+from gui.area_widgets.area_border_creator import AreaBorderCreator
 
 
 class RecordingAreaSelector(QObject):
@@ -19,7 +19,6 @@ class RecordingAreaSelector(QObject):
         self.recording_area_bottom_x = None
         self.recording_area_bottom_y = None
         self.recording_area_monitor = None
-        self.__area_border_color = (30, 200, 30)
 
     def start_selection(self):
         if self.recording_area_border is not None:
@@ -49,7 +48,7 @@ class RecordingAreaSelector(QObject):
             )
             return
         
-        self.__draw_recording_area_border(x0, y0, x1, y1, self.__area_border_color)
+        self.__draw_recording_area_border(x0, y0, x1, y1, (30, 200, 30))
         self.area_selector.close()
 
         self.recording_area_monitor = self.__get_monitor_by_point(x0, y0)

@@ -3,10 +3,10 @@ from PySide6.QtWidgets import QPushButton, QMessageBox
 
 import threading
 
-from gui.main_window.buttons.recording_area_selector.recording_area_selector import RecordingAreaSelector
 from gui.main_window.final_file_generation_dialog.final_file_generation_dialog import FinalFileGenerationDialog
 from settings.settings import Settings
 from recorder.recorder import Recorder
+from ._recording_area_selector import RecordingAreaSelector
 
 
 class RecordButton(QPushButton):
