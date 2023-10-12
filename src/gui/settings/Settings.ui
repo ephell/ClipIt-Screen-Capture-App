@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>100</height>
+    <height>140</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>450</width>
-    <height>100</height>
+    <height>140</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>450</width>
-    <height>100</height>
+    <height>140</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -58,8 +58,46 @@
      </layout>
     </widget>
    </item>
+   <item>
+    <widget class="QGroupBox" name="audio_preferences_group_box">
+     <property name="title">
+      <string>Audio Preferences</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="RecordSpeakerAudioCheckBox" name="record_speaker_audio_check_box">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Record Speaker Audio</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="RecordMicrophoneAudioCheckBox" name="record_microphone_audio_checkbox">
+        <property name="text">
+         <string>Record Microphone Audio</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RecordSpeakerAudioCheckBox</class>
+   <extends>QCheckBox</extends>
+   <header>.check_boxes.record_speaker_audio_check_box</header>
+  </customwidget>
+  <customwidget>
+   <class>RecordMicrophoneAudioCheckBox</class>
+   <extends>QCheckBox</extends>
+   <header>.check_boxes.record_microphone_audio_check_box</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

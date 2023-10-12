@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QWidget, QFileDialog
 from .Ui_Settings import Ui_Settings
 from settings.settings import Settings as SettingsConfig
 
+
 class Settings(QWidget, Ui_Settings):
 
     def __init__(self, parent=None):
