@@ -16,10 +16,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QGroupBox, QHBoxLayout,
-    QLabel, QMainWindow, QPushButton, QSizePolicy,
-    QSpacerItem, QVBoxLayout, QWidget)
+    QLabel, QMainWindow, QSizePolicy, QSpacerItem,
+    QVBoxLayout, QWidget)
 
 from .buttons.open_capture_folder_button.open_capture_folder_button import OpenCaptureFolderButton
+from .buttons.open_editor_button.open_editor_button import OpenEditorButton
 from .buttons.record_button.record_button import RecordButton
 from .buttons.screenshot_button.screenshot_button import ScreenshotButton
 from .buttons.settings_button.settings_button import SettingsButton
@@ -134,7 +135,7 @@ class Ui_MainWindow(object):
         self.miscellaneous_group_box.setObjectName(u"miscellaneous_group_box")
         self.miscellaneous_group_box_layout = QVBoxLayout(self.miscellaneous_group_box)
         self.miscellaneous_group_box_layout.setObjectName(u"miscellaneous_group_box_layout")
-        self.open_editor_button = QPushButton(self.miscellaneous_group_box)
+        self.open_editor_button = OpenEditorButton(self.miscellaneous_group_box)
         self.open_editor_button.setObjectName(u"open_editor_button")
 
         self.miscellaneous_group_box_layout.addWidget(self.open_editor_button)

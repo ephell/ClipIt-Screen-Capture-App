@@ -8,7 +8,7 @@ import threading
 from PySide6.QtCore import Qt, Slot, QThread
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QPushButton, QFileDialog
 
-from gui.editor.editor import Editor
+from gui.main_window.buttons.open_editor_button.editor_window.editor_window import EditorWindow
 from settings.settings import Settings
 from .Ui_MainWindow import Ui_MainWindow
 
@@ -30,7 +30,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.record_button.on_record_button_clicked
         )
         self.record_button.open_editor_after_file_generation_finished_signal.connect(
-            self.__on_file_generation_finished
+            self.open_editor_button.on_file_generation_finished
         )
         self.record_button.recording_starting_signal.connect(
             self.__on_recording_starting
@@ -39,7 +39,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.__on_recording_started
         )
         self.open_editor_button.clicked.connect(
-            self.__on_open_editor_button_clicked
+            self.open_editor_button.on_open_editor_button_clicked
         )
         self.open_capture_folder_button.clicked.connect(
             self.open_capture_folder_button.on_open_capture_folder_button_clicked
@@ -83,7 +83,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def __get_editor(self):
         for widget in self.app.allWidgets():
-            if isinstance(widget, Editor):
+            if isinstance(widget, EditorWindow):
                 return widget
         return None
 
@@ -123,51 +123,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.video_capture_duration_label_updater.set_start_time(start_time)
         self.video_capture_duration_label_updater.start()
 
-    @Slot()
-    def __on_open_editor_button_clicked(self):
-        if self.__get_editor() is None:
-            file_dialog = _OpenFileInEditorDialog(self)
-            while True:
-                if file_dialog.exec() == QFileDialog.Accepted:
-                    file_path = file_dialog.selectedFiles()[0]
-                    if file_path.lower().endswith(".mp4"):
-                        self.editor = Editor(file_path)
-                        self.editor.source_file_changed_signal.connect(
-                            self.__on_editor_source_file_changed
-                        )
-                        self.editor.show()
-                        break
-                    else:
-                        QMessageBox.critical(
-                            self, 
-                            "Invalid File Type", 
-                            "Please select a file with '.mp4' extension."
-                        )
-                else:
-                    break
-            file_dialog.deleteLater()
-        else:
-            _EditorAlreadyOpenMessageBox(self).exec()
-
-    @Slot()
-    def __on_editor_source_file_changed(self, path):
-        self.editor = Editor(path)
-        self.editor.source_file_changed_signal.connect(
-            self.__on_editor_source_file_changed
-        )
-        self.editor.show()            
-
-    @Slot()
-    def __on_file_generation_finished(self, file_path):
-        if self.__get_editor() is None:
-            self.editor = Editor(file_path)
-            self.editor.source_file_changed_signal.connect(
-                self.__on_editor_source_file_changed
-            )
-            self.editor.show()
-        else:
-            _EditorAlreadyOpenMessageBox(self).exec()
-
 
 class _VideoCaptureDurationLabelUpdater(QThread):
 
@@ -188,26 +143,3 @@ class _VideoCaptureDurationLabelUpdater(QThread):
 
     def set_start_time(self, start_time):
         self.start_time = start_time
-
-
-class _OpenFileInEditorDialog(QFileDialog):
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Select a file to open ...")
-        self.setNameFilter("Video Files (*.mp4)")
-        self.setFileMode(QFileDialog.ExistingFile)
-        self.setViewMode(QFileDialog.Detail)
-        self.setDirectory(Settings.get_capture_dir_path())
-
-
-class _EditorAlreadyOpenMessageBox(QMessageBox):
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setAttribute(Qt.WA_DeleteOnClose)
-        self.setWindowTitle("Editor Already Open")
-        self.setText("Editor is already open.")
-        self.setStandardButtons(QMessageBox.Ok)
-        self.setDefaultButton(QMessageBox.Ok)
-        self.setIcon(QMessageBox.Information)

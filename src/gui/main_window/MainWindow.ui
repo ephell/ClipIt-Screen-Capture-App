@@ -209,7 +209,7 @@
         </property>
         <layout class="QVBoxLayout" name="miscellaneous_group_box_layout">
          <item>
-          <widget class="QPushButton" name="open_editor_button">
+          <widget class="OpenEditorButton" name="open_editor_button">
            <property name="text">
             <string>Open Editor</string>
            </property>
@@ -257,6 +257,11 @@
    <class>OpenCaptureFolderButton</class>
    <extends>QPushButton</extends>
    <header>.buttons.open_capture_folder_button.open_capture_folder_button</header>
+  </customwidget>
+  <customwidget>
+   <class>OpenEditorButton</class>
+   <extends>QPushButton</extends>
+   <header>.buttons.open_editor_button.open_editor_button</header>
   </customwidget>
  </customwidgets>
  <resources/>
