@@ -216,7 +216,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="open_capture_folder_button">
+          <widget class="OpenCaptureFolderButton" name="open_capture_folder_button">
            <property name="text">
             <string>Open Capture Folder</string>
            </property>
@@ -252,6 +252,11 @@
    <class>SettingsButton</class>
    <extends>QPushButton</extends>
    <header>.buttons.settings_button.settings_button</header>
+  </customwidget>
+  <customwidget>
+   <class>OpenCaptureFolderButton</class>
+   <extends>QPushButton</extends>
+   <header>.buttons.open_capture_folder_button.open_capture_folder_button</header>
   </customwidget>
  </customwidgets>
  <resources/>

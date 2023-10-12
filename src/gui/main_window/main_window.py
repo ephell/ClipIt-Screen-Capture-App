@@ -42,7 +42,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.__on_open_editor_button_clicked
         )
         self.open_capture_folder_button.clicked.connect(
-            self.__on_open_capture_folder_button_clicked
+            self.open_capture_folder_button.on_open_capture_folder_button_clicked
         )
         self.screenshot_button.clicked.connect(
             self.screenshot_button.on_screenshot_button_clicked
@@ -156,10 +156,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.__on_editor_source_file_changed
         )
         self.editor.show()            
-
-    @Slot()
-    def __on_open_capture_folder_button_clicked(self):
-        os.startfile(Settings.get_capture_dir_path())
 
     @Slot()
     def __on_file_generation_finished(self, file_path):

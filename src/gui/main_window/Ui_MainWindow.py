@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGroupBox, QHBoxLayout,
     QLabel, QMainWindow, QPushButton, QSizePolicy,
     QSpacerItem, QVBoxLayout, QWidget)
 
+from .buttons.open_capture_folder_button.open_capture_folder_button import OpenCaptureFolderButton
 from .buttons.record_button.record_button import RecordButton
 from .buttons.screenshot_button.screenshot_button import ScreenshotButton
 from .buttons.settings_button.settings_button import SettingsButton
@@ -138,7 +139,7 @@ class Ui_MainWindow(object):
 
         self.miscellaneous_group_box_layout.addWidget(self.open_editor_button)
 
-        self.open_capture_folder_button = QPushButton(self.miscellaneous_group_box)
+        self.open_capture_folder_button = OpenCaptureFolderButton(self.miscellaneous_group_box)
         self.open_capture_folder_button.setObjectName(u"open_capture_folder_button")
 
         self.miscellaneous_group_box_layout.addWidget(self.open_capture_folder_button)
