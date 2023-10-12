@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGroupBox, QHBoxLayout,
     QLabel, QMainWindow, QPushButton, QSizePolicy,
     QSpacerItem, QVBoxLayout, QWidget)
 
-from .buttons.screenchot_button.screenshot_button import ScreenshotButton
+from .buttons.screenshot_button.screenshot_button import ScreenshotButton
 from .buttons.select_area_button.select_area_button import SelectAreaButton
 from .check_boxes.record_microphone_audio_check_box import RecordMicrophoneAudioCheckBox
 from .check_boxes.record_speaker_audio_check_box import RecordSpeakerAudioCheckBox

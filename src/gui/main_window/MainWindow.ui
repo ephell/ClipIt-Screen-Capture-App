@@ -299,7 +299,7 @@
   <customwidget>
    <class>ScreenshotButton</class>
    <extends>QPushButton</extends>
-   <header>.buttons.screenchot_button.screenshot_button</header>
+   <header>.buttons.screenshot_button.screenshot_button</header>
   </customwidget>
  </customwidgets>
  <resources/>
