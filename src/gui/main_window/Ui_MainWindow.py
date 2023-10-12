@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGroupBox, QHBoxLayout,
     QLabel, QMainWindow, QPushButton, QSizePolicy,
     QSpacerItem, QVBoxLayout, QWidget)
 
+from .buttons.record_button.record_button import RecordButton
 from .buttons.screenshot_button.screenshot_button import ScreenshotButton
 
 class Ui_MainWindow(object):
@@ -84,7 +85,7 @@ class Ui_MainWindow(object):
         self.video_capture_controls_group_box_layout.setObjectName(u"video_capture_controls_group_box_layout")
         self.start_stop_button_h_layout = QHBoxLayout()
         self.start_stop_button_h_layout.setObjectName(u"start_stop_button_h_layout")
-        self.record_button = QPushButton(self.video_capture_controls_group_box)
+        self.record_button = RecordButton(self.video_capture_controls_group_box)
         self.record_button.setObjectName(u"record_button")
 
         self.start_stop_button_h_layout.addWidget(self.record_button)

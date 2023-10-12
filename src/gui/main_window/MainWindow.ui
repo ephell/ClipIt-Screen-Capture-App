@@ -132,7 +132,7 @@
                 <item>
                  <layout class="QHBoxLayout" name="start_stop_button_h_layout">
                   <item>
-                   <widget class="QPushButton" name="record_button">
+                   <widget class="RecordButton" name="record_button">
                     <property name="text">
                      <string>Record</string>
                     </property>
@@ -242,6 +242,11 @@
    <class>ScreenshotButton</class>
    <extends>QPushButton</extends>
    <header>.buttons.screenshot_button.screenshot_button</header>
+  </customwidget>
+  <customwidget>
+   <class>RecordButton</class>
+   <extends>QPushButton</extends>
+   <header>.buttons.record_button.record_button</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -12,9 +12,6 @@ from PySide6.QtWidgets import (
 
 from gui.editor.editor import Editor
 from gui.settings.settings import Settings as SettingsWindow
-from .final_file_generation_dialog.final_file_generation_dialog import FinalFileGenerationDialog
-from recorder.recorder import Recorder
-from .buttons.recording_area_selector.recording_area_selector import RecordingAreaSelector
 from settings.settings import Settings
 from .Ui_MainWindow import Ui_MainWindow
 
@@ -26,15 +23,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.app = app
         self.first_window_resize_event = True
-        self.is_recorder_running = False
-        self.recorder_stop_event = None
         self.debug_button = QPushButton("Print Debug Info", self)
         self.debug_button.setObjectName("debug_button")
         self.central_layout.addWidget(self.debug_button)
         self.__connect_signals_and_slots()
 
     def __connect_signals_and_slots(self):
-        self.record_button.clicked.connect(self.__on_record_button_clicked)
+        self.record_button.clicked.connect(
+            self.record_button.on_record_button_clicked
+        )
+        self.record_button.open_editor_after_file_generation_finished_signal.connect(
+            self.__on_file_generation_finished
+        )
+        self.record_button.recording_starting_signal.connect(
+            self.__on_recording_starting
+        )
+        self.record_button.recording_started_signal.connect(
+            self.__on_recording_started
+        )
         self.open_editor_button.clicked.connect(
             self.__on_open_editor_button_clicked
         )
@@ -59,8 +65,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     """Override"""
     def closeEvent(self, event):
         super().closeEvent(event)
-        if self.is_recorder_running and not self.recorder_stop_event.is_set():
-            self.recorder_stop_event.set()
+        if (
+            self.record_button.is_recorder_running 
+            and not self.record_button.recorder_stop_event.is_set()
+        ):
+            self.record_button.recorder_stop_event.set()
+            if self.record_button.recording_area_selector.recording_area_border is not None:
+                self.record_button.recording_area_selector.recording_area_border.destroy()
         if self.__get_editor() is not None:
             self.__get_editor().close()
 
@@ -101,90 +112,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #                 print(f'{key} [{clsname}]')
  
     @Slot()
-    def __on_record_button_clicked(self):
-        if not self.is_recorder_running:
-            self.recording_area_selector = RecordingAreaSelector()
-            self.recording_area_selector.area_selection_finished_signal.connect(
-                self.__on_area_selection_finished
-            )
-            self.recording_area_selector.start_selection()
-        if self.is_recorder_running:
-            self.__stop_recording()
+    def __on_recording_starting(self):
+        self.video_capture_duration_label.setText("Starting...")
 
     @Slot()
-    def __on_area_selection_finished(self):
-        self.__start_recording()
-
-    def __start_recording(self):
-        self.record_button.setEnabled(False)
-        self.is_recorder_running = True
-        self.video_capture_duration_label.setText("Starting ...")
-
-        self.recorder_stop_event = threading.Event()
-        self.recorder = Recorder(
-            record_video=True,
-            record_loopback=Settings.get_audio_preferences().getboolean("RECORD_LOOPBACK"),
-            record_microphone=Settings.get_audio_preferences().getboolean("RECORD_MICROPHONE"),
-            stop_event=self.recorder_stop_event,
-            region=[*self.recording_area_selector.get_area_coords()],
-            monitor=self.recording_area_selector.get_monitor(),
-            fps=30
-        )
-        self.recorder.recording_started_signal.connect(
-            self.__on_recording_started
-        )
-        self.recorder.recorder_stop_event_set_signal.connect(
-            self.__on_recorder_stop_event_set
-        )
-        self.recorder.file_generation_finished_signal.connect(
-            self.__on_file_generation_finished
-        )
+    def __on_recording_started(self, start_time, recorder_stop_event):
         self.video_capture_duration_label_updater = _VideoCaptureDurationLabelUpdater(
             self.video_capture_duration_label,
-            self.recorder_stop_event
+            recorder_stop_event
         )
-        self.recorder.start()
-        self.video_capture_duration_label_updater.start()
-
-    def __stop_recording(self):
-        if self.recording_area_selector.recording_area_border is not None:
-            if self.recorder_stop_event is not None:
-                self.recorder_stop_event.set()
-                self.recorder_stop_event = None
-            self.is_recorder_running = False
-            self.recording_area_selector.recording_area_border.destroy()
-            self.recording_area_selector.recording_area_border = None
-
-    @Slot()
-    def __on_recording_started(self, start_time):
-        self.record_button.setEnabled(True)
         self.video_capture_duration_label_updater.set_start_time(start_time)
-        if self.recording_area_selector.recording_area_border is not None:
-            self.recording_area_selector.recording_area_border.update_color((255, 0, 0))
-
-    @Slot()
-    def __on_recorder_stop_event_set(self, total_encoding_steps):
-        self.final_file_generation_dialog = FinalFileGenerationDialog(
-            recorder=self.recorder,
-            total_steps=total_encoding_steps,
-            parent=self
-        )
-        self.final_file_generation_dialog.show()
-
-    @Slot()
-    def __on_file_generation_finished(self, file_path):
-        message_box = _FileGenerationCompleteMessageBox(file_path)
-        user_choice = message_box.exec()
-        if user_choice == QMessageBox.Yes:
-            if self.__get_editor() is None:
-                self.editor = Editor(file_path)
-                self.editor.source_file_changed_signal.connect(
-                    self.__on_editor_source_file_changed
-                )
-                self.editor.show()
-            else:
-                _EditorAlreadyOpenMessageBox(self).exec()
-        message_box.deleteLater()
+        self.video_capture_duration_label_updater.start()
 
     @Slot()
     def __on_open_editor_button_clicked(self):
@@ -229,6 +167,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.settings_window = SettingsWindow(self)
         self.settings_window.show()
 
+    @Slot()
+    def __on_file_generation_finished(self, file_path):
+        if self.__get_editor() is None:
+            self.editor = Editor(file_path)
+            self.editor.source_file_changed_signal.connect(
+                self.__on_editor_source_file_changed
+            )
+            self.editor.show()
+        else:
+            _EditorAlreadyOpenMessageBox(self).exec()
+
 
 class _VideoCaptureDurationLabelUpdater(QThread):
 
@@ -271,20 +220,4 @@ class _EditorAlreadyOpenMessageBox(QMessageBox):
         self.setText("Editor is already open.")
         self.setStandardButtons(QMessageBox.Ok)
         self.setDefaultButton(QMessageBox.Ok)
-        self.setIcon(QMessageBox.Information)
-
-
-class _FileGenerationCompleteMessageBox(QMessageBox):
-
-    def __init__(self, file_path, parent=None):
-        super().__init__(parent)
-        self.file_path = file_path
-        self.setWindowTitle("File Generation Complete")
-        self.setText(
-            "File saved to: \n"
-            f"{file_path}"
-        )
-        self.setInformativeText("Open the file in the editor?")
-        self.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        self.setDefaultButton(QMessageBox.Yes)
         self.setIcon(QMessageBox.Information)
