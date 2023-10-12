@@ -19,17 +19,20 @@ class RecordButton(QPushButton):
         super().__init__(parent)
         self.is_recorder_running = False
         self.recorder_stop_event = None
+        self.file_generation_choice_event = None
 
     def __start_recording(self):
         self.__get_capture_duration_label_widget().setText("Starting...")
         self.setEnabled(False)
         self.is_recorder_running = True
         self.recorder_stop_event = threading.Event()
+        self.file_generation_choice_event = threading.Event()
         self.recorder = Recorder(
             record_video=True,
             record_loopback=Settings.get_audio_preferences().getboolean("RECORD_LOOPBACK"),
             record_microphone=Settings.get_audio_preferences().getboolean("RECORD_MICROPHONE"),
             stop_event=self.recorder_stop_event,
+            file_generation_choice_event=self.file_generation_choice_event,
             region=[*self.recording_area_selector.get_area_coords()],
             monitor=self.recording_area_selector.get_monitor(),
             fps=30
@@ -42,6 +45,9 @@ class RecordButton(QPushButton):
         )
         self.recorder.file_generation_finished_signal.connect(
             self.__on_file_generation_finished
+        )
+        self.recorder.file_generation_started_signal.connect(
+            self.__on_file_generation_started
         )
         self.recorder.start()
 
@@ -96,7 +102,18 @@ class RecordButton(QPushButton):
             self.recording_area_selector.recording_area_border.update_color((255, 0, 0))
 
     @Slot()
-    def __on_recorder_stop_event_set(self, total_encoding_steps):
+    def __on_recorder_stop_event_set(self):
+        message_box = _FileGenerationChoiceMessageBox(self)
+        user_choice = message_box.exec()
+        if user_choice == QMessageBox.Yes:
+            self.recorder.generate_final_file = True
+            self.file_generation_choice_event.set()
+        else:
+            self.recorder.generate_final_file = False
+            self.file_generation_choice_event.set()
+
+    @Slot()
+    def __on_file_generation_started(self, total_encoding_steps):
         self.final_file_generation_dialog = FinalFileGenerationDialog(
             recorder=self.recorder,
             total_steps=total_encoding_steps,
@@ -111,6 +128,17 @@ class RecordButton(QPushButton):
         if user_choice == QMessageBox.Yes:
             self.open_editor_after_file_generation_finished_signal.emit(file_path)
         message_box.deleteLater()
+
+
+class _FileGenerationChoiceMessageBox(QMessageBox):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("File Generation Choice")
+        self.setText("Recording finished! Render and save the file?")
+        self.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        self.setDefaultButton(QMessageBox.Yes)
+        self.setIcon(QMessageBox.Information)
 
 
 class _FileGenerationCompleteMessageBox(QMessageBox):
