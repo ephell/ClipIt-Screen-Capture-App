@@ -18,6 +18,9 @@ class Settings(QWidget, Ui_Settings):
 
     def __connect_signals_and_slots(self):
         self.browse_button.clicked.connect(self.__on_browse_button_clicked)
+        self.dir_path_line_edit.textChanged.connect(
+            self.__on_dir_path_line_edit_text_changed
+        )
 
     def __load_capture_dir_path_to_line_edit(self):
         self.dir_path_line_edit.setText(SettingsConfig.get_capture_dir_path())
@@ -32,3 +35,7 @@ class Settings(QWidget, Ui_Settings):
         )
         if directory:
             self.dir_path_line_edit.setText(directory)
+
+    @Slot()
+    def __on_dir_path_line_edit_text_changed(self):
+        SettingsConfig.set_capture_dir_path(self.dir_path_line_edit.text())
