@@ -61,12 +61,32 @@ class _KeyComboListener:
             self.__listener.stop()
             self.__listener = None
 
-    def get_key_combo_string(self):
-        combo = ""
-        for key in self.__pressed_keys:
-            key = self.__format_key_string(key)
-            combo += key + " + "
-        return combo[:-3]
+    def __on_press(self, key_obj):
+        key_str = self.__get_key_obj_string_representation(key_obj)
+        if len(self.__pressed_keys) < self.__max_key_amount_in_combo:
+            if key_str not in self.__pressed_keys:
+                self.__pressed_keys.append(key_str)
+        else:
+            print("Max key combo length reached")
+        print(f"Key combo: {self.__get_key_combo_string()}")
+        if self.set_text_callback is not None:
+            self.set_text_callback(self.__get_key_combo_string())
+
+    def __on_release(self, key_obj):
+        key_str = self.__get_key_obj_string_representation(key_obj)
+        if key_str in self.__pressed_keys:
+            self.__pressed_keys.remove(key_str)
+        if key_str == keyboard.Key.esc:
+            return False
+
+    def __get_key_obj_string_representation(self, key_obj):
+        try:
+            key_str = key_obj.char
+            if hasattr(key_obj, "vk") and key_obj.vk in self.NUMPAD_KEYS:
+                key_str = self.NUMPAD_KEYS[key_obj.vk]
+        except AttributeError:
+            key_str = key_obj.name
+        return key_str
 
     def __format_key_string(self, key):
         special_keys = {
@@ -80,35 +100,15 @@ class _KeyComboListener:
                 "cmd": "LWin",
                 "cmd_r": "RWin",
                 "num_lock": "NumLock",
-                "caps_lock": "CapsLock"
+                "caps_lock": "CapsLock",
+                "page_up": "PageUp",
+                "page_down": "PageDown"
             }
         return special_keys.get(key, key.title())
 
-    def __convert_key_obj_to_string(self, key):
-        try:
-            key_string = key.char
-            if hasattr(key, "vk") and key.vk in self.NUMPAD_KEYS:
-                key_string = self.NUMPAD_KEYS[key.vk]
-        except AttributeError:
-            key_string = key.name
-        return key_string
-
-    def __on_press(self, key):
-        key_string = self.__convert_key_obj_to_string(key)
-        if len(self.__pressed_keys) < self.__max_key_amount_in_combo:
-            if key_string not in self.__pressed_keys:
-                self.__pressed_keys.append(key_string)
-        else:
-            print("Max key combo length reached")
-
-        print(f"Pressed keys: {self.__pressed_keys}")
-        print(f"Key combo: {self.get_key_combo_string()}")
-        if self.set_text_callback is not None:
-            self.set_text_callback(self.get_key_combo_string())
-
-    def __on_release(self, key):
-        key_string = self.__convert_key_obj_to_string(key)
-        if key_string in self.__pressed_keys:
-            self.__pressed_keys.remove(key_string)
-        if key == keyboard.Key.esc:
-            return False
+    def __get_key_combo_string(self):
+        combo = ""
+        for key in self.__pressed_keys:
+            key = self.__format_key_string(key)
+            combo += key + " + "
+        return combo[:-3]
