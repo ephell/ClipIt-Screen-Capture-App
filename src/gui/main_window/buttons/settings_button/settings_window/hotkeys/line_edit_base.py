@@ -43,28 +43,27 @@ class _KeyComboListener:
 
     def __init__(self, set_text_callback=None):
         self.set_text_callback = set_text_callback
-        self.pressed_keys = []
-        self.max_key_amount_in_combo = 3
-        self.key_combo = ""
-        self.listener = None
+        self.__pressed_keys = []
+        self.__max_key_amount_in_combo = 3
+        self.__listener = None
 
     def start(self):
-        if self.listener is None:
-            self.listener = keyboard.Listener(
+        if self.__listener is None:
+            self.__listener = keyboard.Listener(
                 on_press=self.__on_press, 
                 on_release=self.__on_release,
                 suppress=True
             )
-            self.listener.start()
+            self.__listener.start()
 
     def stop(self):
-        if self.listener is not None:
-            self.listener.stop()
-            self.listener = None
+        if self.__listener is not None:
+            self.__listener.stop()
+            self.__listener = None
 
     def get_key_combo_string(self):
         combo = ""
-        for key in self.pressed_keys:
+        for key in self.__pressed_keys:
             key = self.__format_key_string(key)
             combo += key + " + "
         return combo[:-3]
@@ -96,20 +95,20 @@ class _KeyComboListener:
 
     def __on_press(self, key):
         key_string = self.__convert_key_obj_to_string(key)
-        if len(self.pressed_keys) < self.max_key_amount_in_combo:
-            if key_string not in self.pressed_keys:
-                self.pressed_keys.append(key_string)
+        if len(self.__pressed_keys) < self.__max_key_amount_in_combo:
+            if key_string not in self.__pressed_keys:
+                self.__pressed_keys.append(key_string)
         else:
             print("Max key combo length reached")
 
-        print(f"Pressed keys: {self.pressed_keys}")
+        print(f"Pressed keys: {self.__pressed_keys}")
         print(f"Key combo: {self.get_key_combo_string()}")
         if self.set_text_callback is not None:
             self.set_text_callback(self.get_key_combo_string())
 
     def __on_release(self, key):
         key_string = self.__convert_key_obj_to_string(key)
-        if key_string in self.pressed_keys:
-            self.pressed_keys.remove(key_string)
+        if key_string in self.__pressed_keys:
+            self.__pressed_keys.remove(key_string)
         if key == keyboard.Key.esc:
             return False
