@@ -110,7 +110,11 @@
            <widget class="ScreenshotLineEdit" name="screenshot_line_edit"/>
           </item>
           <item>
-           <widget class="StartStopRecordingLineEdit" name="start_stop_recording_line_edit"/>
+           <widget class="StartStopRecordingLineEdit" name="start_stop_recording_line_edit">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>

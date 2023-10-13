@@ -2,18 +2,22 @@ from pynput import keyboard
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLineEdit
 
+import random
 
 class LineEditBase(QLineEdit):
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setAlignment(Qt.AlignCenter)
+        self.setReadOnly(True)
         self.key_combo_listener = _KeyComboListener(self.setText)
 
     """Override"""
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.setText("Press any key/combo...")
+            self.setText("Press any key/key combo...")
+            if self.hasFocus():
+                self.clearFocus()
             self.setFocus()
 
     """Override"""
@@ -76,8 +80,8 @@ class _KeyComboListener:
         key_str = self.__get_key_obj_string_representation(key_obj)
         if key_str in self.__pressed_keys:
             self.__pressed_keys.remove(key_str)
-        if key_str == keyboard.Key.esc:
-            return False
+        if len(self.__pressed_keys) <= 0:
+            self.stop()
 
     def __get_key_obj_string_representation(self, key_obj):
         try:
