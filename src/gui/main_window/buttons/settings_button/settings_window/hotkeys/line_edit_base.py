@@ -64,7 +64,7 @@ class _KeyComboListener:
     def __on_press(self, key_obj):
         key_str = self.__get_key_obj_string_representation(key_obj)
         if len(self.__pressed_keys) < self.__max_key_amount_in_combo:
-            if key_str not in self.__pressed_keys:
+            if key_str is not None and key_str not in self.__pressed_keys:
                 self.__pressed_keys.append(key_str)
         else:
             print("Max key combo length reached")
