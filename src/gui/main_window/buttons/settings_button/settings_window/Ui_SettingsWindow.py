@@ -19,8 +19,8 @@ from PySide6.QtWidgets import (QApplication, QGroupBox, QHBoxLayout, QLabel,
     QLayout, QLineEdit, QPushButton, QSizePolicy,
     QVBoxLayout, QWidget)
 
-from .check_boxes.record_microphone_audio_check_box import RecordMicrophoneAudioCheckBox
-from .check_boxes.record_speaker_audio_check_box import RecordSpeakerAudioCheckBox
+from .audio_preferences.record_microphone_audio_check_box import RecordMicrophoneAudioCheckBox
+from .audio_preferences.record_speaker_audio_check_box import RecordSpeakerAudioCheckBox
 
 class Ui_SettingsWindow(object):
     def setupUi(self, SettingsWindow):

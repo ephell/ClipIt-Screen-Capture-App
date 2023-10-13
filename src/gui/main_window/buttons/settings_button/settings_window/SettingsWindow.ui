@@ -152,12 +152,12 @@
   <customwidget>
    <class>RecordSpeakerAudioCheckBox</class>
    <extends>QCheckBox</extends>
-   <header>.check_boxes.record_speaker_audio_check_box</header>
+   <header>.audio_preferences.record_speaker_audio_check_box</header>
   </customwidget>
   <customwidget>
    <class>RecordMicrophoneAudioCheckBox</class>
    <extends>QCheckBox</extends>
-   <header>.check_boxes.record_microphone_audio_check_box</header>
+   <header>.audio_preferences.record_microphone_audio_check_box</header>
   </customwidget>
  </customwidgets>
  <resources/>
