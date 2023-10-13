@@ -21,6 +21,8 @@ from PySide6.QtWidgets import (QApplication, QGroupBox, QHBoxLayout, QLabel,
 
 from .audio_preferences.record_microphone_audio_check_box import RecordMicrophoneAudioCheckBox
 from .audio_preferences.record_speaker_audio_check_box import RecordSpeakerAudioCheckBox
+from .hotkeys.screenshot.line_edit import ScreenshotLineEdit
+from .hotkeys.start_stop_recording.line_edit import StartStopRecordingLineEdit
 
 class Ui_SettingsWindow(object):
     def setupUi(self, SettingsWindow):
@@ -91,12 +93,12 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout_3 = QVBoxLayout()
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.screenshot_line_edit = QLineEdit(self.hotkeys_group_box)
+        self.screenshot_line_edit = ScreenshotLineEdit(self.hotkeys_group_box)
         self.screenshot_line_edit.setObjectName(u"screenshot_line_edit")
 
         self.verticalLayout_3.addWidget(self.screenshot_line_edit)
 
-        self.start_stop_recording_line_edit = QLineEdit(self.hotkeys_group_box)
+        self.start_stop_recording_line_edit = StartStopRecordingLineEdit(self.hotkeys_group_box)
         self.start_stop_recording_line_edit.setObjectName(u"start_stop_recording_line_edit")
 
         self.verticalLayout_3.addWidget(self.start_stop_recording_line_edit)
