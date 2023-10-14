@@ -3,19 +3,14 @@ from pynput import keyboard
 
 class HotkeyListener:
 
-    combos_to_add = [
-        ["shift", "A"],
-        ["shift", "a"],
+    VALID_COMBINATIONS = [
+        ["SHIFT", "A"],
+        ["CTRL_L", "A"]
     ]
-    VALID_COMBINATIONS = []
 
     def __init__(self):
         self.__listener = None
         self.pressed_keys = []
-        for combo_str in self.combos_to_add:
-            self.VALID_COMBINATIONS.append(
-                self.__convert_to_keyboard_objects(combo_str)
-            )
 
     def start(self):
         if self.__listener is None:
@@ -35,68 +30,37 @@ class HotkeyListener:
 
     def __on_press(self, key):
         """Callback for listener on_press event."""
-        if (
-            any([key in COMBO for COMBO in self.VALID_COMBINATIONS]) 
-            and not key in self.pressed_keys
-        ):
-            if isinstance(key, keyboard.KeyCode):
-                self.__handle_press_keycode_obj(key)
-            elif isinstance(key, keyboard.Key):
-                self.__handle_press_key_obj(key)
-            if self.__is_valid_combination(self.VALID_COMBINATIONS, self.pressed_keys):
-                self.execute(self.pressed_keys)
+        key = self.__get_key_as_str(key)
+        if key is not None:
+            if self.__is_valid_key(key) and key not in self.pressed_keys:
+                self.pressed_keys.append(key)
+        if self.__combo_detected():
+            self.execute(self.pressed_keys)
+            self.pressed_keys.clear()
 
     def __on_release(self, key):
         """Callback for listener on_release event."""
-        if any([key in COMBO for COMBO in self.VALID_COMBINATIONS]):
-            if isinstance(key, keyboard.KeyCode):
-                self.__handle_release_keycode_obj(key)
-            elif isinstance(key, keyboard.Key):
-                self.__handle_release_key_obj(key)
+        key = self.__get_key_as_str(key)
+        if key is not None and key in self.pressed_keys:
+            self.pressed_keys.remove(key)
 
-    def __handle_press_key_obj(self, key: keyboard.Key):
-        self.pressed_keys.append(key)
+    def __get_key_as_str(self, key: keyboard.KeyCode | keyboard.Key):
+        if isinstance(key, keyboard.Key):
+            return key.name.upper()
+        elif isinstance(key, keyboard.KeyCode):
+            return key.char.upper() if key.char else None
+        return None
 
-    def __handle_release_key_obj(self, key: keyboard.Key):
-        self.pressed_keys.remove(key)
+    def __is_valid_key(self, key_str):
+        if any([key_str.upper() in combo for combo in self.VALID_COMBINATIONS]):
+            return True
+        return False
 
-    def __handle_press_keycode_obj(self, key: keyboard.KeyCode):
-        all_keys_as_str = {
-            k.char for k in self.pressed_keys if isinstance(k, keyboard.KeyCode)
-        }
-        current_key_as_str = key.char
-        if (
-            current_key_as_str.lower() not in all_keys_as_str 
-            and current_key_as_str.upper() not in all_keys_as_str
-        ):
-            self.pressed_keys.append(keyboard.KeyCode.from_char(current_key_as_str))
-
-    def __handle_release_keycode_obj(self, key: keyboard.KeyCode):
-        all_keys_as_str = {
-            k.char for k in self.pressed_keys if isinstance(k, keyboard.KeyCode)
-        }
-        current_key_as_str = key.char
-        if current_key_as_str.upper() in all_keys_as_str:
-            self.pressed_keys.remove(keyboard.KeyCode.from_char(current_key_as_str.upper()))
-        elif current_key_as_str.lower() in all_keys_as_str:
-            self.pressed_keys.remove(keyboard.KeyCode.from_char(current_key_as_str.lower()))
-
-    @staticmethod
-    def __is_valid_combination(all_combos: list[list[str]], pressed_keys: list[str]):
-        for combo in all_combos:
+    def __combo_detected(self):
+        for v_combo in self.VALID_COMBINATIONS:
             if (
-                len(combo) == len(pressed_keys) 
-                and all(combo_key == pressed_key for combo_key, pressed_key in zip(combo, pressed_keys))
+                len(v_combo) == len(self.pressed_keys) 
+                and all(v_key == p_key for v_key, p_key in zip(v_combo, self.pressed_keys))
             ):
                 return True
         return False
-
-    @staticmethod
-    def __convert_to_keyboard_objects(combo_str):
-        result = []
-        for key_str in combo_str:
-            if key_str == "shift":
-                result.append(keyboard.Key.shift)
-            else:
-                result.append(keyboard.KeyCode(char=key_str))
-        return result
