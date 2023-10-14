@@ -7,6 +7,8 @@ from PySide6.QtWidgets import QMainWindow
 from .Ui_MainWindow import Ui_MainWindow
 from gui.main_window.buttons.debug_button.debug_button import DebugButton
 
+from .hotkey_listener.hotkey_listener import HotkeyListener
+
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
@@ -16,6 +18,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.app = app
         self.first_window_resize_event = True
         self.__connect_signals_and_slots()
+        self.hotkey_listener = HotkeyListener()
+        self.hotkey_listener.start()
         # Debug button for various prints to console (not in MainWindow.ui)
         self.debug_button = DebugButton(self)
         self.central_layout.addWidget(self.debug_button)
