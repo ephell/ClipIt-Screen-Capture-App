@@ -51,6 +51,10 @@ class LineEditBase(QLineEdit):
         if not self.key_combo_listener.running():
             self.stopped_listening_for_key_combos_signal.emit(self.text())
 
+    @abstractmethod
+    def load_hotkey_from_settings(self, hotkey_name):
+        pass
+
     @Slot()
     @abstractmethod
     def on_stopped_listening_for_key_combos(self):

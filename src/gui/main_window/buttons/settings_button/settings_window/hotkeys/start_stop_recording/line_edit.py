@@ -6,8 +6,11 @@ from settings.settings import Settings
 
 class StartStopRecordingLineEdit(LineEditBase):
 
+    HOTKEY_NAME = "start_stop_recording"
+
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.load_hotkey_from_settings(self.HOTKEY_NAME)
         self.__connect_signals_and_slots()
 
     def __connect_signals_and_slots(self):
@@ -15,6 +18,9 @@ class StartStopRecordingLineEdit(LineEditBase):
             self.on_stopped_listening_for_key_combos
         )
 
+    def load_hotkey_from_settings(self, hotkey_name):
+        self.setText(Settings.get_hotkeys()[hotkey_name])
+
     @Slot()
     def on_stopped_listening_for_key_combos(self, combo_string):
-        Settings.set_hotkey("start_stop_recording", combo_string)
+        Settings.set_hotkey(self.HOTKEY_NAME, combo_string)
