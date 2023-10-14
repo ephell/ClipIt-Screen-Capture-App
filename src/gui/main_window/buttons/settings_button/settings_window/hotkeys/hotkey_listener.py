@@ -3,9 +3,46 @@ from pynput import keyboard
 
 class HotkeyListener:
 
+    ASCII_CONTROL_CHARACTERS = {
+        "\x00": "CTRL+@",
+        "\x01": "CTRL+A",
+        "\x02": "CTRL+B",
+        "\x03": "CTRL+C",
+        "\x04": "CTRL+D",
+        "\x05": "CTRL+E",
+        "\x06": "CTRL+F",
+        "\x07": "CTRL+G",
+        "\x08": "CTRL+H",
+        "\t"  : "CTRL+I",
+        "\n"  : "CTRL+J",
+        "\x0b": "CTRL+K",
+        "\x0c": "CTRL+L",
+        "\r"  : "CTRL+M",
+        "\x0e": "CTRL+N",
+        "\x0f": "CTRL+O",
+        "\x10": "CTRL+P",
+        "\x11": "CTRL+Q",
+        "\x12": "CTRL+R",
+        "\x13": "CTRL+S",
+        "\x14": "CTRL+T",
+        "\x15": "CTRL+U",
+        "\x16": "CTRL+V",
+        "\x17": "CTRL+W",
+        "\x18": "CTRL+X",
+        "\x19": "CTRL+Y",
+        "\x1a": "CTRL+Z",
+        "\x1b": "CTRL+[",
+        "\x1c": "CTRL+\\",
+        "\x1d": "CTRL+]",
+        "\x1e": "CTRL+^",
+        "\x1f": "CTRL+_"
+    }
+
     VALID_COMBINATIONS = [
-        ["SHIFT", "A"],
-        ["CTRL_L", "A"]
+        ["SHIFT", "A", "B"],
+        ["SHIFT_R", "A", "B"],
+        ["CTRL_L", "A"],
+        ["CTRL_R", "A"],
     ]
 
     def __init__(self):
@@ -32,8 +69,9 @@ class HotkeyListener:
         """Callback for listener on_press event."""
         key = self.__get_key_as_str(key)
         if key is not None:
-            if self.__is_valid_key(key) and key not in self.pressed_keys:
-                self.pressed_keys.append(key)
+            for key in key.split("+"):
+                if self.__is_valid_key(key) and key not in self.pressed_keys:
+                    self.pressed_keys.append(key)
         if self.__combo_detected():
             self.execute(self.pressed_keys)
             self.pressed_keys.clear()
@@ -41,14 +79,19 @@ class HotkeyListener:
     def __on_release(self, key):
         """Callback for listener on_release event."""
         key = self.__get_key_as_str(key)
-        if key is not None and key in self.pressed_keys:
-            self.pressed_keys.remove(key)
+        if key is not None:
+            for key in key.split("+"):
+                if key in self.pressed_keys:
+                    self.pressed_keys.remove(key)
 
     def __get_key_as_str(self, key: keyboard.KeyCode | keyboard.Key):
         if isinstance(key, keyboard.Key):
             return key.name.upper()
         elif isinstance(key, keyboard.KeyCode):
-            return key.char.upper() if key.char else None
+            return (
+                self.ASCII_CONTROL_CHARACTERS.get(key.char)
+                or key.char.upper() if key.char else None
+            )
         return None
 
     def __is_valid_key(self, key_str):
