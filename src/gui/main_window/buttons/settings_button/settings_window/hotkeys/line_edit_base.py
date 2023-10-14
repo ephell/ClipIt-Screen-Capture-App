@@ -2,7 +2,6 @@ from pynput import keyboard
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLineEdit
 
-import random
 
 class LineEditBase(QLineEdit):
 

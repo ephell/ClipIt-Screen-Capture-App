@@ -16,13 +16,15 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QGroupBox, QHBoxLayout, QLabel,
-    QLayout, QLineEdit, QPushButton, QSizePolicy,
-    QVBoxLayout, QWidget)
+    QLineEdit, QPushButton, QSizePolicy, QVBoxLayout,
+    QWidget)
 
 from .audio_preferences.record_microphone_audio_check_box import RecordMicrophoneAudioCheckBox
 from .audio_preferences.record_speaker_audio_check_box import RecordSpeakerAudioCheckBox
 from .hotkeys.screenshot.line_edit import ScreenshotLineEdit
+from .hotkeys.screenshot.status_label import ScreenshotStatusLabel
 from .hotkeys.start_stop_recording.line_edit import StartStopRecordingLineEdit
+from .hotkeys.start_stop_recording.status_label import StartStopRecordingStatusLabel
 
 class Ui_SettingsWindow(object):
     def setupUi(self, SettingsWindow):
@@ -74,8 +76,8 @@ class Ui_SettingsWindow(object):
         self.hotkeys_group_box.setObjectName(u"hotkeys_group_box")
         self.verticalLayout_5 = QVBoxLayout(self.hotkeys_group_box)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.horizontalLayout_4 = QHBoxLayout()
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.screenshot_label = QLabel(self.hotkeys_group_box)
@@ -89,7 +91,7 @@ class Ui_SettingsWindow(object):
         self.verticalLayout_2.addWidget(self.start_stop_recording_label)
 
 
-        self.horizontalLayout_4.addLayout(self.verticalLayout_2)
+        self.horizontalLayout_3.addLayout(self.verticalLayout_2)
 
         self.verticalLayout_3 = QVBoxLayout()
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
@@ -100,36 +102,54 @@ class Ui_SettingsWindow(object):
 
         self.start_stop_recording_line_edit = StartStopRecordingLineEdit(self.hotkeys_group_box)
         self.start_stop_recording_line_edit.setObjectName(u"start_stop_recording_line_edit")
+        self.start_stop_recording_line_edit.setReadOnly(True)
 
         self.verticalLayout_3.addWidget(self.start_stop_recording_line_edit)
 
 
-        self.horizontalLayout_4.addLayout(self.verticalLayout_3)
+        self.horizontalLayout_3.addLayout(self.verticalLayout_3)
 
         self.verticalLayout_4 = QVBoxLayout()
+        self.verticalLayout_4.setSpacing(10)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.verticalLayout_4.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.screenshot_clear_button = QPushButton(self.hotkeys_group_box)
-        self.screenshot_clear_button.setObjectName(u"screenshot_clear_button")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.verticalLayout_6 = QVBoxLayout()
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.screenshot_status_label = ScreenshotStatusLabel(self.hotkeys_group_box)
+        self.screenshot_status_label.setObjectName(u"screenshot_status_label")
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.screenshot_clear_button.sizePolicy().hasHeightForWidth())
-        self.screenshot_clear_button.setSizePolicy(sizePolicy)
+        sizePolicy.setHeightForWidth(self.screenshot_status_label.sizePolicy().hasHeightForWidth())
+        self.screenshot_status_label.setSizePolicy(sizePolicy)
+        self.screenshot_status_label.setMinimumSize(QSize(10, 10))
+        self.screenshot_status_label.setMaximumSize(QSize(10, 10))
 
-        self.verticalLayout_4.addWidget(self.screenshot_clear_button)
-
-        self.start_stop_recording_clear_button = QPushButton(self.hotkeys_group_box)
-        self.start_stop_recording_clear_button.setObjectName(u"start_stop_recording_clear_button")
-
-        self.verticalLayout_4.addWidget(self.start_stop_recording_clear_button)
+        self.verticalLayout_6.addWidget(self.screenshot_status_label, 0, Qt.AlignHCenter|Qt.AlignVCenter)
 
 
-        self.horizontalLayout_4.addLayout(self.verticalLayout_4)
+        self.verticalLayout_4.addLayout(self.verticalLayout_6)
 
-        self.horizontalLayout_4.setStretch(1, 1)
+        self.verticalLayout_7 = QVBoxLayout()
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.start_stop_recording_status_label = StartStopRecordingStatusLabel(self.hotkeys_group_box)
+        self.start_stop_recording_status_label.setObjectName(u"start_stop_recording_status_label")
+        sizePolicy.setHeightForWidth(self.start_stop_recording_status_label.sizePolicy().hasHeightForWidth())
+        self.start_stop_recording_status_label.setSizePolicy(sizePolicy)
+        self.start_stop_recording_status_label.setMinimumSize(QSize(10, 10))
+        self.start_stop_recording_status_label.setMaximumSize(QSize(10, 10))
 
-        self.verticalLayout_5.addLayout(self.horizontalLayout_4)
+        self.verticalLayout_7.addWidget(self.start_stop_recording_status_label, 0, Qt.AlignHCenter|Qt.AlignVCenter)
+
+
+        self.verticalLayout_4.addLayout(self.verticalLayout_7)
+
+
+        self.horizontalLayout_3.addLayout(self.verticalLayout_4)
+
+        self.horizontalLayout_3.setStretch(0, 1)
+        self.horizontalLayout_3.setStretch(1, 2)
+
+        self.verticalLayout_5.addLayout(self.horizontalLayout_3)
 
 
         self.verticalLayout.addWidget(self.hotkeys_group_box)
@@ -150,7 +170,5 @@ class Ui_SettingsWindow(object):
         self.hotkeys_group_box.setTitle(QCoreApplication.translate("SettingsWindow", u"Hotkeys", None))
         self.screenshot_label.setText(QCoreApplication.translate("SettingsWindow", u"Screenshot", None))
         self.start_stop_recording_label.setText(QCoreApplication.translate("SettingsWindow", u"Start/Stop Recording", None))
-        self.screenshot_clear_button.setText(QCoreApplication.translate("SettingsWindow", u"Clear", None))
-        self.start_stop_recording_clear_button.setText(QCoreApplication.translate("SettingsWindow", u"Clear", None))
     # retranslateUi
 

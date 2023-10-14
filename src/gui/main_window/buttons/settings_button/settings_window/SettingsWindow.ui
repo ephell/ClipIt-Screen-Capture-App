@@ -85,7 +85,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_5">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,1,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,2,0">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
@@ -120,28 +120,60 @@
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_4">
-          <property name="sizeConstraint">
-           <enum>QLayout::SetDefaultConstraint</enum>
+          <property name="spacing">
+           <number>10</number>
           </property>
           <item>
-           <widget class="QPushButton" name="screenshot_clear_button">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Clear</string>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+             <widget class="ScreenshotStatusLabel" name="screenshot_status_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
-           <widget class="QPushButton" name="start_stop_recording_clear_button">
-            <property name="text">
-             <string>Clear</string>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+             <widget class="StartStopRecordingStatusLabel" name="start_stop_recording_status_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
@@ -172,6 +204,16 @@
    <class>StartStopRecordingLineEdit</class>
    <extends>QLineEdit</extends>
    <header>.hotkeys.start_stop_recording.line_edit</header>
+  </customwidget>
+  <customwidget>
+   <class>ScreenshotStatusLabel</class>
+   <extends>QLabel</extends>
+   <header>.hotkeys.screenshot.status_label</header>
+  </customwidget>
+  <customwidget>
+   <class>StartStopRecordingStatusLabel</class>
+   <extends>QLabel</extends>
+   <header>.hotkeys.start_stop_recording.status_label</header>
   </customwidget>
  </customwidgets>
  <resources/>
