@@ -1,6 +1,8 @@
 from pynput import keyboard
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QObject, Signal, Slot
 from PySide6.QtWidgets import QLineEdit
+
+import threading
 
 
 class LineEditBase(QLineEdit):
@@ -9,12 +11,22 @@ class LineEditBase(QLineEdit):
         super().__init__(parent)
         self.setAlignment(Qt.AlignCenter)
         self.setReadOnly(True)
-        self.key_combo_listener = _KeyComboListener(self.setText)
+        self.__default_text = "Press any key/key combo..."
+        self.key_combo_listener = _KeyComboListener()
+        self.__connect_signals_and_slots()
+
+    def __connect_signals_and_slots(self):
+        self.key_combo_listener.key_combo_changed_signal.connect(
+            self.on_key_combo_changed_signal
+        )
+        self.key_combo_listener.clear_key_pressed_signal.connect(
+            self.on_clear_key_pressed_signal
+        )
 
     """Override"""
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.setText("Press any key/key combo...")
+            self.setText(self.__default_text)
             if self.hasFocus():
                 self.clearFocus()
             self.setFocus()
@@ -27,8 +39,20 @@ class LineEditBase(QLineEdit):
     def focusOutEvent(self, event):
         self.key_combo_listener.stop()
 
+    @Slot()
+    def on_key_combo_changed_signal(self, combo_string):
+        self.setText(combo_string)
 
-class _KeyComboListener:
+    @Slot()
+    def on_clear_key_pressed_signal(self):
+        self.setText("None")
+        self.clearFocus()
+
+
+class _KeyComboListener(QObject):
+
+    clear_key_pressed_signal = Signal()
+    key_combo_changed_signal = Signal(str)
 
     # The dictionary key is the value of 'vk' attribute of the key object
     NUMPAD_KEYS = {
@@ -44,8 +68,11 @@ class _KeyComboListener:
         105: "Num9"
     }
 
-    def __init__(self, set_text_callback=None):
-        self.set_text_callback = set_text_callback
+    # Used notify the line edit to clear its text and stop the listener
+    CLEAR_KEYS = {"esc", "backspace"}
+
+    def __init__(self):
+        super().__init__()
         self.__pressed_keys = []
         self.__max_key_amount_in_combo = 3
         self.__listener = None
@@ -66,14 +93,14 @@ class _KeyComboListener:
 
     def __on_press(self, key_obj):
         key_str = self.__get_key_obj_string_representation(key_obj)
+        if key_str in self.CLEAR_KEYS:
+            self.clear_key_pressed_signal.emit()
+            return
         if len(self.__pressed_keys) < self.__max_key_amount_in_combo:
             if key_str is not None and key_str not in self.__pressed_keys:
                 self.__pressed_keys.append(key_str)
-        else:
-            print("Max key combo length reached")
-        print(f"Key combo: {self.__get_key_combo_string()}")
-        if self.set_text_callback is not None:
-            self.set_text_callback(self.__get_key_combo_string())
+            print(f"Key combo: {self.__get_key_combo_string()}")
+            self.key_combo_changed_signal.emit(self.__get_key_combo_string())
 
     def __on_release(self, key_obj):
         key_str = self.__get_key_obj_string_representation(key_obj)
