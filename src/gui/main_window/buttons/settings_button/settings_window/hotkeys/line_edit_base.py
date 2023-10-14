@@ -1,9 +1,13 @@
+from abc import abstractmethod
+
 from pynput import keyboard
 from PySide6.QtCore import Qt, QObject, Signal, Slot
 from PySide6.QtWidgets import QLineEdit
 
 
 class LineEditBase(QLineEdit):
+
+    stopped_listening_for_key_combos_signal = Signal(str)
 
     __DEFAULT_TEXT = "Press any key/key combo..."
     __NONE_TEXT = "None"
@@ -21,6 +25,9 @@ class LineEditBase(QLineEdit):
         )
         self.key_combo_listener.clear_key_pressed_signal.connect(
             self.on_clear_key_pressed_signal
+        )
+        self.key_combo_listener.all_keys_released_signal.connect(
+            self.on_all_keys_released_signal
         )
 
     """Override"""
@@ -41,6 +48,13 @@ class LineEditBase(QLineEdit):
             self.setText(self.__NONE_TEXT)
         if self.key_combo_listener.running():
             self.key_combo_listener.stop()
+        if not self.key_combo_listener.running():
+            self.stopped_listening_for_key_combos_signal.emit(self.text())
+
+    @Slot()
+    @abstractmethod
+    def on_stopped_listening_for_key_combos(self):
+        pass
 
     @Slot()
     def on_key_combo_changed_signal(self, combo_string):
@@ -49,6 +63,10 @@ class LineEditBase(QLineEdit):
     @Slot()
     def on_clear_key_pressed_signal(self):
         self.setText(self.__NONE_TEXT)
+        self.clearFocus()
+
+    @Slot()
+    def on_all_keys_released_signal(self):
         self.clearFocus()
 
     @Slot()
@@ -63,6 +81,7 @@ class _KeyComboListener(QObject):
 
     clear_key_pressed_signal = Signal()
     key_combo_changed_signal = Signal(str)
+    all_keys_released_signal = Signal()
 
     # The dictionary key is the value of 'vk' attribute of the key object
     __NUMPAD_KEYS = {
@@ -77,8 +96,24 @@ class _KeyComboListener(QObject):
         104: "Num8",
         105: "Num9"
     }
-    # Used notify the line edit to clear its text and stop the listener
+    # Remove focus from line edit when any of these keys are pressed
     __CLEAR_KEYS = {"esc", "backspace"}
+    # Used to format the string representation of key objects' special keys
+    __SPECIAL_KEYS = {
+            "print_screen": "PrtScr",
+            "ctrl_l": "LCtrl",
+            "ctrl_r": "RCtrl",
+            "alt_l": "LAlt",
+            "alt_gr": "RAlt",
+            "shift": "LShift",
+            "shift_r": "RShift",
+            "cmd": "LWin",
+            "cmd_r": "RWin",
+            "num_lock": "NumLock",
+            "caps_lock": "CapsLock",
+            "page_up": "PageUp",
+            "page_down": "PageDown"
+        }
 
     def __init__(self):
         super().__init__()
@@ -111,7 +146,6 @@ class _KeyComboListener(QObject):
         if len(self.__pressed_keys) < self.__max_key_amount_in_combo:
             if key_str is not None and key_str not in self.__pressed_keys:
                 self.__pressed_keys.append(key_str)
-            print(f"Key combo: {self.__get_key_combo_string()}")
             self.key_combo_changed_signal.emit(self.__get_key_combo_string())
 
     def __on_release(self, key_obj):
@@ -119,7 +153,7 @@ class _KeyComboListener(QObject):
         if key_str in self.__pressed_keys:
             self.__pressed_keys.remove(key_str)
         if len(self.__pressed_keys) <= 0:
-            self.stop()
+            self.all_keys_released_signal.emit()
 
     def __get_key_obj_string_representation(self, key_obj):
         try:
@@ -131,22 +165,7 @@ class _KeyComboListener(QObject):
         return key_str
 
     def __format_key_string(self, key):
-        special_keys = {
-                "print_screen": "PrtScr",
-                "ctrl_l": "LCtrl",
-                "ctrl_r": "RCtrl",
-                "alt_l": "LAlt",
-                "alt_gr": "RAlt",
-                "shift": "LShift",
-                "shift_r": "RShift",
-                "cmd": "LWin",
-                "cmd_r": "RWin",
-                "num_lock": "NumLock",
-                "caps_lock": "CapsLock",
-                "page_up": "PageUp",
-                "page_down": "PageDown"
-            }
-        return special_keys.get(key, key.title())
+        return self.__SPECIAL_KEYS.get(key, key.title())
 
     def __get_key_combo_string(self):
         combo = ""

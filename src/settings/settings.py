@@ -27,16 +27,24 @@ class Settings:
         return parser["AUDIO_PREFERENCES"]
     
     @classmethod
-    def get_hotkeys(cls):
-        parser = ConfigParser()
-        parser.read(cls.SETTINGS_FILE)
-        return parser["HOTKEYS"]
-
-    @classmethod
     def set_audio_preference(cls, preference_name, preference_value):
         parser = ConfigParser()
         parser.read(cls.SETTINGS_FILE)
         parser["AUDIO_PREFERENCES"][preference_name] = preference_value
+        with open(cls.SETTINGS_FILE, "w") as configfile:
+            parser.write(configfile)
+
+    @classmethod
+    def get_hotkeys(cls):
+        parser = ConfigParser()
+        parser.read(cls.SETTINGS_FILE)
+        return parser["HOTKEYS"]
+    
+    @classmethod
+    def set_hotkey(cls, hotkey_name, hotkey_value):
+        parser = ConfigParser()
+        parser.read(cls.SETTINGS_FILE)
+        parser["HOTKEYS"][hotkey_name] = hotkey_value
         with open(cls.SETTINGS_FILE, "w") as configfile:
             parser.write(configfile)
 

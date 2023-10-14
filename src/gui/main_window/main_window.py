@@ -5,9 +5,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow
 
 from .Ui_MainWindow import Ui_MainWindow
+from .buttons.settings_button.settings_window.hotkeys.hotkey_listener import HotkeyListener
 from gui.main_window.buttons.debug_button.debug_button import DebugButton
-
-from .hotkey_listener.hotkey_listener import HotkeyListener
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
