@@ -16,11 +16,12 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QGroupBox, QHBoxLayout, QLabel,
-    QLineEdit, QPushButton, QSizePolicy, QVBoxLayout,
-    QWidget)
+    QSizePolicy, QVBoxLayout, QWidget)
 
 from .audio_preferences.record_microphone_audio_check_box import RecordMicrophoneAudioCheckBox
 from .audio_preferences.record_speaker_audio_check_box import RecordSpeakerAudioCheckBox
+from .captures_directory.browse_button import BrowseButton
+from .captures_directory.line_edit import CapturesDirectoryLineEdit
 from .hotkeys.screenshot.line_edit import ScreenshotLineEdit
 from .hotkeys.screenshot.status_label import ScreenshotStatusLabel
 from .hotkeys.start_stop_recording.line_edit import StartStopRecordingLineEdit
@@ -35,24 +36,24 @@ class Ui_SettingsWindow(object):
         SettingsWindow.setMaximumSize(QSize(425, 240))
         self.verticalLayout = QVBoxLayout(SettingsWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.captures_dir_path_group_box = QGroupBox(SettingsWindow)
-        self.captures_dir_path_group_box.setObjectName(u"captures_dir_path_group_box")
-        self.horizontalLayout = QHBoxLayout(self.captures_dir_path_group_box)
+        self.captures_dir_group_box = QGroupBox(SettingsWindow)
+        self.captures_dir_group_box.setObjectName(u"captures_dir_group_box")
+        self.horizontalLayout = QHBoxLayout(self.captures_dir_group_box)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.dir_path_line_edit = QLineEdit(self.captures_dir_path_group_box)
-        self.dir_path_line_edit.setObjectName(u"dir_path_line_edit")
-        self.dir_path_line_edit.setFocusPolicy(Qt.NoFocus)
-        self.dir_path_line_edit.setReadOnly(True)
+        self.captures_dir_line_edit = CapturesDirectoryLineEdit(self.captures_dir_group_box)
+        self.captures_dir_line_edit.setObjectName(u"captures_dir_line_edit")
+        self.captures_dir_line_edit.setFocusPolicy(Qt.NoFocus)
+        self.captures_dir_line_edit.setReadOnly(True)
 
-        self.horizontalLayout.addWidget(self.dir_path_line_edit)
+        self.horizontalLayout.addWidget(self.captures_dir_line_edit)
 
-        self.browse_button = QPushButton(self.captures_dir_path_group_box)
+        self.browse_button = BrowseButton(self.captures_dir_group_box)
         self.browse_button.setObjectName(u"browse_button")
 
         self.horizontalLayout.addWidget(self.browse_button)
 
 
-        self.verticalLayout.addWidget(self.captures_dir_path_group_box)
+        self.verticalLayout.addWidget(self.captures_dir_group_box)
 
         self.audio_preferences_group_box = QGroupBox(SettingsWindow)
         self.audio_preferences_group_box.setObjectName(u"audio_preferences_group_box")
@@ -110,7 +111,7 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout_3.addLayout(self.verticalLayout_3)
 
         self.verticalLayout_4 = QVBoxLayout()
-        self.verticalLayout_4.setSpacing(10)
+        self.verticalLayout_4.setSpacing(9)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_6 = QVBoxLayout()
         self.verticalLayout_6.setObjectName(u"verticalLayout_6")
@@ -162,7 +163,7 @@ class Ui_SettingsWindow(object):
 
     def retranslateUi(self, SettingsWindow):
         SettingsWindow.setWindowTitle(QCoreApplication.translate("SettingsWindow", u"SettingsWindow", None))
-        self.captures_dir_path_group_box.setTitle(QCoreApplication.translate("SettingsWindow", u"Captures Directory Path", None))
+        self.captures_dir_group_box.setTitle(QCoreApplication.translate("SettingsWindow", u"Captures Directory", None))
         self.browse_button.setText(QCoreApplication.translate("SettingsWindow", u"Browse", None))
         self.audio_preferences_group_box.setTitle(QCoreApplication.translate("SettingsWindow", u"Audio Preferences", None))
         self.record_speaker_audio_check_box.setText(QCoreApplication.translate("SettingsWindow", u"Record Speaker Audio", None))
