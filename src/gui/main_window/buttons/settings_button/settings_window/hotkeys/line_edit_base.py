@@ -9,6 +9,9 @@ from settings.settings import Settings
 
 class LineEditBase(QLineEdit):
 
+    focus_in_event_signal = Signal()
+    focus_out_event_signal = Signal(str)
+
     __DEFAULT_TEXT = "Press any key/key combo..."
     __NONE_TEXT = "None"
     __IN_USE_TEXT = "({}) already in use!"
@@ -51,6 +54,7 @@ class LineEditBase(QLineEdit):
     """Override"""
     def focusInEvent(self, event):
         self.setText(self.__DEFAULT_TEXT)
+        self.focus_in_event_signal.emit()
         
     """Override"""
     def focusOutEvent(self, event):
@@ -58,6 +62,7 @@ class LineEditBase(QLineEdit):
             self.setText(self.__NONE_TEXT)
         if self.key_combo_listener.running():
             self.key_combo_listener.stop()
+        self.focus_out_event_signal.emit(self.text())
 
     @abstractmethod
     def load_hotkey_from_settings(self, hotkey_name):

@@ -28,6 +28,18 @@ class SettingsWindow(QWidget, Ui_SettingsWindow):
         self.left_mouse_button_pressed_signal.connect(
             self.start_stop_recording_line_edit.on_left_mouse_button_pressed_on_settings_window
         )
+        self.screenshot_line_edit.focus_in_event_signal.connect(
+            self.screenshot_status_label.on_screenshot_line_edit_focus_in_event
+        )
+        self.screenshot_line_edit.focus_out_event_signal.connect(
+            self.screenshot_status_label.on_screenshot_line_edit_focus_out_event
+        )
+        self.start_stop_recording_line_edit.focus_in_event_signal.connect(
+            self.start_stop_recording_status_label.on_screenshot_line_edit_focus_in_event
+        )
+        self.start_stop_recording_line_edit.focus_out_event_signal.connect(
+            self.start_stop_recording_status_label.on_screenshot_line_edit_focus_out_event
+        )
 
     """Override"""
     def mousePressEvent(self, event):
