@@ -137,7 +137,7 @@ class _KeyComboListener(QObject):
         if len(self.__pressed_keys) < self.__max_key_amount_in_combo:
             if key is not None and key not in self.__pressed_keys:
                 self.__pressed_keys.append(key)
-            self.key_combo_changed_signal.emit(self.__get_key_combo_string())
+            self.key_combo_changed_signal.emit(self.__get_key_combo_as_str())
 
     def __on_release(self, key):
         key = self.__get_key_as_str(key)
@@ -153,7 +153,7 @@ class _KeyComboListener(QObject):
             return key.char.upper() if key.char else None
         return None
 
-    def __get_key_combo_string(self):
+    def __get_key_combo_as_str(self):
         combo = ""
         for key in self.__pressed_keys:
             key = self.__SPECIAL_KEYS.get(key, key.title())
