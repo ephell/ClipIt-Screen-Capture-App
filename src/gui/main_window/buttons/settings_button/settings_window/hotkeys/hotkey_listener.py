@@ -6,7 +6,7 @@ from settings.settings import Settings
 
 class HotkeyListener(QObject):
 
-    hotkey_pressed_signal = Signal(str)
+    hotkey_detected_signal = Signal(str)
 
     __ASCII_CONTROL_CHARACTERS = {
         "\x00": "CTRL+@",
@@ -84,7 +84,7 @@ class HotkeyListener(QObject):
                 if key not in self.__pressed_keys:
                     self.__pressed_keys.append(key)
         if self.__is_combo_detected():
-            self.hotkey_pressed_signal.emit(self.__get_combo_name())
+            self.hotkey_detected_signal.emit(self.__get_combo_name())
 
     def __on_release(self, key):
         """Callback for listener on_release event."""

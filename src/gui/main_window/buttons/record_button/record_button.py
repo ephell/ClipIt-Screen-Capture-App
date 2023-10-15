@@ -17,10 +17,14 @@ class RecordButton(QPushButton):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.is_recorder_running = False
         self.recorder_stop_event = None
         self.file_generation_choice_event = None
         self.recording_area_selector = None
+        self.has_recording_started = False
+        self.recording_area_selector = RecordingAreaSelector()
+        self.recording_area_selector.area_selection_finished_signal.connect(
+            self.__on_area_selection_finished
+        )
 
     """Override"""
     def keyPressEvent(self, event):
@@ -36,7 +40,6 @@ class RecordButton(QPushButton):
     def __start_recording(self):
         self.__get_capture_duration_label_widget().setText("Starting...")
         self.setEnabled(False)
-        self.is_recorder_running = True
         self.recorder_stop_event = threading.Event()
         self.file_generation_choice_event = threading.Event()
         self.recorder = Recorder(
@@ -68,7 +71,7 @@ class RecordButton(QPushButton):
             if self.recorder_stop_event is not None:
                 self.recorder_stop_event.set()
                 self.recorder_stop_event = None
-            self.is_recorder_running = False
+            self.has_recording_started = False
             self.recording_area_selector.recording_area_border.destroy()
             self.recording_area_selector.recording_area_border = None
 
@@ -88,13 +91,17 @@ class RecordButton(QPushButton):
 
     @Slot()
     def on_record_button_clicked(self):
-        if not self.is_recorder_running:
-            self.recording_area_selector = RecordingAreaSelector()
-            self.recording_area_selector.area_selection_finished_signal.connect(
-                self.__on_area_selection_finished
-            )
-            self.recording_area_selector.start_selection()
-        if self.is_recorder_running:
+        if not self.has_recording_started:
+            if self.recording_area_selector.recording_area_border is None:
+                self.recording_area_selector.start_selection()
+        if self.has_recording_started:
+            self.__stop_recording()
+
+    @Slot()
+    def on_hotkey_pressed(self):
+        if not self.has_recording_started:
+            self.on_record_button_clicked()
+        elif self.has_recording_started:
             self.__stop_recording()
 
     @Slot()
@@ -112,6 +119,7 @@ class RecordButton(QPushButton):
         self.duration_label_updater.start()
         if self.recording_area_selector.recording_area_border is not None:
             self.recording_area_selector.recording_area_border.update_color((255, 0, 0))
+        self.has_recording_started = True
 
     @Slot()
     def __on_recorder_stop_event_set(self):

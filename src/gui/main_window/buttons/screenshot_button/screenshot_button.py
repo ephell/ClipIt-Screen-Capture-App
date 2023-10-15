@@ -49,3 +49,7 @@ class ScreenshotButton(QPushButton):
     def on_screenshot_button_clicked(self):
         self.area_selector = AreaSelector(self.__take_screenshot, self)
         self.area_selector.show()
+
+    @Slot()
+    def on_hotkey_pressed(self):
+        self.on_screenshot_button_clicked()
