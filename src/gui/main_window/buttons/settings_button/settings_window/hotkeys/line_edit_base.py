@@ -21,13 +21,16 @@ class LineEditBase(QLineEdit):
 
     def __connect_signals_and_slots(self):
         self.key_combo_listener.key_combo_changed_signal.connect(
-            self.on_key_combo_changed_signal
+            self.__on_key_combo_changed_signal
         )
         self.key_combo_listener.clear_key_pressed_signal.connect(
-            self.on_clear_key_pressed_signal
+            self.__on_clear_key_pressed_signal
         )
         self.key_combo_listener.all_keys_released_signal.connect(
-            self.on_all_keys_released_signal
+            self.__on_all_keys_released_signal
+        )
+        self.key_combo_listener.key_combo_invalid_signal.connect(
+            self.__on_key_combo_invalid_signal
         )
 
     """Override"""
@@ -61,24 +64,28 @@ class LineEditBase(QLineEdit):
         pass
 
     @Slot()
-    def on_key_combo_changed_signal(self, combo_string):
-        self.setText(combo_string)
-
-    @Slot()
-    def on_clear_key_pressed_signal(self):
-        self.setText(self.__NONE_TEXT)
-        self.clearFocus()
-
-    @Slot()
-    def on_all_keys_released_signal(self):
-        self.clearFocus()
-
-    @Slot()
     def on_left_mouse_button_pressed_on_settings_window(self):
         if self.hasFocus():
             if self.text() == self.__DEFAULT_TEXT:
                 self.setText(self.__NONE_TEXT)
             self.clearFocus()
+
+    @Slot()
+    def __on_key_combo_changed_signal(self, combo_string):
+        self.setText(combo_string)
+
+    @Slot()
+    def __on_clear_key_pressed_signal(self):
+        self.setText(self.__NONE_TEXT)
+        self.clearFocus()
+
+    @Slot()
+    def __on_all_keys_released_signal(self):
+        self.clearFocus()
+
+    @Slot()
+    def __on_key_combo_invalid_signal(self):
+        self.clearFocus()
 
 
 class _KeyComboListener(QObject):
@@ -86,8 +93,9 @@ class _KeyComboListener(QObject):
     clear_key_pressed_signal = Signal()
     key_combo_changed_signal = Signal(str)
     all_keys_released_signal = Signal()
+    key_combo_invalid_signal = Signal()
 
-    # Remove focus from line edit when any of these keys are pressed
+    # Remove focus from line edit and clear its text if these keys are pressed
     __CLEAR_KEYS = {"esc", "backspace"}
     # Used to format the string representation of key objects' special keys
     __SPECIAL_KEYS = {
@@ -137,7 +145,11 @@ class _KeyComboListener(QObject):
         if len(self.__pressed_keys) < self.__max_key_amount_in_combo:
             if key is not None and key not in self.__pressed_keys:
                 self.__pressed_keys.append(key)
-            self.key_combo_changed_signal.emit(self.__get_key_combo_as_str())
+            if self.__is_combo_in_valid_format():
+                self.key_combo_changed_signal.emit(self.__get_key_combo_as_str())
+            else:
+                self.key_combo_invalid_signal.emit()
+                self.__pressed_keys.clear()
 
     def __on_release(self, key):
         key = self.__get_key_as_str(key)
@@ -159,3 +171,17 @@ class _KeyComboListener(QObject):
             key = self.__SPECIAL_KEYS.get(key, key.title())
             combo += key + " + "
         return combo[:-3]
+
+    def __is_combo_in_valid_format(self):
+        """
+        Combo is considered invalid if it contains a regular key that
+        is followed by a special key. For example "Ctrl + A" is valid, 
+        but "A + Ctrl" is not.
+        """
+        combo = self.__pressed_keys
+        special_keys = set(self.__SPECIAL_KEYS.keys())
+        for i in range(0, len(combo) - 1):
+            if combo[i] not in special_keys:
+                if combo[i+1] in special_keys:
+                    return False
+        return True
