@@ -1,6 +1,6 @@
 from time import perf_counter
 
-from PySide6.QtCore import Slot, Signal, QThread
+from PySide6.QtCore import Slot, Signal, QThread, Qt
 from PySide6.QtWidgets import QPushButton, QMessageBox, QMainWindow, QLabel
 
 import threading
@@ -20,7 +20,19 @@ class RecordButton(QPushButton):
         self.is_recorder_running = False
         self.recorder_stop_event = None
         self.file_generation_choice_event = None
+        self.recording_area_selector = None
 
+    """Override"""
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            if self.recording_area_selector is not None:
+                try:
+                    self.recording_area_selector.area_selector.close()
+                except RuntimeError:
+                    # Catches 'Internal C++ object (AreaSelector) already deleted'.
+                    # Not a good solution, but passing is not a problem here.
+                    pass 
+                    
     def __start_recording(self):
         self.__get_capture_duration_label_widget().setText("Starting...")
         self.setEnabled(False)

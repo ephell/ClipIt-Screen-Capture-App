@@ -1,7 +1,7 @@
 import datetime
 
 import mss
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, Qt
 from PySide6.QtWidgets import QPushButton
 
 from gui.area_widgets.area_selector import AreaSelector
@@ -13,6 +13,17 @@ class ScreenshotButton(QPushButton):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.area_selector = None
+
+    """Override"""
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            if self.area_selector is not None:
+                try:
+                    self.area_selector.close()
+                except RuntimeError:
+                    # Catches 'Internal C++ object (AreaSelector) already deleted'.
+                    # Not a good solution, but passing is not a problem here.
+                    pass 
 
     def __take_screenshot(self, x0, y0, x1, y1):
         """Callback function for the area selector."""
