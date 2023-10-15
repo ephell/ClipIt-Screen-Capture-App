@@ -104,15 +104,15 @@ class _KeyComboListener(QObject):
     __CLEAR_KEYS = {"esc", "backspace"}
     # Used to format the string representation of key objects' special keys
     __SPECIAL_KEYS = {
+            "ctrl_l": "Ctrl",
+            "ctrl_r": "Ctrl",
+            "alt_l": "Alt",
+            "alt_gr": "Alt",
+            "shift": "Shift",
+            "shift_r": "Shift",
+            "cmd": "Win",
+            "cmd_r": "Win",
             "print_screen": "PrtScr",
-            "ctrl_l": "LCtrl",
-            "ctrl_r": "RCtrl",
-            "alt_l": "LAlt",
-            "alt_gr": "RAlt",
-            "shift": "LShift",
-            "shift_r": "RShift",
-            "cmd": "LWin",
-            "cmd_r": "RWin",
             "num_lock": "NumLock",
             "caps_lock": "CapsLock",
             "page_up": "PageUp",
