@@ -87,19 +87,6 @@ class _KeyComboListener(QObject):
     key_combo_changed_signal = Signal(str)
     all_keys_released_signal = Signal()
 
-    # The dictionary key is the value of 'vk' attribute of the key object
-    __NUMPAD_KEYS = {
-        96: "Num0",
-        97: "Num1",
-        98: "Num2",
-        99: "Num3",
-        100: "Num4",
-        101: "Num5",
-        102: "Num6",
-        103: "Num7",
-        104: "Num8",
-        105: "Num9"
-    }
     # Remove focus from line edit when any of these keys are pressed
     __CLEAR_KEYS = {"esc", "backspace"}
     # Used to format the string representation of key objects' special keys
@@ -142,38 +129,33 @@ class _KeyComboListener(QObject):
     def running(self):
         return self.__listener is not None and self.__listener.running
 
-    def __on_press(self, key_obj):
-        key_str = self.__get_key_obj_string_representation(key_obj)
-        if key_str in self.__CLEAR_KEYS:
+    def __on_press(self, key):
+        key = self.__get_key_as_str(key)
+        if key in self.__CLEAR_KEYS:
             self.clear_key_pressed_signal.emit()
             return
         if len(self.__pressed_keys) < self.__max_key_amount_in_combo:
-            if key_str is not None and key_str not in self.__pressed_keys:
-                self.__pressed_keys.append(key_str)
+            if key is not None and key not in self.__pressed_keys:
+                self.__pressed_keys.append(key)
             self.key_combo_changed_signal.emit(self.__get_key_combo_string())
 
-    def __on_release(self, key_obj):
-        key_str = self.__get_key_obj_string_representation(key_obj)
-        if key_str in self.__pressed_keys:
-            self.__pressed_keys.remove(key_str)
+    def __on_release(self, key):
+        key = self.__get_key_as_str(key)
+        if key in self.__pressed_keys:
+            self.__pressed_keys.remove(key)
         if len(self.__pressed_keys) <= 0:
             self.all_keys_released_signal.emit()
 
-    def __get_key_obj_string_representation(self, key_obj):
-        try:
-            key_str = key_obj.char
-            if hasattr(key_obj, "vk") and key_obj.vk in self.__NUMPAD_KEYS:
-                key_str = self.__NUMPAD_KEYS[key_obj.vk]
-        except AttributeError:
-            key_str = key_obj.name
-        return key_str
-
-    def __format_key_string(self, key):
-        return self.__SPECIAL_KEYS.get(key, key.title())
+    def __get_key_as_str(self, key: keyboard.KeyCode | keyboard.Key):
+        if isinstance(key, keyboard.Key):
+            return key.name
+        elif isinstance(key, keyboard.KeyCode):
+            return key.char.upper() if key.char else None
+        return None
 
     def __get_key_combo_string(self):
         combo = ""
         for key in self.__pressed_keys:
-            key = self.__format_key_string(key)
+            key = self.__SPECIAL_KEYS.get(key, key.title())
             combo += key + " + "
         return combo[:-3]
