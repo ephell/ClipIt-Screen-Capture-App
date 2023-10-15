@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QLineEdit
 
 class LineEditBase(QLineEdit):
 
-    stopped_listening_for_key_combos_signal = Signal(str)
+    key_combo_listener_stopped_signal = Signal(str)
 
     __DEFAULT_TEXT = "Press any key/key combo..."
     __NONE_TEXT = "None"
@@ -21,16 +21,16 @@ class LineEditBase(QLineEdit):
 
     def __connect_signals_and_slots(self):
         self.key_combo_listener.key_combo_changed_signal.connect(
-            self.__on_key_combo_changed_signal
+            self.__on_key_combo_changed
         )
         self.key_combo_listener.clear_key_pressed_signal.connect(
-            self.__on_clear_key_pressed_signal
+            self.__on_clear_key_pressed
         )
         self.key_combo_listener.all_keys_released_signal.connect(
-            self.__on_all_keys_released_signal
+            self.__on_all_keys_released
         )
         self.key_combo_listener.key_combo_invalid_signal.connect(
-            self.__on_key_combo_invalid_signal
+            self.__on_key_combo_invalid
         )
 
     """Override"""
@@ -52,7 +52,7 @@ class LineEditBase(QLineEdit):
         if self.key_combo_listener.running():
             self.key_combo_listener.stop()
         if not self.key_combo_listener.running():
-            self.stopped_listening_for_key_combos_signal.emit(self.text())
+            self.key_combo_listener_stopped_signal.emit(self.text())
 
     @abstractmethod
     def load_hotkey_from_settings(self, hotkey_name):
@@ -60,7 +60,7 @@ class LineEditBase(QLineEdit):
 
     @Slot()
     @abstractmethod
-    def on_stopped_listening_for_key_combos(self):
+    def on_key_combo_listener_stopped(self):
         pass
 
     @Slot()
@@ -71,20 +71,20 @@ class LineEditBase(QLineEdit):
             self.clearFocus()
 
     @Slot()
-    def __on_key_combo_changed_signal(self, combo_string):
+    def __on_key_combo_changed(self, combo_string):
         self.setText(combo_string)
 
     @Slot()
-    def __on_clear_key_pressed_signal(self):
+    def __on_clear_key_pressed(self):
         self.setText(self.__NONE_TEXT)
         self.clearFocus()
 
     @Slot()
-    def __on_all_keys_released_signal(self):
+    def __on_all_keys_released(self):
         self.clearFocus()
 
     @Slot()
-    def __on_key_combo_invalid_signal(self):
+    def __on_key_combo_invalid(self):
         self.clearFocus()
 
 

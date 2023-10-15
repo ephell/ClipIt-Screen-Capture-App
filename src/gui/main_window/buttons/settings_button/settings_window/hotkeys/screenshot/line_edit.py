@@ -1,4 +1,4 @@
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, Signal
 
 from ..line_edit_base import LineEditBase
 from settings.settings import Settings
@@ -14,13 +14,13 @@ class ScreenshotLineEdit(LineEditBase):
         self.__connect_signals_and_slots()
 
     def __connect_signals_and_slots(self):
-        self.stopped_listening_for_key_combos_signal.connect(
-            self.on_stopped_listening_for_key_combos
+        self.key_combo_listener_stopped_signal.connect(
+            self.on_key_combo_listener_stopped
         )
 
     def load_hotkey_from_settings(self, hotkey_name):
         self.setText(Settings.get_hotkeys()[hotkey_name])
     
     @Slot()
-    def on_stopped_listening_for_key_combos(self, combo_string):
+    def on_key_combo_listener_stopped(self, combo_string):
         Settings.set_hotkey(self.HOTKEY_NAME, combo_string)
