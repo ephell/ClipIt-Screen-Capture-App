@@ -4,13 +4,14 @@ from pynput import keyboard
 from PySide6.QtCore import Qt, QObject, Signal, Slot
 from PySide6.QtWidgets import QLineEdit
 
+from settings.settings import Settings
+
 
 class LineEditBase(QLineEdit):
 
-    key_combo_listener_stopped_signal = Signal(str)
-
     __DEFAULT_TEXT = "Press any key/key combo..."
     __NONE_TEXT = "None"
+    __CONFLICTING_TEXT = "({}) already in use!"
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -20,17 +21,23 @@ class LineEditBase(QLineEdit):
         self.__connect_signals_and_slots()
 
     def __connect_signals_and_slots(self):
-        self.key_combo_listener.key_combo_changed_signal.connect(
-            self.__on_key_combo_changed
-        )
         self.key_combo_listener.clear_key_pressed_signal.connect(
             self.__on_clear_key_pressed
         )
         self.key_combo_listener.all_keys_released_signal.connect(
             self.__on_all_keys_released
         )
-        self.key_combo_listener.key_combo_invalid_signal.connect(
+        self.key_combo_listener.combo_valid_signal.connect(
+            self.__on_key_combo_valid
+        )
+        self.key_combo_listener.combo_invalid_signal.connect(
             self.__on_key_combo_invalid
+        )
+        self.key_combo_listener.combo_in_use_signal.connect(
+            self.__on_key_combo_in_use
+        )
+        self.key_combo_listener.max_combo_length_reached_signal.connect(
+            self.__on_max_combo_length_reached
         )
 
     """Override"""
@@ -51,8 +58,6 @@ class LineEditBase(QLineEdit):
             self.setText(self.__NONE_TEXT)
         if self.key_combo_listener.running():
             self.key_combo_listener.stop()
-        if not self.key_combo_listener.running():
-            self.key_combo_listener_stopped_signal.emit(self.text())
 
     @abstractmethod
     def load_hotkey_from_settings(self, hotkey_name):
@@ -60,7 +65,17 @@ class LineEditBase(QLineEdit):
 
     @Slot()
     @abstractmethod
-    def on_key_combo_listener_stopped(self):
+    def on_key_combo_listener_started(self):
+        pass
+
+    @Slot()
+    @abstractmethod
+    def on_key_combo_valid(self, combo_string):
+        pass
+
+    @Slot()
+    @abstractmethod
+    def on_key_combo_in_use(self):
         pass
 
     @Slot()
@@ -69,10 +84,6 @@ class LineEditBase(QLineEdit):
             if self.text() == self.__DEFAULT_TEXT:
                 self.setText(self.__NONE_TEXT)
             self.clearFocus()
-
-    @Slot()
-    def __on_key_combo_changed(self, combo_string):
-        self.setText(combo_string)
 
     @Slot()
     def __on_clear_key_pressed(self):
@@ -84,16 +95,31 @@ class LineEditBase(QLineEdit):
         self.clearFocus()
 
     @Slot()
+    def __on_key_combo_valid(self, combo_string):
+        self.setText(combo_string)
+
+    @Slot()
     def __on_key_combo_invalid(self):
+        self.clearFocus()
+
+    @Slot()
+    def __on_key_combo_in_use(self, combo_string):
+        self.setText(self.__CONFLICTING_TEXT.format(combo_string))
+
+    @Slot()
+    def __on_max_combo_length_reached(self):
         self.clearFocus()
 
 
 class _KeyComboListener(QObject):
 
     clear_key_pressed_signal = Signal()
-    key_combo_changed_signal = Signal(str)
     all_keys_released_signal = Signal()
-    key_combo_invalid_signal = Signal()
+    combo_valid_signal = Signal(str)
+    combo_invalid_signal = Signal()
+    combo_in_use_signal = Signal(str)
+    max_combo_length_reached_signal = Signal()
+    listener_started_signal = Signal()
 
     # Remove focus from line edit and clear its text if these keys are pressed
     __CLEAR_KEYS = {"esc", "backspace"}
@@ -128,6 +154,7 @@ class _KeyComboListener(QObject):
                 suppress=True
             )
             self.__listener.start()
+            self.listener_started_signal.emit()
 
     def stop(self):
         if self.__listener is not None:
@@ -142,14 +169,21 @@ class _KeyComboListener(QObject):
         if key in self.__CLEAR_KEYS:
             self.clear_key_pressed_signal.emit()
             return
-        if len(self.__pressed_keys) < self.__max_key_amount_in_combo:
-            if key is not None and key not in self.__pressed_keys:
-                self.__pressed_keys.append(key)
+        if key is not None and key not in self.__pressed_keys:
+            self.__pressed_keys.append(key)
             if self.__is_combo_in_valid_format():
-                self.key_combo_changed_signal.emit(self.__get_key_combo_as_str())
+                if not self.__is_combo_in_use():
+                    self.combo_valid_signal.emit(self.__get_key_combo_as_str())
+                else:
+                    self.combo_in_use_signal.emit(self.__get_key_combo_as_str())
+                    self.__pressed_keys.clear()
             else:
-                self.key_combo_invalid_signal.emit()
+                self.combo_invalid_signal.emit()
                 self.__pressed_keys.clear()
+            if len(self.__pressed_keys) >= self.__max_key_amount_in_combo:
+                self.max_combo_length_reached_signal.emit()
+                self.__pressed_keys.clear()
+                return
 
     def __on_release(self, key):
         key = self.__get_key_as_str(key)
@@ -185,3 +219,7 @@ class _KeyComboListener(QObject):
                 if combo[i+1] in special_keys:
                     return False
         return True
+
+    def __is_combo_in_use(self):
+        """Check if combo is already used by another hotkey."""
+        return self.__get_key_combo_as_str() in list(dict(Settings.get_hotkeys().items()).values())
