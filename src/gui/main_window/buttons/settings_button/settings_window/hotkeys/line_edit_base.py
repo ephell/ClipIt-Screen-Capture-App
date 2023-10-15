@@ -11,7 +11,7 @@ class LineEditBase(QLineEdit):
 
     __DEFAULT_TEXT = "Press any key/key combo..."
     __NONE_TEXT = "None"
-    __CONFLICTING_TEXT = "({}) already in use!"
+    __IN_USE_TEXT = "({}) already in use!"
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -104,7 +104,7 @@ class LineEditBase(QLineEdit):
 
     @Slot()
     def __on_key_combo_in_use(self, combo_string):
-        self.setText(self.__CONFLICTING_TEXT.format(combo_string))
+        self.setText(self.__IN_USE_TEXT.format(combo_string))
 
     @Slot()
     def __on_max_combo_length_reached(self):
