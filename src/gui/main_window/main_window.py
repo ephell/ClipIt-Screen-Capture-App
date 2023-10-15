@@ -1,10 +1,11 @@
 from logger import GlobalLogger
 log = GlobalLogger.LOGGER
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QMainWindow
 
 from .Ui_MainWindow import Ui_MainWindow
+from .buttons.settings_button.settings_window.hotkeys.hotkey_listener import HotkeyListener
 from gui.main_window.buttons.debug_button.debug_button import DebugButton
 
 
@@ -15,11 +16,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.app = app
         self.first_window_resize_event = True
+        self.hotkey_listener = HotkeyListener()
+        self.hotkey_listener.start()
         self.__connect_signals_and_slots()
         # Debug button for various prints to console (not in MainWindow.ui)
-        self.debug_button = DebugButton(self)
-        self.central_layout.addWidget(self.debug_button)
-        self.debug_button.clicked.connect(self.debug_button.on_debug_button_clicked)
+        # self.debug_button = DebugButton(self)
+        # self.central_layout.addWidget(self.debug_button)
+        # self.debug_button.clicked.connect(self.debug_button.on_debug_button_clicked)
 
     def __connect_signals_and_slots(self):
         self.record_button.clicked.connect(
@@ -40,21 +43,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.settings_button.clicked.connect(
             self.settings_button.on_settings_button_clicked
         )
-
-    """Override"""
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Escape:
-            if self.select_area_button.area_selector is not None:
-                try:
-                    self.select_area_button.area_selector.close()
-                except RuntimeError:
-                    log.info("Area selector already closed.")
+        self.hotkey_listener.hotkey_detected_signal.connect(
+            self.__on_hotkey_detected
+        )
 
     """Override"""
     def closeEvent(self, event):
         super().closeEvent(event)
         if (
-            self.record_button.is_recorder_running 
+            self.record_button.has_recording_started 
             and not self.record_button.recorder_stop_event.is_set()
         ):
             self.record_button.recorder_stop_event.set()
@@ -69,3 +66,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.setFixedSize(event.size())
             self.first_window_resize_event = False
         super().resizeEvent(event)
+
+
+    @Slot()
+    def __on_hotkey_detected(self, hotkey_name: str):
+        if hotkey_name == "screenshot":
+            self.screenshot_button.on_hotkey_pressed()
+        elif hotkey_name == "start_stop_recording":
+            self.record_button.on_hotkey_pressed()

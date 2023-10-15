@@ -35,6 +35,20 @@ class Settings:
             parser.write(configfile)
 
     @classmethod
+    def get_hotkeys(cls):
+        parser = ConfigParser()
+        parser.read(cls.SETTINGS_FILE)
+        return parser["HOTKEYS"]
+    
+    @classmethod
+    def set_hotkey(cls, hotkey_name, hotkey_value):
+        parser = ConfigParser()
+        parser.read(cls.SETTINGS_FILE)
+        parser["HOTKEYS"][hotkey_name] = hotkey_value
+        with open(cls.SETTINGS_FILE, "w") as configfile:
+            parser.write(configfile)
+
+    @classmethod
     def set_capture_dir_path(cls, path):
         parser = ConfigParser()
         parser.read(cls.SETTINGS_FILE)

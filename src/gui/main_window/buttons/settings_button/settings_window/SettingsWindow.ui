@@ -6,26 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>450</width>
-    <height>140</height>
+    <width>425</width>
+    <height>240</height>
    </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>450</width>
-    <height>140</height>
+    <width>425</width>
+    <height>240</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>450</width>
-    <height>140</height>
+    <width>425</width>
+    <height>240</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -33,13 +27,13 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="captures_dir_path_group_box">
+    <widget class="QGroupBox" name="captures_dir_group_box">
      <property name="title">
-      <string>Captures Directory Path</string>
+      <string>Captures Directory</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QLineEdit" name="dir_path_line_edit">
+       <widget class="CapturesDirectoryLineEdit" name="captures_dir_line_edit">
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
@@ -49,7 +43,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="browse_button">
+       <widget class="BrowseButton" name="browse_button">
         <property name="text">
          <string>Browse</string>
         </property>
@@ -84,18 +78,152 @@
      </layout>
     </widget>
    </item>
+   <item>
+    <widget class="QGroupBox" name="hotkeys_group_box">
+     <property name="title">
+      <string>Hotkeys</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_5">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,2,0">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QLabel" name="screenshot_label">
+            <property name="text">
+             <string>Screenshot</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="start_stop_recording_label">
+            <property name="text">
+             <string>Start/Stop Recording</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="ScreenshotLineEdit" name="screenshot_line_edit"/>
+          </item>
+          <item>
+           <widget class="StartStopRecordingLineEdit" name="start_stop_recording_line_edit">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="spacing">
+           <number>9</number>
+          </property>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+             <widget class="ScreenshotStatusLabel" name="screenshot_status_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+             <widget class="StartStopRecordingStatusLabel" name="start_stop_recording_status_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
    <class>RecordSpeakerAudioCheckBox</class>
    <extends>QCheckBox</extends>
-   <header>.check_boxes.record_speaker_audio_check_box</header>
+   <header>.audio_preferences.record_speaker_audio_check_box</header>
   </customwidget>
   <customwidget>
    <class>RecordMicrophoneAudioCheckBox</class>
    <extends>QCheckBox</extends>
-   <header>.check_boxes.record_microphone_audio_check_box</header>
+   <header>.audio_preferences.record_microphone_audio_check_box</header>
+  </customwidget>
+  <customwidget>
+   <class>ScreenshotLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>.hotkeys.screenshot.line_edit</header>
+  </customwidget>
+  <customwidget>
+   <class>StartStopRecordingLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>.hotkeys.start_stop_recording.line_edit</header>
+  </customwidget>
+  <customwidget>
+   <class>ScreenshotStatusLabel</class>
+   <extends>QLabel</extends>
+   <header>.hotkeys.screenshot.status_label</header>
+  </customwidget>
+  <customwidget>
+   <class>StartStopRecordingStatusLabel</class>
+   <extends>QLabel</extends>
+   <header>.hotkeys.start_stop_recording.status_label</header>
+  </customwidget>
+  <customwidget>
+   <class>BrowseButton</class>
+   <extends>QPushButton</extends>
+   <header>.captures_directory.browse_button</header>
+  </customwidget>
+  <customwidget>
+   <class>CapturesDirectoryLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>.captures_directory.line_edit</header>
   </customwidget>
  </customwidgets>
  <resources/>

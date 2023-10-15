@@ -1,11 +1,12 @@
-from PySide6.QtCore import Qt, Slot
-from PySide6.QtWidgets import QWidget, QFileDialog
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QWidget
 
 from .Ui_SettingsWindow import Ui_SettingsWindow
-from settings.settings import Settings as SettingsConfig
 
 
 class SettingsWindow(QWidget, Ui_SettingsWindow):
+
+    left_mouse_button_pressed_signal = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -16,28 +17,31 @@ class SettingsWindow(QWidget, Ui_SettingsWindow):
         self.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self.setWindowModality(Qt.ApplicationModal)
         self.__connect_signals_and_slots()
-        self.__load_capture_dir_path_to_line_edit()
 
     def __connect_signals_and_slots(self):
-        self.browse_button.clicked.connect(self.__on_browse_button_clicked)
-        self.dir_path_line_edit.textChanged.connect(
-            self.__on_dir_path_line_edit_text_changed
+        self.browse_button.new_directory_selected_signal.connect(
+            self.captures_dir_line_edit.on_new_directory_selected
+        )
+        self.left_mouse_button_pressed_signal.connect(
+            self.screenshot_line_edit.on_left_mouse_button_pressed_on_settings_window
+        )
+        self.left_mouse_button_pressed_signal.connect(
+            self.start_stop_recording_line_edit.on_left_mouse_button_pressed_on_settings_window
+        )
+        self.screenshot_line_edit.focus_in_event_signal.connect(
+            self.screenshot_status_label.on_screenshot_line_edit_focus_in_event
+        )
+        self.screenshot_line_edit.focus_out_event_signal.connect(
+            self.screenshot_status_label.on_screenshot_line_edit_focus_out_event
+        )
+        self.start_stop_recording_line_edit.focus_in_event_signal.connect(
+            self.start_stop_recording_status_label.on_screenshot_line_edit_focus_in_event
+        )
+        self.start_stop_recording_line_edit.focus_out_event_signal.connect(
+            self.start_stop_recording_status_label.on_screenshot_line_edit_focus_out_event
         )
 
-    def __load_capture_dir_path_to_line_edit(self):
-        self.dir_path_line_edit.setText(SettingsConfig.get_capture_dir_path())
-
-    @Slot()
-    def __on_browse_button_clicked(self):
-        directory = QFileDialog.getExistingDirectory(
-            self, 
-            "Select Directory", 
-            "",
-            QFileDialog.ShowDirsOnly
-        )
-        if directory:
-            self.dir_path_line_edit.setText(directory)
-
-    @Slot()
-    def __on_dir_path_line_edit_text_changed(self):
-        SettingsConfig.set_capture_dir_path(self.dir_path_line_edit.text())
+    """Override"""
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.left_mouse_button_pressed_signal.emit()
