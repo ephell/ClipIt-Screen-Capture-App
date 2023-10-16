@@ -9,7 +9,6 @@ __pycache__/
 *.mp3
 *.wav
 *.png
-*.jpg
 test.py
 testt.py
 testtt.py
