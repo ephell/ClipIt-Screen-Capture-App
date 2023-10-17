@@ -16,8 +16,8 @@ class Timeline(QWidget):
         self.media_duration = media_duration
         self.scene = _GraphicsScene(740, 160)
         self.view = _GraphicsView(self.scene)
-        self.ruler = Ruler(self.scene, self.view, self.media_duration)
         self.media_item = MediaItem(self.scene, self.media_duration)
+        self.ruler = Ruler(self.scene, self.view, self.media_duration)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.view)
         self.setLayout(self.layout)

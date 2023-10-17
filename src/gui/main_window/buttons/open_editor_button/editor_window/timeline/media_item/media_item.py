@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtGui import QFont, QPen
+from PySide6.QtGui import QPen, QBrush, QPixmap, QImage, QPainter
 from PySide6.QtWidgets import QGraphicsRectItem
 
 from ._media_item_left_handle import LeftHandle
@@ -31,6 +31,7 @@ class MediaItem(QGraphicsRectItem):
         self.right_handle = RightHandle(self)
         self.time_edits = TimeEdits(scene, media_duration)
         self.__connect_signals_and_slots()
+        self.__thumbnail_pixmap = None
 
     def __connect_signals_and_slots(self):
         self.time_edits.left_handle_time_edit_time_changed_signal.connect(
@@ -42,8 +43,22 @@ class MediaItem(QGraphicsRectItem):
 
     """Override"""
     def paint(self, painter, option, widget):
-        painter.setPen(QPen(Qt.blue, 1))
-        painter.drawRect(self.boundingRect())
+        if self.__thumbnail_pixmap is None:
+            painter.setBrush(QBrush(Qt.gray))
+            painter.drawRect(self.boundingRect())
+        else:
+            painter.setBrush(QBrush(self.__thumbnail_pixmap))
+            painter.drawRect(self.boundingRect())    
+    
+    def update_start_time(self, time):
+        self.start_time = time
+        self.time_edits.update_start_time(time)
+        self.scene.media_item_start_time_changed.emit(time)
+
+    def update_end_time(self, time):
+        self.end_time = time
+        self.time_edits.update_end_time(time)
+        self.scene.media_item_end_time_changed.emit(time)
 
     @Slot()
     def on_view_resize(self):
@@ -58,6 +73,8 @@ class MediaItem(QGraphicsRectItem):
             self.scenePos().y()
         )
         self.time_edits.on_view_resize()
+        if self.__thumbnail_pixmap is not None:
+            self.resize_thumbnail_pixmap()
         self.update()
 
     @Slot()
@@ -99,15 +116,37 @@ class MediaItem(QGraphicsRectItem):
         )
         self.scene.media_item_end_time_changed.emit(time)
 
-    def update_start_time(self, time):
-        self.start_time = time
-        self.time_edits.update_start_time(time)
-        self.scene.media_item_start_time_changed.emit(time)
+    @Slot()
+    def on_finished_collecting_media_item_thumbnail_frames(self, qvideo_frame_list):
+        self.__thumbnail_pixmap = self.__create_thumbnail_pixmap(qvideo_frame_list)
+        self.update()
 
-    def update_end_time(self, time):
-        self.end_time = time
-        self.time_edits.update_end_time(time)
-        self.scene.media_item_end_time_changed.emit(time)
+    def __create_thumbnail_pixmap(self, qvideo_frame_list):
+        qimage_list = [image.toImage() for image in qvideo_frame_list]
+        qimage_width, qimage_height = qimage_list[0].width(), qimage_list[0].height()
+        thumbnail_width = qimage_width * len(qimage_list)
+        thumbnail_height = qimage_height
+        thumbnail_image = QImage(
+            thumbnail_width, 
+            thumbnail_height,
+            qimage_list[0].format()
+        )
+        painter = QPainter(thumbnail_image)
+        for i, qimage in enumerate(qimage_list):
+            painter.drawImage(i * qimage_width, 0, qimage)
+        painter.end()
+        thumbnail_pixmap = QPixmap.fromImage(thumbnail_image)
+        scaled_thumbnail_pixmap = thumbnail_pixmap.scaled(
+            self.boundingRect().size().toSize(), 
+            Qt.IgnoreAspectRatio
+        )
+        return scaled_thumbnail_pixmap
+
+    def resize_thumbnail_pixmap(self):
+        self.__thumbnail_pixmap = self.__thumbnail_pixmap.scaled(
+            self.boundingRect().size().toSize(), 
+            Qt.IgnoreAspectRatio
+        )
 
     def __get_max_possible_width(self):
         return self.scene.width() - self.left_pad_x - self.right_pad_x

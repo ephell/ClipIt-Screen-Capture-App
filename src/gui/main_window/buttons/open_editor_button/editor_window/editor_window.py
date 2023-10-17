@@ -60,6 +60,9 @@ class EditorWindow(QWidget):
         self.preview.scene.video_output_native_size_changed_signal.connect(
             self.__on_video_output_native_size_changed
         )
+        self.preview.media_player.finished_collecting_media_item_thumbnail_frames.connect(
+            self.timeline.media_item.on_finished_collecting_media_item_thumbnail_frames
+        )
 
     """Override"""
     def closeEvent(self, event):
@@ -81,7 +84,7 @@ class EditorWindow(QWidget):
         # Delete the editor object from the parent if parent exists.
         if self.parent() is not None:
             for attr_name, attr_value in vars(self.parent()).items():
-                if isinstance(attr_value, Editor):
+                if isinstance(attr_value, EditorWindow):
                     setattr(self.parent(), attr_name, None)
                     break
 

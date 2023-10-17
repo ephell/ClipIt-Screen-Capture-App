@@ -21,7 +21,7 @@ class MediaPlayer(QMediaPlayer):
         self.setVideoOutput(self.video_output)
         self.start_time = 0
         self.end_time = self.duration()
-        # Related to logic of media item thumbnail frames collection.
+        # Logic related to media item thumbnail frames collection.
         self.__video_sink = self.videoSink()
         self.__have_media_item_thumbnail_frames_been_collected = False
         self.__finished_collecting_signal_sent = False
