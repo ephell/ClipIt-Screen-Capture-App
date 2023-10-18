@@ -1,6 +1,6 @@
 import numpy as np
 from moviepy.editor import VideoFileClip
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QImage, QPixmap, QPainter, QColor
 
 
@@ -8,12 +8,23 @@ class ThumbnailCreator:
 
     def __init__(self, media_item):
         self.media_item = media_item
+        self.__scene = media_item.scene
         self.__frames_to_extract = 5
         self.__initial_thumbnail_width = media_item.initial_width
+        self.__initial_scene_width = self.__scene.width()
+        self.__previous_scene_width = self.__initial_scene_width
         self.__filler_color = QColor(Qt.gray)
         self.__q_pixmaps = self.__get_q_pixmaps()
+        self.__current_thumbnail = self.__create_max_size_thumbnail()
 
     def create_thumbnail(self):
+        if self.__previous_scene_width != self.__scene.width():
+            self.__previous_scene_width = self.__scene.width()
+            self.__current_thumbnail = self.__create_max_size_thumbnail()
+        return self.__crop_to_fit(self.__current_thumbnail)
+
+    def __create_max_size_thumbnail(self):
+        """Creates a QPixmap image object that can fully cover the MediaItem."""
         q_pixmaps = self.__draw_fillers_on_q_pixmaps(self.__q_pixmaps)
         thumbnail_width = q_pixmaps[0].width() * len(q_pixmaps)
         thumbnail_height = q_pixmaps[0].height()
@@ -23,6 +34,16 @@ class ThumbnailCreator:
             painter.drawPixmap(i * q_pixmap.width(), 0, q_pixmap)
         painter.end()
         return thumbnail_pixmap
+
+    def __crop_to_fit(self, max_size_thumbnail: QPixmap):
+        return max_size_thumbnail.copy(
+            QRect(
+                self.media_item.scenePos().x() - self.media_item.initial_x,
+                0,
+                self.media_item.right_handle.scenePos().x() - self.media_item.scenePos().x(),
+                self.__q_pixmaps[0].height()
+            )
+        )
 
     def __draw_fillers_on_q_pixmaps(self, q_pixmaps: list[QPixmap]):
         q_pixmaps_with_fillers = []
@@ -83,5 +104,5 @@ class ThumbnailCreator:
         return [i * interval for i in range(self.__frames_to_extract)]
 
     def __calculate_filler_width(self):
-        width_diff = self.media_item.boundingRect().width() - self.__initial_thumbnail_width
+        width_diff = self.media_item.get_max_possible_width() - self.__initial_thumbnail_width
         return max(0, width_diff / len(self.__q_pixmaps))

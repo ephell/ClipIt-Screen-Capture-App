@@ -118,12 +118,12 @@ class MediaItem(QGraphicsRectItem):
         )
         self.scene.media_item_end_time_changed.emit(time)
 
-    def __get_max_possible_width(self):
+    def get_max_possible_width(self):
         return self.scene.width() - self.left_pad_x - self.right_pad_x
     
     def __get_x_pos_from_time(self, time):
         total_time = self.media_duration
-        max_possible_width = self.__get_max_possible_width()
+        max_possible_width = self.get_max_possible_width()
         return (time / total_time) * max_possible_width + self.initial_x
 
     def __move_to_x_based_on_time(self, time):
@@ -131,7 +131,7 @@ class MediaItem(QGraphicsRectItem):
 
     def __get_width_from_time_interval(self, start_time, end_time):
         total_time = self.media_duration
-        max_possible_width = self.__get_max_possible_width()
+        max_possible_width = self.get_max_possible_width()
         return (end_time - start_time) / total_time * max_possible_width
 
     def __resize_based_on_time_interval(self, start_time, end_time):
