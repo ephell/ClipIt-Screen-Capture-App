@@ -17,7 +17,7 @@ class EditorWindow(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowFlag(Qt.Window)
         self.preview = Preview(file_path, self)
-        self.timeline = Timeline(self.preview.media_player.duration(), self)
+        self.timeline = Timeline(self.preview.media_player, self)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.preview)
         self.layout.addWidget(self.timeline)
@@ -59,9 +59,6 @@ class EditorWindow(QWidget):
         )
         self.preview.scene.video_output_native_size_changed_signal.connect(
             self.__on_video_output_native_size_changed
-        )
-        self.preview.media_player.finished_collecting_media_item_thumbnail_frames.connect(
-            self.timeline.media_item.on_finished_collecting_media_item_thumbnail_frames
         )
 
     """Override"""

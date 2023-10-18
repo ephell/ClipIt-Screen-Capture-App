@@ -5,17 +5,19 @@ from PySide6.QtWidgets import QGraphicsRectItem
 from ._media_item_left_handle import LeftHandle
 from ._media_item_right_handle import RightHandle
 from ._media_item_time_edits.media_item_time_edits import TimeEdits
+from ._thumbnail_creator import ThumbnailCreator
 
 
 class MediaItem(QGraphicsRectItem):
 
-    def __init__(self, scene, media_duration):
+    def __init__(self, scene, media_player):
         super().__init__()
         self.scene = scene
         self.scene.addItem(self)
-        self.media_duration = media_duration
+        self.media_player = media_player
+        self.media_duration = self.media_player.duration()
         self.start_time = 0
-        self.end_time = media_duration
+        self.end_time = self.media_duration
         self.left_pad_x = self.scene.media_item_x
         self.right_pad_x = self.scene.media_item_x
         self.top_pad_y = self.scene.media_item_y
@@ -29,12 +31,9 @@ class MediaItem(QGraphicsRectItem):
         self.setRect(0, 0, self.initial_width, self.initial_height)
         self.left_handle = LeftHandle(self)
         self.right_handle = RightHandle(self)
-        self.time_edits = TimeEdits(scene, media_duration)
+        self.time_edits = TimeEdits(scene, self.media_duration)
         self.__connect_signals_and_slots()
-        # Thumbnail related
-        self.__thumbnail_pixmap = None
-        self.__initial_thumbnail_pixmap = None
-        self.__qimage_list = None
+        self.__thumbnail_creator = ThumbnailCreator(self)
 
     def __connect_signals_and_slots(self):
         self.time_edits.left_handle_time_edit_time_changed_signal.connect(
@@ -46,12 +45,12 @@ class MediaItem(QGraphicsRectItem):
 
     """Override"""
     def paint(self, painter, option, widget):
-        if self.__thumbnail_pixmap is None:
-            painter.setBrush(QBrush(Qt.gray))
+        if self.__thumbnail_creator is not None:
+            painter.setBrush(QBrush(self.__thumbnail_creator.create_thumbnail()))
             painter.drawRect(self.boundingRect())
         else:
-            painter.setBrush(QBrush(self.__thumbnail_pixmap))
-            painter.drawRect(self.boundingRect())    
+            painter.setBrush(QBrush(Qt.gray))
+            painter.drawRect(self.boundingRect())
     
     def update_start_time(self, time):
         self.start_time = time
@@ -76,8 +75,8 @@ class MediaItem(QGraphicsRectItem):
             self.scenePos().y()
         )
         self.time_edits.on_view_resize()
-        if self.__thumbnail_pixmap is not None:
-            self.resize_thumbnail_pixmap()
+        # if self.__thumbnail_pixmap is not None:
+        #     self.resize_thumbnail_pixmap()
         self.update()
 
     @Slot()
@@ -118,100 +117,6 @@ class MediaItem(QGraphicsRectItem):
             self.scenePos().y()
         )
         self.scene.media_item_end_time_changed.emit(time)
-
-    @Slot()
-    def on_finished_collecting_media_item_thumbnail_frames(self, qimage_list):
-        self.__thumbnail_pixmap = self.__create_initial_thumbnail_pixmap(qimage_list)
-        self.__initial_thumbnail_pixmap = self.__thumbnail_pixmap
-        self.__qimage_list = qimage_list
-        self.update()
-
-    def __create_initial_thumbnail_pixmap(self, qimage_list):
-        width_per_qimage = self.__calculate_width_per_qimage(qimage_list)
-        for i, qimage in enumerate(qimage_list):
-            qimage_list[i] = qimage.scaled(
-                width_per_qimage,
-                self.boundingRect().height(),
-                mode=Qt.FastTransformation
-            )
-
-        thumbnail_width = self.boundingRect().width()
-        thumbnail_height = self.boundingRect().height()
-        thumbnail_image = QImage(
-            thumbnail_width,
-            thumbnail_height,
-            qimage_list[0].format()
-        )
-        painter = QPainter(thumbnail_image)
-        for i, qimage in enumerate(qimage_list):
-            painter.drawImage(i * width_per_qimage, 0, qimage)
-        painter.end() 
-        thumbnail_image.save("test.png")
-
-        return QPixmap.fromImage(thumbnail_image)
-
-    def __calculate_width_per_qimage(self, qimage_list):
-        if self.__initial_thumbnail_pixmap is not None:
-            return self.__initial_thumbnail_pixmap.width() / len(qimage_list)
-        return self.boundingRect().width() / len(qimage_list)
-
-    def __scale_qimage_list(self, qimage_list):
-        width_per_qimage = self.__calculate_width_per_qimage(qimage_list)
-        for i, qimage in enumerate(qimage_list):
-            qimage_list[i] = qimage.scaled(
-                width_per_qimage,
-                self.boundingRect().height(),
-                mode=Qt.FastTransformation
-            )
-        return qimage_list
-
-    def __calculate_filler_width(self):
-        width_diff = self.boundingRect().width() - self.__initial_thumbnail_pixmap.width()
-        return max(0, width_diff / len(self.__qimage_list))
-
-    def __add_fillers_to_qimages(self, qimage_list):
-        filler_width = self.__calculate_filler_width()
-        filler_color = QColor(Qt.gray)
-        new_qimage_list = []
-        for qimage in qimage_list:
-            new_qimage = QImage(
-                qimage.width() + filler_width,
-                qimage.height(),
-                qimage.format()
-            )
-            painter = QPainter(new_qimage)
-            new_qimage.fill(filler_color)
-            painter.drawImage(0, 0, qimage)
-            new_qimage_list.append(new_qimage)
-            painter.end()
-        return new_qimage_list
-
-    def __create_thumbnail_pixmap(self, qimage_list):
-        qimage_list = self.__scale_qimage_list(qimage_list)
-
-        filler_width = self.__calculate_filler_width()
-        if filler_width > 0:
-            qimage_list = self.__add_fillers_to_qimages(qimage_list)
-
-        qimage_width = qimage_list[0].width()
-        qimage_height = self.boundingRect().height()
-        thumbnail_width = qimage_width * len(qimage_list)
-        thumbnail_height = qimage_height
-        thumbnail_image = QImage(
-            thumbnail_width,
-            thumbnail_height,
-            qimage_list[0].format()
-        )
-
-        painter = QPainter(thumbnail_image)
-        for i, qimage in enumerate(qimage_list):
-            painter.drawImage(i * qimage_width, 0, qimage)
-        painter.end()
-
-        return QPixmap.fromImage(thumbnail_image)
-
-    def resize_thumbnail_pixmap(self):
-        self.__thumbnail_pixmap = self.__create_thumbnail_pixmap(self.__qimage_list)
 
     def __get_max_possible_width(self):
         return self.scene.width() - self.left_pad_x - self.right_pad_x
