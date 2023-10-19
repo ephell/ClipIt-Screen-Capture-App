@@ -89,8 +89,6 @@ class ThumbnailCreator:
         max_width = self.media_item.get_max_possible_width()
         return int(max_width / self.__scaled_q_pixmap_w)
 
-    def __get_max_thumbnail_width(self):
-        return self.__calculate_amt_of_frames_to_extract() * self.__scaled_q_pixmap_w
 
     def __combine_q_pixmaps(self, q_pixmaps: list[QPixmap]):
         """Creates a QPixmap image object that can fully cover the MediaItem."""
@@ -118,7 +116,7 @@ class ThumbnailCreator:
         q_pixmaps_with_fillers = []
         for q_pixmap in q_pixmaps:
             q_pixmap_with_filler = QPixmap(
-                q_pixmap.width() + self.__calculate_filler_width(),
+                q_pixmap.width() + self.__calculate_filler_width(len(q_pixmaps)),
                 q_pixmap.height()
             )
             painter = QPainter(q_pixmap_with_filler)
@@ -128,10 +126,13 @@ class ThumbnailCreator:
             painter.end()
         return q_pixmaps_with_fillers
 
-    def __calculate_filler_width(self):
+    def __calculate_filler_width(self, frame_amount):
         # Problem with initial thumbnail width probably
-        width_diff = self.media_item.get_max_possible_width() - self.__get_max_thumbnail_width()
-        return max(0, width_diff / self.__calculate_amt_of_frames_to_extract())
+        width_diff = self.media_item.get_max_possible_width() - self.__get_max_thumbnail_width(frame_amount)
+        return max(0, width_diff / frame_amount)
+
+    def __get_max_thumbnail_width(self, frame_amount):
+        return frame_amount * self.__scaled_q_pixmap_w
 
     def __get_scale_dimensions(self):
         """
