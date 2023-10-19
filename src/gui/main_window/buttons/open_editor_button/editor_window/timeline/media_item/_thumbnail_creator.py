@@ -127,12 +127,11 @@ class ThumbnailCreator:
         return q_pixmaps_with_fillers
 
     def __calculate_filler_width(self, frame_amount):
-        # Problem with initial thumbnail width probably
-        width_diff = self.media_item.get_max_possible_width() - self.__get_max_thumbnail_width(frame_amount)
+        max_possible_thumbnail_width = frame_amount * self.__scaled_q_pixmap_w
+        width_diff = self.media_item.get_max_possible_width() - max_possible_thumbnail_width
         return max(0, width_diff / frame_amount)
 
-    def __get_max_thumbnail_width(self, frame_amount):
-        return frame_amount * self.__scaled_q_pixmap_w
+
 
     def __get_scale_dimensions(self):
         """
