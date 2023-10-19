@@ -1,4 +1,3 @@
-# from collections import deque
 import queue
 from time import sleep
 
@@ -12,94 +11,50 @@ class ThumbnailCreator:
 
     def __init__(self, media_item):
         self.media_item = media_item
-        self.__scaled_q_pixmap_w, self.__scaled_q_pixmap_h = self.__get_scale_dimensions()
-        self.__filler_color = QColor(Qt.gray)
-
-        self.__max_sized_thumbnail = None
         self.__q_pixmaps = {}
-
+        self.__q_pixmap_w, self.__q_pixmap_h = self.__get_scaled_q_pixmap_dimensions()
+        self.__filler_color = QColor(Qt.gray)
+        self.__resize_event_timer = QTimer()
+        self.__resize_event_timer.setSingleShot(True)
+        self.__resize_event_timer.timeout.connect(self.__on_resize_event_timer_expired)
+        self.__resize_event_timer_interval = 250
+        self.__extraction_in_progress = False
         self.__extraction_queue = queue.Queue()
         self.__extractor = _QPixmapsExtractor(
             self.media_item,
-            self.__scaled_q_pixmap_w,
-            self.__scaled_q_pixmap_h,
+            self.__q_pixmap_w,
+            self.__q_pixmap_h,
             self.__extraction_queue
         )
-        self.__extractor.extraction_finished_signal.connect(
-            self.__on_extraction_finished
-        )
+        self.__extractor.finished_signal.connect(self.__on_extraction_finished)
         self.__extractor.start()
 
-        self.listas = []
-
-        self.timer = QTimer()
-        self.timer.setSingleShot(True)
-        self.timer.timeout.connect(self.on_timer_expired)
-    
-    @Slot()
-    def on_timer_expired(self):
-        frames_to_extract = self.__calculate_amt_of_frames_to_extract()
-        if frames_to_extract not in self.__q_pixmaps.keys():
-            if frames_to_extract not in self.listas:
-                self.listas.append(frames_to_extract)
-                self.__extraction_queue.put(frames_to_extract)
-
-    @Slot()
-    def __on_extraction_finished(self, amt_extracted, q_pixmaps_list):
-        self.__q_pixmaps.update({amt_extracted: q_pixmaps_list})
-        self.__max_sized_thumbnail = self.create_thumbnail(amt_extracted)
-        self.media_item.update()
-
     def get_thumbnail(self):
-        if self.__max_sized_thumbnail is None:
+        if len(self.__q_pixmaps) == 0:
             return QBrush(self.__filler_color)
         
-        amt_of_frames = self.__calculate_amt_of_frames_to_extract()
+        frame_amount = self.__calculate_required_frame_amount()
+        if not self.__is_key_valid(frame_amount):
+            return self.__crop_to_fit(
+                        self.__create_thumbnail(
+                            self.__get_closest_valid_key(frame_amount)
+                        )
+                    )
+        return self.__crop_to_fit(self.__create_thumbnail(frame_amount))
 
-        if self.__q_pixmaps.get(amt_of_frames) is None:
-            amt_of_frames = self.__find_valid_key(amt_of_frames)
-            return self.__crop_to_fit(self.create_thumbnail(amt_of_frames))
-        else:
-            return self.__crop_to_fit(self.create_thumbnail(amt_of_frames))
+    def __calculate_required_frame_amount(self):
+        return int(self.media_item.get_max_possible_width() / self.__q_pixmap_w)
 
-    def __find_valid_key(self, amt_of_frames):
-        keys = self.__q_pixmaps.keys()
+    def __is_key_valid(self, key):
+        return key in self.__q_pixmaps.keys()
+
+    def __get_closest_valid_key(self, invalid_key):
+        valid_keys = self.__q_pixmaps.keys()
         closest_lower = None
-        for key in keys:
-            if key <= amt_of_frames and (closest_lower is None or key > closest_lower):
+        for key in valid_keys:
+            if key <= invalid_key and (closest_lower is None or key > closest_lower):
                 closest_lower = key
         return closest_lower
-
-    def create_thumbnail(self, amt_of_frames):
-        q_pixmaps = self.__q_pixmaps.get(amt_of_frames)
-        q_pixmaps_with_fillers = self.__add_filler_to_each_q_pixmap(q_pixmaps)
-        q_pixmaps_combined = self.__combine_q_pixmaps(q_pixmaps_with_fillers)
-        return q_pixmaps_combined
-
-    def on_view_resize(self):
-        """Not a slot. Called in MediaItem."""
-        self.timer.start(250)
-
-
-
-
-
-
-    def __calculate_amt_of_frames_to_extract(self):
-        max_width = self.media_item.get_max_possible_width()
-        return int(max_width / self.__scaled_q_pixmap_w)
-
-
-    def __combine_q_pixmaps(self, q_pixmaps: list[QPixmap]):
-        """Creates a QPixmap image object that can fully cover the MediaItem."""
-        thumbnail_width = q_pixmaps[0].width() * len(q_pixmaps)
-        thumbnail_height = q_pixmaps[0].height()
-        thumbnail_pixmap = QPixmap(thumbnail_width, thumbnail_height)
-        painter = QPainter(thumbnail_pixmap)
-        for i, q_pixmap in enumerate(q_pixmaps):
-            painter.drawPixmap(i * q_pixmap.width(), 0, q_pixmap)
-        painter.end()
-        return thumbnail_pixmap
 
     def __crop_to_fit(self, max_size_thumbnail: QPixmap):
         return max_size_thumbnail.copy(
@@ -107,10 +62,14 @@ class ThumbnailCreator:
                 self.media_item.scenePos().x() - self.media_item.initial_x,
                 0,
                 self.media_item.right_handle.scenePos().x() - self.media_item.scenePos().x(),
-                # self.__q_pixmaps[0].height()
-                self.media_item.initial_height
+                self.media_item.boundingRect().height()
             )
         )
+
+    def __create_thumbnail(self, frame_count):
+        q_pixmaps = self.__q_pixmaps.get(frame_count)
+        q_pixmaps_with_fillers = self.__add_filler_to_each_q_pixmap(q_pixmaps)
+        return self.__combine_q_pixmaps(q_pixmaps_with_fillers)
 
     def __add_filler_to_each_q_pixmap(self, q_pixmaps: list[QPixmap]):
         q_pixmaps_with_fillers = []
@@ -126,21 +85,29 @@ class ThumbnailCreator:
             painter.end()
         return q_pixmaps_with_fillers
 
+    def __combine_q_pixmaps(self, q_pixmaps: list[QPixmap]):
+        """Creates a QPixmap image object that can fully cover the MediaItem."""
+        final_q_pixmap = QPixmap(
+            q_pixmaps[0].width() * len(q_pixmaps),
+            q_pixmaps[0].height()
+        )
+        painter = QPainter(final_q_pixmap)
+        for i, q_pixmap in enumerate(q_pixmaps):
+            painter.drawPixmap(i * q_pixmap.width(), 0, q_pixmap)
+        painter.end()
+        return final_q_pixmap
+
     def __calculate_filler_width(self, frame_amount):
-        max_possible_thumbnail_width = frame_amount * self.__scaled_q_pixmap_w
+        max_possible_thumbnail_width = frame_amount * self.__q_pixmap_w
         width_diff = self.media_item.get_max_possible_width() - max_possible_thumbnail_width
         return max(0, width_diff / frame_amount)
 
-
-
-    def __get_scale_dimensions(self):
+    def __get_scaled_q_pixmap_dimensions(self):
         """
         Extracts the first frame from the video, scales it to the 
         height of the MediaItem and returns the scaled frame's dimensions.
         """
-        # Extract video frame (np.ndarray)
         frame = VideoFileClip(self.media_item.media_player.file_path).get_frame(0)
-        # Convert frame to QPixmap
         frame_height, frame_width, _ = frame.shape
         bytes_per_line = 3 * frame_width
         q_image = QImage(
@@ -151,14 +118,28 @@ class ThumbnailCreator:
             QImage.Format_RGB888
         )
         q_pixmap = QPixmap.fromImage(q_image)
-        # Scale QPixmap to height of MediaItem
         scaled_q_pixmap = q_pixmap.scaledToHeight(
             self.media_item.boundingRect().height(),
             mode=Qt.FastTransformation
         )
         return scaled_q_pixmap.width(), scaled_q_pixmap.height()
 
+    @Slot()
+    def __on_resize_event_timer_expired(self):
+        if self.__calculate_required_frame_amount() not in self.__q_pixmaps.keys():
+            if not self.__extraction_in_progress:
+                self.__extraction_in_progress = True
+                self.__extraction_queue.put(self.__calculate_required_frame_amount())
 
+    @Slot()
+    def __on_extraction_finished(self, amt_extracted, q_pixmaps_list):
+        self.__extraction_in_progress = False
+        self.__q_pixmaps.update({amt_extracted: q_pixmaps_list})
+        self.media_item.update()
+
+    def on_view_resize(self):
+        """Not a slot. Called in MediaItem."""
+        self.__resize_event_timer.start(self.__resize_event_timer_interval)
 
 
 
@@ -167,7 +148,7 @@ class ThumbnailCreator:
 
 class _QPixmapsExtractor(QThread):
 
-    extraction_finished_signal = Signal(int, list)
+    finished_signal = Signal(int, list)
 
     def __init__(
             self,
@@ -198,12 +179,12 @@ class _QPixmapsExtractor(QThread):
                 q_pixmaps = self.__convert_frames_to_q_pixmaps(frames)
                 scaled_q_pixmaps = self.__scale_q_pixmaps(q_pixmaps)
 
-                self.extraction_finished_signal.emit(amt_to_extract, scaled_q_pixmaps)
+                self.finished_signal.emit(amt_to_extract, scaled_q_pixmaps)
 
                 print("Finished extracting and emitting")
 
             else:
-                sleep(1)
+                sleep(0.5)
 
     def __calculate_extraction_timestamps(self, frame_amount):
         interval = int(self.video_duration / frame_amount)
