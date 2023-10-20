@@ -6,6 +6,8 @@ from moviepy.editor import VideoFileClip
 from PySide6.QtCore import Qt, QRect, QThread, Signal, Slot, QTimer
 from PySide6.QtGui import QImage, QPixmap, QPainter, QColor, QBrush
 
+import threading
+
 
 class ThumbnailCreator:
 
@@ -19,12 +21,10 @@ class ThumbnailCreator:
         self.__resize_event_timer.timeout.connect(self.__on_resize_event_timer_expired)
         self.__resize_event_timer_interval = 250
         self.__extracted_frame_counts = []
-        self.__extraction_queue = queue.Queue()
         self.__extractor = _QPixmapsExtractor(
             self.media_item,
             self.__q_pixmap_w,
-            self.__q_pixmap_h,
-            self.__extraction_queue
+            self.__q_pixmap_h
         )
         self.__extractor.finished_signal.connect(self.__on_extraction_finished)
         self.__extractor.start()
@@ -129,7 +129,7 @@ class ThumbnailCreator:
         if frame_amount not in self.__q_pixmaps.keys():
             if frame_amount not in self.__extracted_frame_counts:
                 self.__extracted_frame_counts.append(frame_amount)
-                self.__extraction_queue.put(frame_amount)
+                self.__extractor.put_in_queue(frame_amount)
 
     @Slot()
     def __on_extraction_finished(self, amt_extracted, q_pixmaps_list):
@@ -148,32 +148,38 @@ class _QPixmapsExtractor(QThread):
     def __init__(
             self,
             media_item,
-            scale_to_w,
-            scale_to_h,
-            extraction_queue: queue.Queue,
+            scale_q_pixmap_to_w,
+            scale_q_pixmap_to_h,
         ):
         super().__init__()
-        self.media_item = media_item
-        self.scale_to_w = scale_to_w
-        self.scale_to_h = scale_to_h
-        self.extraction_queue = extraction_queue
-        self.video_duration = self.media_item.media_duration
-        self.video_file_path = self.media_item.media_player.file_path
+        self.__media_item = media_item
+        self.__scale_q_pixmap_to_w = scale_q_pixmap_to_w
+        self.__scale_q_pixmap_to_h = scale_q_pixmap_to_h
+        self.__video_duration = self.__media_item.media_duration
+        self.__video_file_path = self.__media_item.media_player.file_path
+        self.__frame_amount_queue = queue.Queue()
+        self.__work_available_flag = threading.Event()
 
     def run(self):
         while True:
-            if not self.extraction_queue.empty():
-                frame_amount = self.extraction_queue.get()
+            self.__work_available_flag.wait()
+            if not self.__frame_amount_queue.empty():
+                frame_amount = self.__frame_amount_queue.get()
                 timestamps = self.__calculate_extraction_timestamps(frame_amount)
-                frames = self.__extract_video_frames(self.video_file_path, timestamps)
+                frames = self.__extract_video_frames(self.__video_file_path, timestamps)
                 q_pixmaps = self.__convert_frames_to_q_pixmaps(frames)
                 scaled_q_pixmaps = self.__scale_q_pixmaps(q_pixmaps)
                 self.finished_signal.emit(frame_amount, scaled_q_pixmaps)
             else:
-                sleep(1)
+                self.__work_available_flag.clear()
+
+    def put_in_queue(self, frame_amount):
+        self.__frame_amount_queue.put(frame_amount)
+        if not self.__work_available_flag.is_set():
+            self.__work_available_flag.set()
 
     def __calculate_extraction_timestamps(self, frame_amount):
-        interval = int(self.video_duration / frame_amount)
+        interval = int(self.__video_duration / frame_amount)
         return [i * interval for i in range(frame_amount)]
 
     def __extract_video_frames(self, video_file_path, extraction_timestamps):
@@ -204,8 +210,8 @@ class _QPixmapsExtractor(QThread):
         for q_pixmap in q_pixmaps:
             scaled_q_pixmaps.append(
                 q_pixmap.scaled(
-                    self.scale_to_w,
-                    self.scale_to_h,
+                    self.__scale_q_pixmap_to_w,
+                    self.__scale_q_pixmap_to_h,
                     mode=Qt.FastTransformation
                 )
             )
