@@ -17,7 +17,7 @@ class EditorWindow(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowFlag(Qt.Window)
         self.preview = Preview(file_path, self)
-        self.timeline = Timeline(self.preview.media_player.duration(), self)
+        self.timeline = Timeline(self.preview.media_player, self)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.preview)
         self.layout.addWidget(self.timeline)
@@ -81,7 +81,7 @@ class EditorWindow(QWidget):
         # Delete the editor object from the parent if parent exists.
         if self.parent() is not None:
             for attr_name, attr_value in vars(self.parent()).items():
-                if isinstance(attr_value, Editor):
+                if isinstance(attr_value, EditorWindow):
                     setattr(self.parent(), attr_name, None)
                     break
 

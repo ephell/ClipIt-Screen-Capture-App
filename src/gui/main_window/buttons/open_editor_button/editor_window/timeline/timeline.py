@@ -11,13 +11,14 @@ from .ruler.ruler import Ruler
 
 class Timeline(QWidget):
 
-    def __init__(self, media_duration, parent=None):
+    def __init__(self, media_player, parent=None):
         super().__init__(parent)
-        self.media_duration = media_duration
+        self.media_player = media_player
+        self.media_duration = self.media_player.duration()
         self.scene = _GraphicsScene(740, 160)
         self.view = _GraphicsView(self.scene)
+        self.media_item = MediaItem(self.scene, self.media_player)
         self.ruler = Ruler(self.scene, self.view, self.media_duration)
-        self.media_item = MediaItem(self.scene, self.media_duration)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.view)
         self.setLayout(self.layout)

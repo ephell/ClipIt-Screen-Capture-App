@@ -1,21 +1,23 @@
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtGui import QFont, QPen
+from PySide6.QtGui import QBrush
 from PySide6.QtWidgets import QGraphicsRectItem
 
 from ._media_item_left_handle import LeftHandle
 from ._media_item_right_handle import RightHandle
 from ._media_item_time_edits.media_item_time_edits import TimeEdits
+from ._thumbnail_creator import ThumbnailCreator
 
 
 class MediaItem(QGraphicsRectItem):
 
-    def __init__(self, scene, media_duration):
+    def __init__(self, scene, media_player):
         super().__init__()
         self.scene = scene
         self.scene.addItem(self)
-        self.media_duration = media_duration
+        self.media_player = media_player
+        self.media_duration = self.media_player.duration()
         self.start_time = 0
-        self.end_time = media_duration
+        self.end_time = self.media_duration
         self.left_pad_x = self.scene.media_item_x
         self.right_pad_x = self.scene.media_item_x
         self.top_pad_y = self.scene.media_item_y
@@ -29,7 +31,8 @@ class MediaItem(QGraphicsRectItem):
         self.setRect(0, 0, self.initial_width, self.initial_height)
         self.left_handle = LeftHandle(self)
         self.right_handle = RightHandle(self)
-        self.time_edits = TimeEdits(scene, media_duration)
+        self.time_edits = TimeEdits(scene, self.media_duration)
+        self.__thumbnail_creator = ThumbnailCreator(self)
         self.__connect_signals_and_slots()
 
     def __connect_signals_and_slots(self):
@@ -42,8 +45,22 @@ class MediaItem(QGraphicsRectItem):
 
     """Override"""
     def paint(self, painter, option, widget):
-        painter.setPen(QPen(Qt.blue, 1))
-        painter.drawRect(self.boundingRect())
+        if self.__thumbnail_creator is not None:
+            painter.setBrush(QBrush(self.__thumbnail_creator.get_thumbnail()))
+            painter.drawRect(self.boundingRect())
+        else:
+            painter.setBrush(QBrush(Qt.gray))
+            painter.drawRect(self.boundingRect())
+    
+    def update_start_time(self, time):
+        self.start_time = time
+        self.time_edits.update_start_time(time)
+        self.scene.media_item_start_time_changed.emit(time)
+
+    def update_end_time(self, time):
+        self.end_time = time
+        self.time_edits.update_end_time(time)
+        self.scene.media_item_end_time_changed.emit(time)
 
     @Slot()
     def on_view_resize(self):
@@ -58,6 +75,7 @@ class MediaItem(QGraphicsRectItem):
             self.scenePos().y()
         )
         self.time_edits.on_view_resize()
+        self.__thumbnail_creator.on_view_resize()
         self.update()
 
     @Slot()
@@ -99,22 +117,12 @@ class MediaItem(QGraphicsRectItem):
         )
         self.scene.media_item_end_time_changed.emit(time)
 
-    def update_start_time(self, time):
-        self.start_time = time
-        self.time_edits.update_start_time(time)
-        self.scene.media_item_start_time_changed.emit(time)
-
-    def update_end_time(self, time):
-        self.end_time = time
-        self.time_edits.update_end_time(time)
-        self.scene.media_item_end_time_changed.emit(time)
-
-    def __get_max_possible_width(self):
+    def get_max_possible_width(self):
         return self.scene.width() - self.left_pad_x - self.right_pad_x
     
     def __get_x_pos_from_time(self, time):
         total_time = self.media_duration
-        max_possible_width = self.__get_max_possible_width()
+        max_possible_width = self.get_max_possible_width()
         return (time / total_time) * max_possible_width + self.initial_x
 
     def __move_to_x_based_on_time(self, time):
@@ -122,7 +130,7 @@ class MediaItem(QGraphicsRectItem):
 
     def __get_width_from_time_interval(self, start_time, end_time):
         total_time = self.media_duration
-        max_possible_width = self.__get_max_possible_width()
+        max_possible_width = self.get_max_possible_width()
         return (end_time - start_time) / total_time * max_possible_width
 
     def __resize_based_on_time_interval(self, start_time, end_time):

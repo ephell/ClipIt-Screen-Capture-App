@@ -1,11 +1,11 @@
 from PySide6.QtCore import Qt, QRectF
-from PySide6.QtGui import QPen
-from PySide6.QtWidgets import (
-    QGraphicsRectItem, QGraphicsItem
-)
+from PySide6.QtGui import QPixmap, QBrush
+from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsItem
 
 
 class RightHandle(QGraphicsRectItem):
+
+    __FILL_IMAGE_PATH = "src/gui/main_window/buttons/open_editor_button/editor_window/timeline/media_item/media_item_handle.jpg"
 
     def __init__(self, media_item):
         super().__init__()
@@ -13,19 +13,24 @@ class RightHandle(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.ItemIsFocusable, True)
         self.parent = media_item
         self.parent.scene.addItem(self)
-        self.handle_width = 20
+        self.handle_width = 16
         self.handle_height = self.parent.initial_height
         self.setRect(0, 0, self.handle_width, self.handle_height)
         self.left_pad_x = self.parent.scene.media_item_x
         self.right_pad_x = self.parent.scene.media_item_x
-        self.initial_x = self.left_pad_x
+        self.initial_x = self.__get_max_possible_x()
         self.initial_y = self.parent.scenePos().y()
         self.setPos(self.initial_x, self.initial_y)
         self.media_duration = self.parent.media_duration
+        self.__fill_image =  QPixmap(self.__FILL_IMAGE_PATH)
+        self.__scaled_fill_image = self.__fill_image.scaled(
+            self.boundingRect().size().toSize(), 
+            Qt.KeepAspectRatio
+        )
 
     """Override"""
     def paint(self, painter, option, widget):
-        painter.setPen(QPen(Qt.red, 1))
+        painter.setBrush(QBrush(self.__scaled_fill_image))
         painter.drawRect(self.boundingRect())
 
     """Override"""
@@ -56,6 +61,13 @@ class RightHandle(QGraphicsRectItem):
             elif self.__is_within_decrease_bounds(event.scenePos()):
                 new_parent_rect_width -= abs(delta)
                 new_handle_x -= abs(delta)
+
+            # Snap the handle to it's maximum possible x value if it's within
+            # 1 pixel of it. If omitted, the handle won't ever be able to 
+            # reach this value after being moved away at least once.
+            max_x = self.__get_max_possible_x()
+            if max_x >= new_handle_x > max_x - 1:
+                new_handle_x = max_x
 
             if (
                 new_parent_rect_width > 0
