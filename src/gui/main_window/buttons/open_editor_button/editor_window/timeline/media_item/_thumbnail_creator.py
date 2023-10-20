@@ -18,7 +18,7 @@ class ThumbnailCreator:
         self.__resize_event_timer.setSingleShot(True)
         self.__resize_event_timer.timeout.connect(self.__on_resize_event_timer_expired)
         self.__resize_event_timer_interval = 250
-        self.__extraction_in_progress = False
+        self.__extracted_frame_counts = []
         self.__extraction_queue = queue.Queue()
         self.__extractor = _QPixmapsExtractor(
             self.media_item,
@@ -49,9 +49,8 @@ class ThumbnailCreator:
         return key in self.__q_pixmaps.keys()
 
     def __get_closest_valid_key(self, invalid_key):
-        valid_keys = self.__q_pixmaps.keys()
         closest_lower = None
-        for key in valid_keys:
+        for key in self.__q_pixmaps.keys():
             if key <= invalid_key and (closest_lower is None or key > closest_lower):
                 closest_lower = key
         return closest_lower
@@ -66,8 +65,8 @@ class ThumbnailCreator:
             )
         )
 
-    def __create_thumbnail(self, frame_count):
-        q_pixmaps = self.__q_pixmaps.get(frame_count)
+    def __create_thumbnail(self, frame_amount):
+        q_pixmaps = self.__q_pixmaps.get(frame_amount)
         q_pixmaps_with_fillers = self.__add_filler_to_each_q_pixmap(q_pixmaps)
         return self.__combine_q_pixmaps(q_pixmaps_with_fillers)
 
@@ -126,24 +125,20 @@ class ThumbnailCreator:
 
     @Slot()
     def __on_resize_event_timer_expired(self):
-        if self.__calculate_required_frame_amount() not in self.__q_pixmaps.keys():
-            if not self.__extraction_in_progress:
-                self.__extraction_in_progress = True
-                self.__extraction_queue.put(self.__calculate_required_frame_amount())
+        frame_amount = self.__calculate_required_frame_amount()
+        if frame_amount not in self.__q_pixmaps.keys():
+            if frame_amount not in self.__extracted_frame_counts:
+                self.__extracted_frame_counts.append(frame_amount)
+                self.__extraction_queue.put(frame_amount)
 
     @Slot()
     def __on_extraction_finished(self, amt_extracted, q_pixmaps_list):
-        self.__extraction_in_progress = False
         self.__q_pixmaps.update({amt_extracted: q_pixmaps_list})
         self.media_item.update()
 
     def on_view_resize(self):
         """Not a slot. Called in MediaItem."""
         self.__resize_event_timer.start(self.__resize_event_timer_interval)
-
-
-
-
 
 
 class _QPixmapsExtractor(QThread):
@@ -159,32 +154,23 @@ class _QPixmapsExtractor(QThread):
         ):
         super().__init__()
         self.media_item = media_item
+        self.scale_to_w = scale_to_w
+        self.scale_to_h = scale_to_h
         self.extraction_queue = extraction_queue
         self.video_duration = self.media_item.media_duration
         self.video_file_path = self.media_item.media_player.file_path
-        self.scale_to_w = scale_to_w
-        self.scale_to_h = scale_to_h
 
     def run(self):
         while True:
             if not self.extraction_queue.empty():
-
-                amt_to_extract = self.extraction_queue.get()
-
-                print(f"Extracting {amt_to_extract} frames")
-
-                timestamps = self.__calculate_extraction_timestamps(amt_to_extract)
-
+                frame_amount = self.extraction_queue.get()
+                timestamps = self.__calculate_extraction_timestamps(frame_amount)
                 frames = self.__extract_video_frames(self.video_file_path, timestamps)
                 q_pixmaps = self.__convert_frames_to_q_pixmaps(frames)
                 scaled_q_pixmaps = self.__scale_q_pixmaps(q_pixmaps)
-
-                self.finished_signal.emit(amt_to_extract, scaled_q_pixmaps)
-
-                print("Finished extracting and emitting")
-
+                self.finished_signal.emit(frame_amount, scaled_q_pixmaps)
             else:
-                sleep(0.5)
+                sleep(1)
 
     def __calculate_extraction_timestamps(self, frame_amount):
         interval = int(self.video_duration / frame_amount)
