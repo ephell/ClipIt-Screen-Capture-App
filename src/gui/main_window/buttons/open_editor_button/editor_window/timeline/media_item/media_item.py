@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtGui import QPen, QBrush, QPixmap, QImage, QPainter, QColor
+from PySide6.QtGui import QBrush
 from PySide6.QtWidgets import QGraphicsRectItem
 
 from ._media_item_left_handle import LeftHandle
@@ -32,8 +32,8 @@ class MediaItem(QGraphicsRectItem):
         self.left_handle = LeftHandle(self)
         self.right_handle = RightHandle(self)
         self.time_edits = TimeEdits(scene, self.media_duration)
+        self.__thumbnail_creator = ThumbnailCreator(self)
         self.__connect_signals_and_slots()
-        self.thumbnail_creator = ThumbnailCreator(self)
 
     def __connect_signals_and_slots(self):
         self.time_edits.left_handle_time_edit_time_changed_signal.connect(
@@ -45,8 +45,8 @@ class MediaItem(QGraphicsRectItem):
 
     """Override"""
     def paint(self, painter, option, widget):
-        if self.thumbnail_creator is not None:
-            painter.setBrush(QBrush(self.thumbnail_creator.get_thumbnail()))
+        if self.__thumbnail_creator is not None:
+            painter.setBrush(QBrush(self.__thumbnail_creator.get_thumbnail()))
             painter.drawRect(self.boundingRect())
         else:
             painter.setBrush(QBrush(Qt.gray))
@@ -75,7 +75,7 @@ class MediaItem(QGraphicsRectItem):
             self.scenePos().y()
         )
         self.time_edits.on_view_resize()
-        self.thumbnail_creator.on_view_resize()
+        self.__thumbnail_creator.on_view_resize()
         self.update()
 
     @Slot()
