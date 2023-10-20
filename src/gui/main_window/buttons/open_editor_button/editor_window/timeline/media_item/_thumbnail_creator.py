@@ -1,12 +1,10 @@
 import queue
-from time import sleep
+import threading
 
-import numpy as np
 from moviepy.editor import VideoFileClip
+import numpy as np
 from PySide6.QtCore import Qt, QRect, QThread, Signal, Slot, QTimer
 from PySide6.QtGui import QImage, QPixmap, QPainter, QColor, QBrush
-
-import threading
 
 
 class ThumbnailCreator:
