@@ -18,7 +18,7 @@ class RightHandle(QGraphicsRectItem):
         self.setRect(0, 0, self.handle_width, self.handle_height)
         self.left_pad_x = self.parent.scene.media_item_x
         self.right_pad_x = self.parent.scene.media_item_x
-        self.initial_x = self.left_pad_x
+        self.initial_x = self.__get_max_possible_x()
         self.initial_y = self.parent.scenePos().y()
         self.setPos(self.initial_x, self.initial_y)
         self.media_duration = self.parent.media_duration
@@ -61,6 +61,13 @@ class RightHandle(QGraphicsRectItem):
             elif self.__is_within_decrease_bounds(event.scenePos()):
                 new_parent_rect_width -= abs(delta)
                 new_handle_x -= abs(delta)
+
+            # Snap the handle to it's maximum possible x value if it's within
+            # 1 pixel of it. If omitted, the handle won't ever be able to 
+            # reach this value after being moved away at least once.
+            max_x = self.__get_max_possible_x()
+            if max_x >= new_handle_x > max_x - 1:
+                new_handle_x = max_x
 
             if (
                 new_parent_rect_width > 0

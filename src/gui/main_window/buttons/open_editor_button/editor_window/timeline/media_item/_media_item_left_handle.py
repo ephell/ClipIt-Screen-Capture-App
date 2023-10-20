@@ -64,6 +64,12 @@ class LeftHandle(QGraphicsRectItem):
                 new_parent_rect_width -= abs(delta)
                 new_handle_x += abs(delta)
 
+            # Snap the handle back to its initial position if it's within 
+            # a 1-pixel range. If omitted, the handle won't ever be able 
+            # to be moved back after being moved away at least once.
+            if self.initial_x <= new_handle_x < self.initial_x + 1:
+                new_handle_x = self.initial_x
+
             if (
                 new_parent_rect_width > 0
                 and new_handle_x >= self.__get_min_possible_x()
