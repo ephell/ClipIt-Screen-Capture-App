@@ -20,7 +20,6 @@ class ThumbnailCreator:
         self.__resize_event_timer.setSingleShot(True)
         self.__resize_event_timer.timeout.connect(self.__on_resize_event_timer_expired)
         self.__resize_event_timer_interval = 250
-        self.__extracted_frame_counts = []
         self.__extractor = _QPixmapsExtractor(
             self.media_item,
             self.__q_pixmap_w,
@@ -125,11 +124,8 @@ class ThumbnailCreator:
 
     @Slot()
     def __on_resize_event_timer_expired(self):
-        frame_amount = self.__calculate_required_frame_amount()
-        if frame_amount not in self.__q_pixmaps.keys():
-            if frame_amount not in self.__extracted_frame_counts:
-                self.__extracted_frame_counts.append(frame_amount)
-                self.__extractor.put_in_queue(frame_amount)
+        print(threading.enumerate())
+        self.__extractor.put_in_queue(self.__calculate_required_frame_amount())
 
     @Slot()
     def __on_extraction_finished(self, amt_extracted, q_pixmaps_list):
@@ -159,6 +155,7 @@ class _QPixmapsExtractor(QThread):
         self.__video_file_path = self.__media_item.media_player.file_path
         self.__frame_amount_queue = queue.Queue()
         self.__work_available_flag = threading.Event()
+        self.__extracted_frame_amounts = []
 
     def run(self):
         while True:
@@ -174,9 +171,11 @@ class _QPixmapsExtractor(QThread):
                 self.__work_available_flag.clear()
 
     def put_in_queue(self, frame_amount):
-        self.__frame_amount_queue.put(frame_amount)
-        if not self.__work_available_flag.is_set():
-            self.__work_available_flag.set()
+        if frame_amount not in self.__extracted_frame_amounts:
+            self.__extracted_frame_amounts.append(frame_amount)
+            self.__frame_amount_queue.put(frame_amount)
+            if not self.__work_available_flag.is_set():
+                self.__work_available_flag.set()
 
     def __calculate_extraction_timestamps(self, frame_amount):
         interval = int(self.__video_duration / frame_amount)
