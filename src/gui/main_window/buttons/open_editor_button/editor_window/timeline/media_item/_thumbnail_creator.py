@@ -124,12 +124,11 @@ class ThumbnailCreator:
 
     @Slot()
     def __on_resize_event_timer_expired(self):
-        print(threading.enumerate())
         self.__extractor.put_in_queue(self.__calculate_required_frame_amount())
 
     @Slot()
-    def __on_extraction_finished(self, amt_extracted, q_pixmaps_list):
-        self.__q_pixmaps.update({amt_extracted: q_pixmaps_list})
+    def __on_extraction_finished(self, frame_amount, q_pixmaps_list):
+        self.__q_pixmaps.update({frame_amount: q_pixmaps_list})
         self.media_item.update()
 
     def on_view_resize(self):
