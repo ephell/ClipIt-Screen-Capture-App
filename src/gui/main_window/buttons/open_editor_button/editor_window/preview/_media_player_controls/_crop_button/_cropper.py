@@ -33,6 +33,7 @@ class Cropper(QGraphicsRectItem):
         self.scene.addItem(self)
         self.max_rect = max_rect
         self.setRect(self.max_rect)
+        self.min_possible_size = 50 # 50x50
         self.handles = {}
         self.handle_selected = None
         self.mouse_press_pos = None
@@ -157,7 +158,7 @@ class Cropper(QGraphicsRectItem):
         boundingRect = self.boundingRect()
         rect = self.rect()
         diff = QPointF(0, 0)
-        min_size = 25
+        min_size = self.min_possible_size
         self.prepareGeometryChange()
 
         if self.handle_selected == self.handle_top_left:
@@ -172,9 +173,9 @@ class Cropper(QGraphicsRectItem):
             rect.setLeft(boundingRect.left() + offset)
             rect.setTop(boundingRect.top() + offset)
             # Prevent overlapping.
-            if rect.left() >= rect.right():
+            if rect.left() > rect.right() - min_size:
                 rect.setLeft(rect.right() - min_size)
-            if rect.top() >= rect.bottom():
+            if rect.top() > rect.bottom() - min_size:
                 rect.setTop(rect.bottom() - min_size)
 
         elif self.handle_selected == self.handle_top_middle:
@@ -184,7 +185,7 @@ class Cropper(QGraphicsRectItem):
             boundingRect.setTop(toY)
             rect.setTop(boundingRect.top() + offset)
             # Prevent overlapping.
-            if rect.top() >= rect.bottom():
+            if rect.top() > rect.bottom() - min_size:
                 rect.setTop(rect.bottom() - min_size)
 
         elif self.handle_selected == self.handle_top_right:
@@ -199,9 +200,9 @@ class Cropper(QGraphicsRectItem):
             rect.setRight(boundingRect.right() - offset)
             rect.setTop(boundingRect.top() + offset)
             # Prevent overlapping.
-            if rect.right() <= rect.left():
+            if rect.right() < rect.left() + min_size:
                 rect.setRight(rect.left() + min_size)
-            if rect.top() >= rect.bottom():
+            if rect.top() > rect.bottom() - min_size:
                 rect.setTop(rect.bottom() - min_size)
 
         elif self.handle_selected == self.handle_middle_left:
@@ -211,7 +212,7 @@ class Cropper(QGraphicsRectItem):
             boundingRect.setLeft(toX)
             rect.setLeft(boundingRect.left() + offset)
             # Prevent overlapping.
-            if rect.left() >= rect.right():
+            if rect.left() > rect.right() - min_size:
                 rect.setLeft(rect.right() - min_size)
 
         elif self.handle_selected == self.handle_middle_right:
@@ -221,7 +222,7 @@ class Cropper(QGraphicsRectItem):
             boundingRect.setRight(toX)
             rect.setRight(boundingRect.right() - offset)
             # Prevent overlapping.
-            if rect.right() <= rect.left():
+            if rect.right() < rect.left() + min_size:
                 rect.setRight(rect.left() + min_size)
 
         elif self.handle_selected == self.handle_bottom_left:
@@ -236,9 +237,9 @@ class Cropper(QGraphicsRectItem):
             rect.setLeft(boundingRect.left() + offset)
             rect.setBottom(boundingRect.bottom() - offset)
             # Prevent overlapping.
-            if rect.left() >= rect.right():
+            if rect.left() > rect.right() - min_size:
                 rect.setLeft(rect.right() - min_size)
-            if rect.bottom() <= rect.top():
+            if rect.bottom() < rect.top() + min_size:
                 rect.setBottom(rect.top() + min_size)
 
         elif self.handle_selected == self.handle_bottom_middle:
@@ -248,7 +249,7 @@ class Cropper(QGraphicsRectItem):
             boundingRect.setBottom(toY)
             rect.setBottom(boundingRect.bottom() - offset)
             # Prevent overlapping.
-            if rect.bottom() <= rect.top():
+            if rect.bottom() < rect.top() + min_size:
                 rect.setBottom(rect.top() + min_size)
 
         elif self.handle_selected == self.handle_bottom_right:
@@ -263,9 +264,9 @@ class Cropper(QGraphicsRectItem):
             rect.setRight(boundingRect.right() - offset)
             rect.setBottom(boundingRect.bottom() - offset)
             # Prevent overlapping.
-            if rect.right() <= rect.left():
+            if rect.right() < rect.left() + min_size:
                 rect.setRight(rect.left() + min_size)
-            if rect.bottom() <= rect.top():
+            if rect.bottom() < rect.top() + min_size:
                 rect.setBottom(rect.top() + min_size)
 
         # Make sure it's not possible to resize past 'max_rect' bounds.
