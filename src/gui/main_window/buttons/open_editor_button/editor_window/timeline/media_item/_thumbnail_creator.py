@@ -40,7 +40,10 @@ class ThumbnailCreator:
         return self.__crop_to_fit(self.__create_thumbnail(frame_amount))
 
     def __calculate_required_frame_amount(self):
-        return int(self.media_item.get_max_possible_width() / self.__q_pixmap_w)
+        return max(
+            1,
+            int(self.media_item.get_max_possible_width() / self.__q_pixmap_w)
+        )
 
     def __is_key_valid(self, key):
         return key in self.__q_pixmaps.keys()
@@ -118,6 +121,11 @@ class ThumbnailCreator:
             self.media_item.boundingRect().height(),
             mode=Qt.FastTransformation
         )
+        # This condition triggers when 'media_item.boundingRect().height()' is 
+        # lower than the height of the video. When that happens only one
+        # frame is extracted and used as a thumbnail.
+        if frame_width < scaled_q_pixmap.width():
+            return frame_width, scaled_q_pixmap.height()
         return scaled_q_pixmap.width(), scaled_q_pixmap.height()
 
     @Slot()
