@@ -275,8 +275,8 @@ class Cropper(QGraphicsRectItem):
         self.__update_handles_pos()
 
         # Emit the new dimensions of the cropper.
-        top_l_x = round(self.rect().x())
-        top_l_y = round(self.rect().y())
-        width = round(self.rect().width())
-        height = round(self.rect().height())
+        top_l_x = int(round(self.rect().x()))
+        top_l_y = int(round(self.rect().y()))
+        width = int(round(self.rect().width()))
+        height = int(round(self.rect().height()))
         self.scene.cropper_resized_signal.emit(top_l_x, top_l_y, width, height)
