@@ -2,21 +2,28 @@ from PySide6.QtCore import Signal, Slot, QThread
 from PySide6.QtWidgets import (
     QPushButton, QDialog, QFileDialog, QMessageBox
 )
-from proglog import ProgressBarLogger
 
 from utilities.video import VideoUtils
+from ._progress_loggers import ProgressLoggers
 from ._rendering_progress_dialog.rendering_progress_dialog import RenderingProgressDialog
 from settings.settings import Settings
 
 
 class RenderAndSaveButton(QPushButton):
 
-    rendering_progress_signal = Signal(int)
+    final_file_rendering_progress_signal = Signal(int)
+    temp_cut_video_rendering_progress_signal = Signal(int)
+    cropping_progress_signal = Signal(int)
     file_rendered_signal = Signal()
 
     def __init__(self, parent):
         super().__init__(parent)
         self.media_player = None
+        self.__progress_loggers = ProgressLoggers(
+            self.final_file_rendering_progress_signal,
+            self.temp_cut_video_rendering_progress_signal,
+            self.cropping_progress_signal
+        )
 
     def set_media_player(self, media_player):
         self.media_player = media_player
@@ -60,7 +67,6 @@ class RenderAndSaveButton(QPushButton):
         return (top_l_x, top_l_y, bot_r_x, bot_r_y)
 
     def __render_and_save(self, input_file_path, output_file_path):
-        self.logger = _RenderingProgressLogger(self.rendering_progress_signal)
         self.rendering_thread = _RenderingThread(
             self.__get_start_time(),
             self.__get_end_time(),
@@ -68,14 +74,20 @@ class RenderAndSaveButton(QPushButton):
             output_file_path,
             self.__get_volume(),
             self.__get_crop_area(),
-            self.logger
+            self.__progress_loggers
         )
         self.rendering_progress_dialog = RenderingProgressDialog(self)
-        self.rendering_progress_signal.connect(
-            self.rendering_progress_dialog.progress_bar.setValue
+        self.final_file_rendering_progress_signal.connect(
+            self.rendering_progress_dialog.final_file_rendering_progress_received
+        )
+        self.temp_cut_video_rendering_progress_signal.connect(
+            self.rendering_progress_dialog.temp_cut_video_rendering_progress_received
+        )
+        self.cropping_progress_signal.connect(
+            self.rendering_progress_dialog.cropping_progress_received  
         )
         self.rendering_thread.finished.connect(
-            lambda: self.rendering_progress_dialog.on_rendering_complete(
+            lambda: self.rendering_progress_dialog.rendering_finished(
                 output_file_path
             )
         )
@@ -140,15 +152,3 @@ class _RenderingThread(QThread):
             self.crop_area,
             self.logger
         )
-
-
-class _RenderingProgressLogger(ProgressBarLogger):
-
-    def __init__(self, progress_signal):
-        super().__init__()
-        self.progress_signal = progress_signal
-
-    def bars_callback(self, bar, attr, value, old_value=None):
-        if attr == "index":
-            percentage = (value / self.bars[bar]["total"]) * 100
-            self.progress_signal.emit(percentage)

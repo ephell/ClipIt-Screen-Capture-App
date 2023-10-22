@@ -17,20 +17,48 @@ class RenderingProgressDialog(QDialog, Ui_RenderingProgressDialog):
         self.setWindowModality(Qt.ApplicationModal)
         self.setFixedSize(self.size())
         self.close_button.clicked.connect(self.close)
-        self.is_rendering_complete = False
+        self.__is_rendering_finished = False
+        self.__is_final_file_rendering_text_set = False
+        self.__is_temp_cut_video_rendering_text_set = False
+        self.__is_cropping_progress_text_set = False
+        self.__final_file_rendering_text = "Rendering..."
+        self.__temp_cut_video_rendering_text = "Preparing video for cropping..."
+        self.__cropping_text = "Cropping..."
+        self.__rendering_complete_text = "File successfully rendered and saved!"
 
     """Override"""
     def keyPressEvent(self, event):
-        if not self.is_rendering_complete:
+        if not self.__is_rendering_finished:
             if event.key() == Qt.Key_Escape:
                 event.ignore()
         else:
             super().keyPressEvent(event)
 
     @Slot()
-    def on_rendering_complete(self, file_path):
-        self.status_message_label.setText("File successfully rendered and saved!")
+    def final_file_rendering_progress_received(self, progress_percentage):
+        if not self.__is_final_file_rendering_text_set:
+            self.status_message_label.setText(self.__final_file_rendering_text)
+            self.__is_final_file_rendering_text_set = True
+        self.progress_bar.setValue(progress_percentage)
+
+    @Slot()
+    def temp_cut_video_rendering_progress_received(self, progress_percentage):
+        if not self.__is_temp_cut_video_rendering_text_set:
+            self.status_message_label.setText(self.__temp_cut_video_rendering_text)
+            self.__is_temp_cut_video_rendering_text_set = True
+        self.progress_bar.setValue(progress_percentage)
+
+    @Slot()
+    def cropping_progress_received(self, progress_percentage):
+        if not self.__is_cropping_progress_text_set:
+            self.status_message_label.setText(self.__cropping_text)
+            self.__is_cropping_progress_text_set = True
+        self.progress_bar.setValue(progress_percentage)
+
+    @Slot()
+    def rendering_finished(self, file_path):
+        self.status_message_label.setText(self.__rendering_complete_text)
         self.close_button.setEnabled(True)
-        self.is_rendering_complete = True
+        self.__is_rendering_finished = True
         dir_path = os.path.dirname(file_path)
         os.startfile(dir_path)

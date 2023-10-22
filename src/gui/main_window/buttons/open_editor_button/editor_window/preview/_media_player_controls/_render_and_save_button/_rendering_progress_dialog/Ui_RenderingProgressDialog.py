@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'RenderingProgressDialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.1
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -23,7 +23,7 @@ class Ui_RenderingProgressDialog(object):
     def setupUi(self, RenderingProgressDialog):
         if not RenderingProgressDialog.objectName():
             RenderingProgressDialog.setObjectName(u"RenderingProgressDialog")
-        RenderingProgressDialog.resize(500, 166)
+        RenderingProgressDialog.resize(500, 169)
         self.verticalLayout = QVBoxLayout(RenderingProgressDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.main_widget_frame = QFrame(RenderingProgressDialog)
@@ -114,11 +114,12 @@ class Ui_RenderingProgressDialog(object):
 
         self.retranslateUi(RenderingProgressDialog)
 
+        QMetaObject.connectSlotsByName(RenderingProgressDialog)
     # setupUi
 
     def retranslateUi(self, RenderingProgressDialog):
         RenderingProgressDialog.setWindowTitle(QCoreApplication.translate("RenderingProgressDialog", u"Rendering And Saving", None))
-        self.status_message_label.setText(QCoreApplication.translate("RenderingProgressDialog", u"Rendering and saving ...", None))
+        self.status_message_label.setText(QCoreApplication.translate("RenderingProgressDialog", u"...", None))
         self.close_button.setText(QCoreApplication.translate("RenderingProgressDialog", u"Close", None))
     # retranslateUi
 
