@@ -131,11 +131,11 @@ class _RenderingThread(QThread):
         self.logger = logger
 
     def run(self):
-        VideoUtils.cut_and_save_video(
-            self.cut_begin,
-            self.cut_end,
+        VideoUtils.render_and_save_video(
             self.input_file_path,
             self.output_file_path,
+            self.cut_begin,
+            self.cut_end,
             self.volume,
             self.crop_area,
             self.logger
