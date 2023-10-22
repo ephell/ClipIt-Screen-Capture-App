@@ -4,7 +4,7 @@ log = GlobalLogger.LOGGER
 import multiprocessing as mp
 from time import perf_counter, sleep
 
-import cv2
+import imageio
 import mss
 import numpy as np
 
@@ -38,8 +38,8 @@ class VideoRecorder(mp.Process):
         self.file_generation_choice_value = file_generation_choice_value
         self.captured_filename = Settings.get_temp_file_paths().CAPTURED_VIDEO_FILE
         self.reencoded_filename = Settings.get_temp_file_paths().REENCODED_VIDEO_FILE
-        self.frame_size = (int(self.region[2]), int(self.region[3]))
-        self.cv2_writer_fourcc = "mp4v"
+        self.macro_block_size = 2
+        self.quality = 5 # 10 is max (pretty large file size)
 
     def run(self):
         fps, total_frames_captured = self.__capture_and_save_video()
@@ -49,7 +49,7 @@ class VideoRecorder(mp.Process):
             self.file_generation_choice_value is None
             or self.file_generation_choice_value.value == True
         ):
-            self.__reencode_captured_video(fps, total_frames_captured)
+            self.__reencode_with_precise_fps(fps, total_frames_captured)
 
     def __capture_and_save_video(self):
         with mss.mss() as sct:
@@ -60,11 +60,12 @@ class VideoRecorder(mp.Process):
                 "height": int(self.region[3]),
                 "mon": self.monitor,
             }
-            encoder = cv2.VideoWriter(
-                filename=self.captured_filename,
-                fourcc=cv2.VideoWriter_fourcc(*self.cv2_writer_fourcc), 
+
+            frame_writer = imageio.get_writer(
+                self.captured_filename,
                 fps=self.fps,
-                frameSize=self.frame_size
+                quality=self.quality,
+                macro_block_size=self.macro_block_size
             )
 
             # Syncing with other recording processes.
@@ -82,45 +83,49 @@ class VideoRecorder(mp.Process):
             if self.recording_started is not None:
                 self.recording_started.value = start_time
 
-            fps = self.fps
             total_frames_captured = 0
             while not self.stop_event.is_set():
                 frame_start_time = perf_counter()
-                screen = np.array(sct.grab(monitor))[:, :, :3]
+                frame = np.array(sct.grab(monitor))
+                frame = self.__remove_alpha_channel(frame)
+                frame = self.__flip_from_BGRA_to_RGB(frame)
                 total_frames_captured += 1
-                encoder.write(screen)
+                frame_writer.append_data(frame)
                 frame_capture_time = perf_counter() - frame_start_time
-                sleep_time = (1.0 / fps) - frame_capture_time
+                sleep_time = (1.0 / self.fps) - frame_capture_time
                 if sleep_time > 0:
                     sleep(sleep_time)
-            encoder.release()
+
+            frame_writer.close()
             log.info("Finished recording video!")
 
         avg_fps = total_frames_captured / (perf_counter() - start_time)
 
         return avg_fps, total_frames_captured
 
-    def __reencode_captured_video(self, fps, total_frames_in_input_file):
-        """Reencodes video with precise fps."""
-        video_to_reencode = cv2.VideoCapture(self.captured_filename)
-        reencoder = cv2.VideoWriter(
-            filename=self.reencoded_filename,
-            fourcc=cv2.VideoWriter_fourcc(*self.cv2_writer_fourcc), 
-            fps=fps,
-            frameSize=self.frame_size
-        )
+    def __remove_alpha_channel(self, frame: np.ndarray):
+        return frame[:, :, :3]
+
+    def __flip_from_BGRA_to_RGB(self, frame: np.ndarray):
+        return np.flip(frame[:, :, :3], 2)
+
+    def __reencode_with_precise_fps(self, fps, total_frames_in_input_file):
+        """Rewrites the video file with precise fps."""
         log.info("Started reencoding video ... ")
-        frames_reencoded = 0
-        while video_to_reencode.isOpened():
-            frame_read_successfully, frame = video_to_reencode.read()
-            if frame_read_successfully:
-                reencoder.write(frame)
-                frames_reencoded += 1
-                if self.reencoding_progress_queue is not None:
-                    progress = (frames_reencoded / total_frames_in_input_file) * 100
-                    self.reencoding_progress_queue.put(progress)
-            else:
-                break
-        video_to_reencode.release()
-        reencoder.release()
+        input_video_reader = imageio.get_reader(self.captured_filename)
+        output_video_writer = imageio.get_writer(
+            self.reencoded_filename,
+            fps=fps,
+            quality=self.quality,
+            macro_block_size=self.macro_block_size
+        )
+        frames_written = 0
+        for frame in input_video_reader:
+            output_video_writer.append_data(frame)
+            frames_written += 1
+            if self.reencoding_progress_queue is not None:
+                progress = (frames_written / total_frames_in_input_file) * 100
+                self.reencoding_progress_queue.put(progress)
+        input_video_reader.close()
+        output_video_writer.close()
         log.info("Finished reencoding video!")
