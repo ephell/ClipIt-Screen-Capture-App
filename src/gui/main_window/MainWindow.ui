@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>225</width>
-    <height>280</height>
+    <width>350</width>
+    <height>155</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,20 +18,34 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>225</width>
-    <height>280</height>
+    <width>350</width>
+    <height>155</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>225</width>
-    <height>280</height>
+    <width>350</width>
+    <height>155</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>ClipIt</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget {
+	background-color: rgb(40, 40, 40);
+	color: white;
+}
+
+QPushButton {
+	background-color: rgb(65, 65, 65);
+    border: 1px solid rgb(125, 125, 125);
+}</string>
+  </property>
   <widget class="QWidget" name="central_widget">
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
    <layout class="QVBoxLayout" name="central_layout">
     <item>
      <widget class="QFrame" name="capture_timer_frame">
@@ -83,7 +97,7 @@
         <widget class="QLabel" name="capture_duration_label">
          <property name="font">
           <font>
-           <pointsize>23</pointsize>
+           <pointsize>32</pointsize>
            <bold>true</bold>
           </font>
          </property>
@@ -109,46 +123,138 @@
      </widget>
     </item>
     <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+       <widget class="Line" name="separator_line">
+        <property name="minimumSize">
+         <size>
+          <width>285</width>
+          <height>1</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>285</width>
+          <height>1</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: gray;</string>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="QFrame" name="button_frame">
+      <property name="styleSheet">
+       <string notr="true">#record_button,
+#screenshot_button, 
+#open_editor_button, 
+#open_capture_folder_button, 
+#settings_button {
+    background-color: rgb(65, 65, 65);
+    border: 1px solid rgb(125, 125, 125);
+    border-radius: 20px;
+    max-width: 40px;
+    max-height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+/*  Images */
+#record_button {
+ 	image: url(:/icons/buttons/icons/record_button/1x/baseline_videocam_white_24dp.png);
+}
+#screenshot_button{
+	image: url(:/icons/buttons/icons/screenshot_button/1x/baseline_screenshot_monitor_white_24dp.png);
+}
+#open_editor_button{
+	image: url(:/icons/buttons/icons/open_editor_button/1x/baseline_movie_edit_white_24dp.png);
+}
+#open_capture_folder_button{
+	image: url(:/icons/buttons/icons/open_capture_folder_button/1x/baseline_folder_white_24dp.png);
+}
+#settings_button{
+	image: url(:/icons/buttons/icons/settings_button/1x/baseline_settings_white_24dp.png);
+}
+
+/*  Hover */
+#record_button:hover, 
+#screenshot_button:hover,
+ #open_editor_button:hover, 
+#open_capture_folder_button:hover,
+ #settings_button:hover {
+    background-color: rgb(75, 75, 75);
+}
+
+/*  Pressed */
+#record_button:pressed, 
+#screenshot_button:pressed,
+ #open_editor_button:pressed, 
+#open_capture_folder_button:pressed,
+ #settings_button:pressed {
+    background-color: rgb(45, 45, 45);
+}</string>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="RecordButton" name="record_button">
+         <property name="styleSheet">
+          <string notr="true">
+</string>
+         </property>
          <property name="text">
-          <string>Start/Stop Recording</string>
+          <string/>
          </property>
         </widget>
        </item>
        <item>
         <widget class="ScreenshotButton" name="screenshot_button">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
          <property name="text">
-          <string>Screenshot</string>
+          <string/>
          </property>
         </widget>
        </item>
        <item>
         <widget class="OpenEditorButton" name="open_editor_button">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
          <property name="text">
-          <string>Open Editor</string>
+          <string/>
          </property>
         </widget>
        </item>
        <item>
         <widget class="OpenCaptureFolderButton" name="open_capture_folder_button">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
          <property name="text">
-          <string>Open Capture Folder</string>
+          <string/>
          </property>
         </widget>
        </item>
        <item>
         <widget class="SettingsButton" name="settings_button">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
          <property name="text">
-          <string>Settings</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -185,6 +291,8 @@
    <header>.buttons.open_editor_button.open_editor_button</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="main_window_button_icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -47,7 +47,7 @@
            </font>
           </property>
           <property name="text">
-           <string>(2/3) Merging speaker and microphone audio ... </string>
+           <string>...</string>
           </property>
          </widget>
         </item>

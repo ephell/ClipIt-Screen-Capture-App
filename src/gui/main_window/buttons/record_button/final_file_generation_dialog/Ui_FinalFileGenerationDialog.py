@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'FinalFileGenerationDialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.1
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -88,6 +88,6 @@ class Ui_FinalFileGenerationDialog(object):
 
     def retranslateUi(self, FinalFileGenerationDialog):
         FinalFileGenerationDialog.setWindowTitle(QCoreApplication.translate("FinalFileGenerationDialog", u"Generating Final File", None))
-        self.status_message_label.setText(QCoreApplication.translate("FinalFileGenerationDialog", u"(2/3) Merging speaker and microphone audio ... ", None))
+        self.status_message_label.setText(QCoreApplication.translate("FinalFileGenerationDialog", u"...", None))
     # retranslateUi
 
