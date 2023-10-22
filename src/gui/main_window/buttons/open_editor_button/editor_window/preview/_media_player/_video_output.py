@@ -57,4 +57,9 @@ class VideoOutput(QGraphicsVideoItem):
         Returns the rectangle that represents the currently visible part
         of the video output.
         """
-        return (self.top_l_x, self.top_l_y, self.width, self.height)
+        return (
+            int(self.top_l_x), 
+            int(self.top_l_y), 
+            int(self.width),
+            int(self.height)
+        )
