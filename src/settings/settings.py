@@ -62,6 +62,7 @@ class _TempFilePaths:
     DIR_PATH = os.path.join(os.getcwd(), "temp")
     CAPTURED_VIDEO_FILE = os.path.join(DIR_PATH, "captured_video.mp4")
     REENCODED_VIDEO_FILE = os.path.join(DIR_PATH, "reencoded_video.mp4")
+    CUT_VIDEO_FILE = os.path.join(DIR_PATH, "cut_video.mp4")
     CROPPED_VIDEO_FILE = os.path.join(DIR_PATH, "cropped_video.mp4")
     LOOPBACK_AUDIO_FILE = os.path.join(DIR_PATH, "loopback_audio.wav")
     MICROPHONE_AUDIO_FILE = os.path.join(DIR_PATH, "microphone_audio.wav")
