@@ -38,15 +38,7 @@ class Ui_MainWindow(object):
         MainWindow.setSizePolicy(sizePolicy)
         MainWindow.setMinimumSize(QSize(350, 155))
         MainWindow.setMaximumSize(QSize(350, 155))
-        MainWindow.setStyleSheet(u"QWidget {\n"
-"	background-color: rgb(40, 40, 40);\n"
-"	color: white;\n"
-"}\n"
-"\n"
-"QPushButton {\n"
-"	background-color: rgb(65, 65, 65);\n"
-"    border: 1px solid rgb(125, 125, 125);\n"
-"}")
+        MainWindow.setStyleSheet(u"")
         self.central_widget = QWidget(MainWindow)
         self.central_widget.setObjectName(u"central_widget")
         self.central_widget.setStyleSheet(u"")
@@ -103,55 +95,7 @@ class Ui_MainWindow(object):
 
         self.button_frame = QFrame(self.central_widget)
         self.button_frame.setObjectName(u"button_frame")
-        self.button_frame.setStyleSheet(u"#record_button,\n"
-"#screenshot_button, \n"
-"#open_editor_button, \n"
-"#open_capture_folder_button, \n"
-"#settings_button {\n"
-"    background-color: rgb(65, 65, 65);\n"
-"    border: 1px solid rgb(125, 125, 125);\n"
-"    border-radius: 20px;\n"
-"    max-width: 40px;\n"
-"    max-height: 40px;\n"
-"    min-width: 40px;\n"
-"    min-height: 40px;\n"
-"}\n"
-"\n"
-"/*  Images */\n"
-"#record_button {\n"
-" 	image: url(:/icons/buttons/icons/record_button/1x/baseline_videocam_white_24dp.png);\n"
-"}\n"
-"#screenshot_button{\n"
-"	image: url(:/icons/buttons/icons/screenshot_button/1x/baseline_screenshot_monitor_white_24dp.png);\n"
-"}\n"
-"#open_editor_button{\n"
-"	image: url(:/icons/buttons/icons/open_editor_button/1x/baseline_movie_edit_white_24dp.png);\n"
-"}\n"
-"#open_capture_folder_button{\n"
-"	image: url(:/icons/buttons/icons/open_capture_folder_button/1x/baseline_folder_white_24dp.png);\n"
-"}\n"
-"#settings_button{\n"
-"	image: url(:/icons/buttons/icons/settings_button/1x/baseline_settings_white_24dp.png);\n"
-"}\n"
-"\n"
-"/* "
-                        " Hover */\n"
-"#record_button:hover, \n"
-"#screenshot_button:hover,\n"
-" #open_editor_button:hover, \n"
-"#open_capture_folder_button:hover,\n"
-" #settings_button:hover {\n"
-"    background-color: rgb(75, 75, 75);\n"
-"}\n"
-"\n"
-"/*  Pressed */\n"
-"#record_button:pressed, \n"
-"#screenshot_button:pressed,\n"
-" #open_editor_button:pressed, \n"
-"#open_capture_folder_button:pressed,\n"
-" #settings_button:pressed {\n"
-"    background-color: rgb(45, 45, 45);\n"
-"}")
+        self.button_frame.setStyleSheet(u"")
         self.button_frame.setFrameShape(QFrame.StyledPanel)
         self.button_frame.setFrameShadow(QFrame.Raised)
         self.horizontalLayout = QHBoxLayout(self.button_frame)

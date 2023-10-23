@@ -14,6 +14,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, app):
         super().__init__()
         self.setupUi(self)
+        self.__set_stylesheet("src/gui/main_window/MainWindow.qss")
         self.app = app
         self.first_window_resize_event = True
         self.hotkey_listener = HotkeyListener()
@@ -47,6 +48,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.__on_hotkey_detected
         )
 
+    def __set_stylesheet(self, qss_file_path: str):
+        with open(qss_file_path, "r") as qss_file:
+            self.setStyleSheet(qss_file.read())
+
     """Override"""
     def closeEvent(self, event):
         super().closeEvent(event)
@@ -66,7 +71,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.setFixedSize(event.size())
             self.first_window_resize_event = False
         super().resizeEvent(event)
-
 
     @Slot()
     def __on_hotkey_detected(self, hotkey_name: str):
