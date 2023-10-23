@@ -31,9 +31,9 @@ class Ui_SettingsWindow(object):
     def setupUi(self, SettingsWindow):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
-        SettingsWindow.resize(425, 240)
-        SettingsWindow.setMinimumSize(QSize(425, 240))
-        SettingsWindow.setMaximumSize(QSize(425, 240))
+        SettingsWindow.resize(425, 270)
+        SettingsWindow.setMinimumSize(QSize(425, 270))
+        SettingsWindow.setMaximumSize(QSize(425, 270))
         self.verticalLayout = QVBoxLayout(SettingsWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.captures_dir_group_box = QGroupBox(SettingsWindow)
@@ -98,11 +98,15 @@ class Ui_SettingsWindow(object):
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.screenshot_line_edit = ScreenshotLineEdit(self.hotkeys_group_box)
         self.screenshot_line_edit.setObjectName(u"screenshot_line_edit")
+        self.screenshot_line_edit.setMinimumSize(QSize(0, 27))
+        self.screenshot_line_edit.setMaximumSize(QSize(16777215, 27))
 
         self.verticalLayout_3.addWidget(self.screenshot_line_edit)
 
         self.start_stop_recording_line_edit = StartStopRecordingLineEdit(self.hotkeys_group_box)
         self.start_stop_recording_line_edit.setObjectName(u"start_stop_recording_line_edit")
+        self.start_stop_recording_line_edit.setMinimumSize(QSize(0, 27))
+        self.start_stop_recording_line_edit.setMaximumSize(QSize(16777215, 27))
         self.start_stop_recording_line_edit.setReadOnly(True)
 
         self.verticalLayout_3.addWidget(self.start_stop_recording_line_edit)

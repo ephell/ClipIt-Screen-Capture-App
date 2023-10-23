@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>425</width>
-    <height>240</height>
+    <height>270</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>425</width>
-    <height>240</height>
+    <height>270</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>425</width>
-    <height>240</height>
+    <height>270</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -107,10 +107,35 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="ScreenshotLineEdit" name="screenshot_line_edit"/>
+           <widget class="ScreenshotLineEdit" name="screenshot_line_edit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>27</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>27</height>
+             </size>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="StartStopRecordingLineEdit" name="start_stop_recording_line_edit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>27</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>27</height>
+             </size>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
