@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsItem
 class RightHandle(QGraphicsRectItem):
 
     __THUMBNAIL_PATH = "src/gui/main_window/buttons/open_editor_button/editor_window/timeline/media_item/media_item_handle.jpg"
+    __THUMBNAIL_IN_FOCUS_PATH = "src/gui/main_window/buttons/open_editor_button/editor_window/timeline/media_item/media_item_handle_in_focus.jpg"
 
     def __init__(self, media_item):
         super().__init__()
@@ -22,15 +23,19 @@ class RightHandle(QGraphicsRectItem):
         self.initial_y = self.parent.scenePos().y()
         self.setPos(self.initial_x, self.initial_y)
         self.media_duration = self.parent.media_duration
-        self.__thumbnail =  QPixmap(self.__THUMBNAIL_PATH)
-        self.__scaled_thumbnail = self.__thumbnail.scaled(
-            self.boundingRect().size().toSize(), 
-            Qt.KeepAspectRatio
-        )
+        self.__thumbnail = None
 
     """Override"""
     def paint(self, painter, option, widget):
-        painter.setBrush(QBrush(self.__scaled_thumbnail))
+        if self.hasFocus():
+            self.__thumbnail = QPixmap(self.__THUMBNAIL_IN_FOCUS_PATH)
+        elif not self.hasFocus():
+            self.__thumbnail = QPixmap(self.__THUMBNAIL_PATH)
+        self.__thumbnail = self.__thumbnail.scaled(
+            self.boundingRect().size().toSize(), 
+            Qt.KeepAspectRatio
+        )
+        painter.setBrush(QBrush(self.__thumbnail))
         painter.drawRect(self.boundingRect())
         painter.setPen(self.parent.contour_color)
         painter.drawRect(self.boundingRect())
