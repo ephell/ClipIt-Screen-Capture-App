@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icons">
+    <file>buttons/icons/screenshot_button/1x/baseline_camera_alt_white_24dp.png</file>
+    <file>buttons/icons/screenshot_button/2x/baseline_camera_alt_white_24dp.png</file>
     <file>buttons/icons/settings_button/1x/baseline_settings_white_24dp.png</file>
     <file>buttons/icons/settings_button/2x/baseline_settings_white_24dp.png</file>
     <file>buttons/icons/open_capture_folder_button/1x/baseline_folder_white_24dp.png</file>

@@ -16,8 +16,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
-    QMainWindow, QSizePolicy, QSpacerItem, QVBoxLayout,
-    QWidget)
+    QMainWindow, QSizePolicy, QVBoxLayout, QWidget)
 
 from .buttons.open_capture_folder_button.open_capture_folder_button import OpenCaptureFolderButton
 from .buttons.open_editor_button.open_editor_button import OpenEditorButton
@@ -30,60 +29,41 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(350, 155)
+        MainWindow.resize(320, 170)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
-        MainWindow.setMinimumSize(QSize(350, 155))
-        MainWindow.setMaximumSize(QSize(350, 155))
+        MainWindow.setMinimumSize(QSize(320, 170))
+        MainWindow.setMaximumSize(QSize(320, 170))
         MainWindow.setStyleSheet(u"")
         self.central_widget = QWidget(MainWindow)
         self.central_widget.setObjectName(u"central_widget")
         self.central_widget.setStyleSheet(u"")
-        self.central_layout = QVBoxLayout(self.central_widget)
-        self.central_layout.setObjectName(u"central_layout")
-        self.capture_timer_frame = QFrame(self.central_widget)
-        self.capture_timer_frame.setObjectName(u"capture_timer_frame")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.capture_timer_frame.sizePolicy().hasHeightForWidth())
-        self.capture_timer_frame.setSizePolicy(sizePolicy1)
-        self.capture_timer_frame.setMinimumSize(QSize(0, 60))
-        self.capture_timer_frame.setMaximumSize(QSize(16777215, 60))
-        self.capture_timer_frame.setFrameShape(QFrame.StyledPanel)
-        self.capture_timer_frame.setFrameShadow(QFrame.Raised)
-        self.video_capture_timer_frame_layout = QHBoxLayout(self.capture_timer_frame)
-        self.video_capture_timer_frame_layout.setObjectName(u"video_capture_timer_frame_layout")
-        self.video_capture_timer_frame_layout.setContentsMargins(-1, 9, -1, 9)
-        self.capture_timer_left_h_spacer = QSpacerItem(113, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.video_capture_timer_frame_layout.addItem(self.capture_timer_left_h_spacer)
-
-        self.capture_duration_label = QLabel(self.capture_timer_frame)
+        self.verticalLayout_4 = QVBoxLayout(self.central_widget)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_2 = QVBoxLayout()
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.capture_duration_label = QLabel(self.central_widget)
         self.capture_duration_label.setObjectName(u"capture_duration_label")
         font = QFont()
         font.setPointSize(32)
         font.setBold(True)
         self.capture_duration_label.setFont(font)
 
-        self.video_capture_timer_frame_layout.addWidget(self.capture_duration_label)
-
-        self.capture_timer_right_h_spacer = QSpacerItem(113, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.video_capture_timer_frame_layout.addItem(self.capture_timer_right_h_spacer)
+        self.verticalLayout_2.addWidget(self.capture_duration_label, 0, Qt.AlignHCenter|Qt.AlignVCenter)
 
 
-        self.central_layout.addWidget(self.capture_timer_frame)
+        self.verticalLayout_4.addLayout(self.verticalLayout_2)
 
         self.verticalLayout = QVBoxLayout()
+        self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.separator_line = QFrame(self.central_widget)
         self.separator_line.setObjectName(u"separator_line")
-        self.separator_line.setMinimumSize(QSize(285, 1))
-        self.separator_line.setMaximumSize(QSize(285, 1))
+        self.separator_line.setMinimumSize(QSize(272, 3))
+        self.separator_line.setMaximumSize(QSize(272, 3))
         self.separator_line.setStyleSheet(u"background-color: gray;")
         self.separator_line.setFrameShape(QFrame.HLine)
         self.separator_line.setFrameShadow(QFrame.Sunken)
@@ -91,11 +71,12 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.separator_line, 0, Qt.AlignHCenter|Qt.AlignVCenter)
 
 
-        self.central_layout.addLayout(self.verticalLayout)
+        self.verticalLayout_4.addLayout(self.verticalLayout)
 
+        self.verticalLayout_3 = QVBoxLayout()
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.button_frame = QFrame(self.central_widget)
         self.button_frame.setObjectName(u"button_frame")
-        self.button_frame.setStyleSheet(u"")
         self.button_frame.setFrameShape(QFrame.StyledPanel)
         self.button_frame.setFrameShadow(QFrame.Raised)
         self.horizontalLayout = QHBoxLayout(self.button_frame)
@@ -131,8 +112,13 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.settings_button)
 
 
-        self.central_layout.addWidget(self.button_frame)
+        self.verticalLayout_3.addWidget(self.button_frame)
 
+
+        self.verticalLayout_4.addLayout(self.verticalLayout_3)
+
+        self.verticalLayout_4.setStretch(0, 1)
+        self.verticalLayout_4.setStretch(2, 1)
         MainWindow.setCentralWidget(self.central_widget)
 
         self.retranslateUi(MainWindow)

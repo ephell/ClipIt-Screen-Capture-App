@@ -2,11 +2,17 @@
     color: white;
 }
 /* --- Frames --- */
-#capture_timer_frame {
-    border: 0px solid transparent;
-}
 #button_frame {
     border: 0px solid transparent;
+}
+
+/* --- Separator --- */
+#separator_line {
+    border: 1px solid rgb(40, 40, 40);
+    max-width: 270px;
+    min-width: 270px;
+    max-height: 1px;
+    min-height: 1px;
 }
 
 /* --- Buttons ---  */
@@ -17,11 +23,11 @@
 #settings_button {
     background-color: rgb(65, 65, 65);
     border: 1px solid rgb(95, 95, 95);
-    border-radius: 20px;
-    max-width: 40px;
-    max-height: 40px;
-    min-width: 40px;
-    min-height: 40px;
+    border-radius: 21px;
+    max-width: 42px;
+    max-height: 42px;
+    min-width: 42px;
+    min-height: 42px;
 }
 
 /* Images */
@@ -29,7 +35,8 @@
  	image: url(:/icons/buttons/icons/record_button/1x/baseline_videocam_white_24dp.png);
 }
 #screenshot_button{
-	image: url(:/icons/buttons/icons/screenshot_button/1x/baseline_screenshot_monitor_white_24dp.png);
+	/* image: url(:/icons/buttons/icons/screenshot_button/1x/baseline_screenshot_monitor_white_24dp.png); */
+    image: url(:/icons/buttons/icons/screenshot_button/1x/baseline_camera_alt_white_24dp.png);
 }
 #open_editor_button{
 	image: url(:/icons/buttons/icons/open_editor_button/1x/baseline_movie_edit_white_24dp.png);

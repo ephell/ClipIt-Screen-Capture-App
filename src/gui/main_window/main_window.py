@@ -4,7 +4,7 @@ log = GlobalLogger.LOGGER
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QMainWindow
 
-from .Ui_MainWindow import Ui_MainWindow
+from .MainWindow_ui import Ui_MainWindow
 from .buttons.settings_button.settings_window.hotkeys.hotkey_listener import HotkeyListener
 from gui.main_window.buttons.debug_button.debug_button import DebugButton
 
