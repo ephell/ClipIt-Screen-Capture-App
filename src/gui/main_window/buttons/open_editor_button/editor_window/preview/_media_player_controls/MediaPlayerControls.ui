@@ -28,9 +28,6 @@
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <property name="spacing">
-      <number>6</number>
-     </property>
      <item>
       <spacer name="horizontalSpacer_4">
        <property name="orientation">
@@ -67,6 +64,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QPushButton" name="play_button">
+          <property name="toolTip">
+           <string>Play</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -84,6 +84,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="pause_button">
+          <property name="toolTip">
+           <string>Pause</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -101,6 +104,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="reset_button">
+          <property name="toolTip">
+           <string>Reset</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -118,6 +124,9 @@
         </item>
         <item>
          <widget class="VolumeButton" name="volume_button">
+          <property name="toolTip">
+           <string>Set Volume</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -135,6 +144,9 @@
         </item>
         <item>
          <widget class="CropButton" name="crop_button">
+          <property name="toolTip">
+           <string>Crop</string>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -158,6 +170,9 @@
         </item>
         <item>
          <widget class="RenderAndSaveButton" name="render_and_save_button">
+          <property name="toolTip">
+           <string>Render And Save</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -175,6 +190,9 @@
         </item>
         <item>
          <widget class="UploadButton" name="upload_button">
+          <property name="toolTip">
+           <string>Upload File</string>
+          </property>
           <property name="text">
            <string/>
           </property>
