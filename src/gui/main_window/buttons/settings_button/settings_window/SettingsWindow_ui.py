@@ -31,9 +31,9 @@ class Ui_SettingsWindow(object):
     def setupUi(self, SettingsWindow):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
-        SettingsWindow.resize(425, 270)
-        SettingsWindow.setMinimumSize(QSize(425, 270))
-        SettingsWindow.setMaximumSize(QSize(425, 270))
+        SettingsWindow.resize(443, 270)
+        SettingsWindow.setMinimumSize(QSize(443, 270))
+        SettingsWindow.setMaximumSize(QSize(443, 270))
         self.verticalLayout = QVBoxLayout(SettingsWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.captures_dir_group_box = QGroupBox(SettingsWindow)

@@ -1,7 +1,7 @@
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QWidget
 
-from .Ui_SettingsWindow import Ui_SettingsWindow
+from .SettingsWindow_ui import Ui_SettingsWindow
 
 
 class SettingsWindow(QWidget, Ui_SettingsWindow):

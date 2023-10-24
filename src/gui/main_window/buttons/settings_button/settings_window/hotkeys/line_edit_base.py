@@ -14,7 +14,8 @@ class LineEditBase(QLineEdit):
 
     __DEFAULT_TEXT = "Press any key/key combo..."
     __NONE_TEXT = "None"
-    __IN_USE_TEXT = "({}) already in use!"
+    __IN_USE_TEXT = "Combo ({}) in use!"
+    __INVALID_TEXT = "Combo ({}) is invalid!"
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -63,6 +64,7 @@ class LineEditBase(QLineEdit):
         if self.key_combo_listener.running():
             self.key_combo_listener.stop()
         self.focus_out_event_signal.emit(self.text())
+        super().focusOutEvent(event)
 
     @abstractmethod
     def load_hotkey_from_settings(self, hotkey_name):
@@ -104,7 +106,8 @@ class LineEditBase(QLineEdit):
         self.setText(combo_string)
 
     @Slot()
-    def __on_key_combo_invalid(self):
+    def __on_key_combo_invalid(self, combo_string):
+        self.setText(self.__INVALID_TEXT.format(combo_string))
         self.clearFocus()
 
     @Slot()
@@ -121,7 +124,7 @@ class _KeyComboListener(QObject):
     clear_key_pressed_signal = Signal()
     all_keys_released_signal = Signal()
     combo_valid_signal = Signal(str)
-    combo_invalid_signal = Signal()
+    combo_invalid_signal = Signal(str)
     combo_in_use_signal = Signal(str)
     max_combo_length_reached_signal = Signal()
     listener_started_signal = Signal()
@@ -142,9 +145,22 @@ class _KeyComboListener(QObject):
             "num_lock": "NumLock",
             "caps_lock": "CapsLock",
             "page_up": "PageUp",
-            "page_down": "PageDown"
+            "page_down": "PageDown",
+            "enter": "Enter",
+            "left": "Left",
+            "right": "Right",
+            "up": "Up",
+            "down": "Down",
+            "home": "Home",
+            "end": "End",
+            "delete": "Delete",
+            "insert": "Insert",
+            "space": "Space",
+            "tab": "Tab",
+            "scroll_lock": "ScrollLock",
+            "pause": "Pause"
         }
-
+    
     def __init__(self):
         super().__init__()
         self.__pressed_keys = []
@@ -173,6 +189,7 @@ class _KeyComboListener(QObject):
         key = self.__get_key_as_str(key)
         if key in self.__CLEAR_KEYS:
             self.clear_key_pressed_signal.emit()
+            self.__pressed_keys.clear()
             return
         if key is not None and key not in self.__pressed_keys:
             self.__pressed_keys.append(key)
@@ -181,9 +198,8 @@ class _KeyComboListener(QObject):
                     self.combo_valid_signal.emit(self.__get_key_combo_as_str())
                 else:
                     self.combo_in_use_signal.emit(self.__get_key_combo_as_str())
-                    self.__pressed_keys.clear()
             else:
-                self.combo_invalid_signal.emit()
+                self.combo_invalid_signal.emit(self.__get_key_combo_as_str())
                 self.__pressed_keys.clear()
             if len(self.__pressed_keys) >= self.__max_key_amount_in_combo:
                 self.max_combo_length_reached_signal.emit()

@@ -52,7 +52,20 @@ class HotkeyListener(QObject):
         "NumLock": {"num_lock"},
         "CapsLock": {"caps_lock"},
         "PageUp": {"page_up"},
-        "PageDown": {"page_down"}
+        "PageDown": {"page_down"},
+        "Enter": {"enter"},
+        "Left": {"left"},
+        "Right": {"right"},
+        "Up": {"up"},
+        "Down": {"down"},
+        "Home": {"home"},
+        "End": {"end"},
+        "Delete": {"delete"},
+        "Insert": {"insert"},
+        "Space": {"space"},
+        "Tab": {"tab"},
+        "ScrollLock": {"scroll_lock"},
+        "Pause": {"pause"}
     }
 
     def __init__(self):
