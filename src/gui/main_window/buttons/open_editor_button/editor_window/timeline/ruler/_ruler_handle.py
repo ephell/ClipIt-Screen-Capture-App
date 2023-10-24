@@ -29,7 +29,8 @@ class RulerHandle(QGraphicsItem):
         self.needle_height = self.height - self.head_height
         self.needle_x = (self.width - self.needle_width) / 2
         self.needle_y = self.head_height
-        self.color = QColor(255, 255, 255)
+        self.no_focus_color = QColor(255, 255, 255)
+        self.in_focus_color = QColor(31, 143, 221)
         self.time_edit = RulerHandleTimeEdit(self.scene, self.media_duration)
         self.__connect_signals_and_slots()
 
@@ -47,8 +48,12 @@ class RulerHandle(QGraphicsItem):
 
     """Override"""
     def paint(self, painter, option, widget):
-        painter.setPen(QPen(self.color))
-        painter.setBrush(QBrush(self.color))
+        if self.hasFocus():
+            painter.setPen(QPen(self.in_focus_color))
+            painter.setBrush(QBrush(self.in_focus_color))
+        elif not self.hasFocus():
+            painter.setPen(QPen(self.no_focus_color))
+            painter.setBrush(QBrush(self.no_focus_color))
         painter.drawRect(QRectF(0, 0, self.head_width, self.head_height))
         painter.drawRect(QRectF(
             self.needle_x, self.needle_y, 
