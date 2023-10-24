@@ -3,7 +3,7 @@ import os
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import QDialog
 
-from .Ui_RenderingProgressDialog import Ui_RenderingProgressDialog
+from .RenderingProgressDialog_ui import Ui_RenderingProgressDialog
 
 
 class RenderingProgressDialog(QDialog, Ui_RenderingProgressDialog):

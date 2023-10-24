@@ -1,8 +1,16 @@
-#button_frame {
+/* --- Frames --- */
+QFrame {
     border: 0px solid transparent;
 }
 
-QPushButton {
+/* --- Buttons --- */
+.MediaPlayerControls_play_button,
+.MediaPlayerControls_pause_button,
+.MediaPlayerControls_reset_button,
+.MediaPlayerControls_volume_button,
+.MediaPlayerControls_crop_button,
+.MediaPlayerControls_render_and_save_button,
+.MediaPlayerControls_upload_button {
     background-color: rgb(65, 65, 65);
     border: 1px solid rgb(95, 95, 95);
     border-radius: 21px;
@@ -12,40 +20,52 @@ QPushButton {
     min-height: 42px;
 }
 
-QPushButton:hover {
+.MediaPlayerControls_play_button:hover,
+.MediaPlayerControls_pause_button:hover,
+.MediaPlayerControls_reset_button:hover,
+.MediaPlayerControls_volume_button:hover,
+.MediaPlayerControls_crop_button:hover,
+.MediaPlayerControls_render_and_save_button:hover,
+.MediaPlayerControls_upload_button:hover {
     background-color: rgb(75, 75, 75);
 }   
 
-QPushButton:pressed {
+.MediaPlayerControls_play_button:pressed,
+.MediaPlayerControls_pause_button:pressed,
+.MediaPlayerControls_reset_button:pressed,
+.MediaPlayerControls_volume_button:pressed,
+.MediaPlayerControls_crop_button:pressed,
+.MediaPlayerControls_render_and_save_button:pressed,
+.MediaPlayerControls_upload_button:pressed {
     background-color: rgb(55, 55, 55);
 }
 
-/* --- Icons --- */
-QPushButton#play_button {
+/* --- Button Icons --- */
+.MediaPlayerControls_play_button {
     image: url(:/icons/icons/play_button/1x/baseline_play_arrow_white_24dp.png);
 }
 
-QPushButton#pause_button {
+.MediaPlayerControls_pause_button {
     image: url(:/icons/icons/pause_button/1x/baseline_pause_white_24dp.png);
 }
 
-QPushButton#reset_button {
+.MediaPlayerControls_reset_button {
     image: url(:/icons/icons/reset_button/1x/baseline_restart_alt_white_24dp.png);
 }
 
-QPushButton#volume_button {
+.MediaPlayerControls_volume_button {
     image: url(:/icons/icons/volume_button/1x/baseline_volume_up_white_24dp.png);
 }
 
-QPushButton#crop_button {
+.MediaPlayerControls_crop_button {
     image: url(:/icons/icons/crop_button/1x/baseline_crop_white_24dp.png);
 }
 
-QPushButton#render_and_save_button {
+.MediaPlayerControls_render_and_save_button {
     image: url(:/icons/icons/render_and_save_button/1x/baseline_save_white_24dp.png);
 }
 
-QPushButton#upload_button {
+.MediaPlayerControls_upload_button {
     image: url(:/icons/icons/upload_button/1x/baseline_upload_file_white_24dp.png);
 }
-/* --- --- --- */
+/* --- End of Buttons --- */

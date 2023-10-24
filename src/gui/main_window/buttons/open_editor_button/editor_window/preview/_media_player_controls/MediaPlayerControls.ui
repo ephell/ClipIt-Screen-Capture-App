@@ -80,6 +80,9 @@
             <height>30</height>
            </size>
           </property>
+          <property name="class" stdset="0">
+           <string>MediaPlayerControls_play_button</string>
+          </property>
          </widget>
         </item>
         <item>
@@ -99,6 +102,9 @@
             <width>30</width>
             <height>30</height>
            </size>
+          </property>
+          <property name="class" stdset="0">
+           <string>MediaPlayerControls_pause_button</string>
           </property>
          </widget>
         </item>
@@ -120,6 +126,9 @@
             <height>30</height>
            </size>
           </property>
+          <property name="class" stdset="0">
+           <string>MediaPlayerControls_reset_button</string>
+          </property>
          </widget>
         </item>
         <item>
@@ -139,6 +148,9 @@
             <width>30</width>
             <height>30</height>
            </size>
+          </property>
+          <property name="class" stdset="0">
+           <string>MediaPlayerControls_volume_button</string>
           </property>
          </widget>
         </item>
@@ -166,6 +178,9 @@
           <property name="checkable">
            <bool>true</bool>
           </property>
+          <property name="class" stdset="0">
+           <string>MediaPlayerControls_crop_button</string>
+          </property>
          </widget>
         </item>
         <item>
@@ -186,6 +201,9 @@
             <height>30</height>
            </size>
           </property>
+          <property name="class" stdset="0">
+           <string>MediaPlayerControls_render_and_save_button</string>
+          </property>
          </widget>
         </item>
         <item>
@@ -205,6 +223,9 @@
             <width>30</width>
             <height>30</height>
            </size>
+          </property>
+          <property name="class" stdset="0">
+           <string>MediaPlayerControls_upload_button</string>
           </property>
          </widget>
         </item>
