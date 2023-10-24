@@ -71,7 +71,7 @@ class _GraphicsScene(QGraphicsScene):
         self.setSceneRect(0, 0, width, height)
         self.initial_width = width
         self.initial_height = height
-        self.setBackgroundBrush(QColor(70, 70, 70))
+        self.setBackgroundBrush(QColor(65, 65, 65))
 
 
 class _GraphicsView(QGraphicsView):
