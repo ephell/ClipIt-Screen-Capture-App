@@ -98,6 +98,9 @@
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="RecordButton" name="record_button">
+           <property name="toolTip">
+            <string>Start/Stop Recording</string>
+           </property>
            <property name="styleSheet">
             <string notr="true"/>
            </property>
@@ -108,6 +111,9 @@
          </item>
          <item>
           <widget class="ScreenshotButton" name="screenshot_button">
+           <property name="toolTip">
+            <string>Take A Screenshot</string>
+           </property>
            <property name="styleSheet">
             <string notr="true"/>
            </property>
@@ -118,6 +124,9 @@
          </item>
          <item>
           <widget class="OpenEditorButton" name="open_editor_button">
+           <property name="toolTip">
+            <string>Open Editor</string>
+           </property>
            <property name="styleSheet">
             <string notr="true"/>
            </property>
@@ -128,6 +137,9 @@
          </item>
          <item>
           <widget class="OpenCaptureFolderButton" name="open_capture_folder_button">
+           <property name="toolTip">
+            <string>Open Captures Directory</string>
+           </property>
            <property name="styleSheet">
             <string notr="true"/>
            </property>
@@ -138,6 +150,9 @@
          </item>
          <item>
           <widget class="SettingsButton" name="settings_button">
+           <property name="toolTip">
+            <string>Open Settings</string>
+           </property>
            <property name="styleSheet">
             <string notr="true"/>
            </property>
