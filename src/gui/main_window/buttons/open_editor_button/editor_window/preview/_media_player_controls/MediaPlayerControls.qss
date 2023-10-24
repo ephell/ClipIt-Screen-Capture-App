@@ -1,0 +1,51 @@
+#button_frame {
+    border: 0px solid transparent;
+}
+
+QPushButton {
+    background-color: rgb(65, 65, 65);
+    border: 1px solid rgb(95, 95, 95);
+    border-radius: 21px;
+    max-width: 42px;
+    max-height: 42px;
+    min-width: 42px;
+    min-height: 42px;
+}
+
+QPushButton:hover {
+    background-color: rgb(75, 75, 75);
+}   
+
+QPushButton:pressed {
+    background-color: rgb(55, 55, 55);
+}
+
+/* --- Icons --- */
+QPushButton#play_button {
+    image: url(:/icons/icons/play_button/1x/baseline_play_arrow_white_24dp.png);
+}
+
+QPushButton#pause_button {
+    image: url(:/icons/icons/pause_button/1x/baseline_pause_white_24dp.png);
+}
+
+QPushButton#reset_button {
+    image: url(:/icons/icons/reset_button/1x/baseline_restart_alt_white_24dp.png);
+}
+
+QPushButton#volume_button {
+    image: url(:/icons/icons/volume_button/1x/baseline_volume_up_white_24dp.png);
+}
+
+QPushButton#crop_button {
+    image: url(:/icons/icons/crop_button/1x/baseline_crop_white_24dp.png);
+}
+
+QPushButton#render_and_save_button {
+    image: url(:/icons/icons/render_and_save_button/1x/baseline_save_white_24dp.png);
+}
+
+QPushButton#upload_button {
+    image: url(:/icons/icons/upload_button/1x/baseline_upload_file_white_24dp.png);
+}
+/* --- --- --- */

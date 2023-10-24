@@ -24,6 +24,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.debug_button = DebugButton(self)
         # self.central_layout.addWidget(self.debug_button)
         # self.debug_button.clicked.connect(self.debug_button.on_debug_button_clicked)
+    
+    def __set_stylesheet(self, qss_file_path: str):
+        with open(qss_file_path, "r") as qss_file:
+            self.setStyleSheet(qss_file.read())
 
     def __connect_signals_and_slots(self):
         self.record_button.clicked.connect(
@@ -47,10 +51,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.hotkey_listener.hotkey_detected_signal.connect(
             self.__on_hotkey_detected
         )
-
-    def __set_stylesheet(self, qss_file_path: str):
-        with open(qss_file_path, "r") as qss_file:
-            self.setStyleSheet(qss_file.read())
 
     """Override"""
     def closeEvent(self, event):
