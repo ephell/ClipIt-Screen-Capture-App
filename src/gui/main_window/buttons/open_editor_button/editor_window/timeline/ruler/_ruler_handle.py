@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, Slot, QRectF
-from PySide6.QtGui import QPen, QPainterPath, QBrush
+from PySide6.QtGui import QPen, QPainterPath, QBrush, QColor
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsWidget
 
 from ._ruler_handle_time_edit import RulerHandleTimeEdit
@@ -15,8 +15,8 @@ class RulerHandle(QGraphicsItem):
         self.setFlag(QGraphicsWidget.ItemIsMovable, True)
         self.setFlag(QGraphicsWidget.ItemIsFocusable, True)
         self.media_duration = media_duration
-        self.width = 10
-        self.height = 70 + self.scene.media_item_y
+        self.width = 11
+        self.height = 69 + self.scene.media_item_y
         self.left_pad_x = self.scene.ruler_x
         self.right_pad_x = self.scene.ruler_x
         self.top_pad_y = 0
@@ -24,11 +24,12 @@ class RulerHandle(QGraphicsItem):
         self.initial_y = self.top_pad_y
         self.setPos(self.initial_x, self.initial_y)
         self.head_width = self.width
-        self.head_height = self.height / 15
+        self.head_height = self.height / 12
         self.needle_width = 1
         self.needle_height = self.height - self.head_height
         self.needle_x = (self.width - self.needle_width) / 2
         self.needle_y = self.head_height
+        self.color = QColor(255, 255, 255)
         self.time_edit = RulerHandleTimeEdit(self.scene, self.media_duration)
         self.__connect_signals_and_slots()
 
@@ -46,11 +47,12 @@ class RulerHandle(QGraphicsItem):
 
     """Override"""
     def paint(self, painter, option, widget):
-        painter.setPen(QPen(Qt.magenta))
-        painter.setBrush(QBrush(Qt.magenta))
+        painter.setPen(QPen(self.color))
+        painter.setBrush(QBrush(self.color))
         painter.drawRect(QRectF(0, 0, self.head_width, self.head_height))
         painter.drawRect(QRectF(
-            self.needle_x, self.needle_y, self.needle_width, self.needle_height
+            self.needle_x, self.needle_y, 
+            self.needle_width, self.needle_height
         ))
 
     """Override"""

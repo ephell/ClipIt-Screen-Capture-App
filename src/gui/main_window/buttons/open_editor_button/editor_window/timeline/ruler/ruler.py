@@ -122,12 +122,6 @@ class Ruler(QGraphicsItem):
             for i in range(int(tick_amount) + 1)
         ]
 
-    def __get_intermediate_tick_positions(self, tick_positions):
-        return [
-            (tick_positions[i] + tick_positions[i + 1]) // 2
-            for i in range(len(tick_positions) - 1)
-        ]
-
     def __get_max_possible_width(self):
         return self.scene.width() - self.left_pad_x - self.right_pad_x
 
