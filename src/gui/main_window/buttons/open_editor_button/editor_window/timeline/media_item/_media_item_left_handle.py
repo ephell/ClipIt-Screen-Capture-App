@@ -24,6 +24,7 @@ class LeftHandle(QGraphicsRectItem):
         self.setPos(self.initial_x, self.initial_y)
         self.media_duration = self.parent.media_duration
         self.__thumbnail = None
+        self.__pixels_to_move_by_key = 1
 
     """Override"""
     def paint(self, painter, option, widget):
@@ -97,7 +98,7 @@ class LeftHandle(QGraphicsRectItem):
     """Override"""
     def keyPressEvent(self, event):
         if self.hasFocus():
-            move_by_amount_px = self.__get_one_ms_pixel_value()
+            move_by_amount_px = self.__pixels_to_move_by_key
             if event.key() == Qt.Key_Left:
                 self.__move_by_key(-move_by_amount_px)
             elif event.key() == Qt.Key_Right:
@@ -112,15 +113,17 @@ class LeftHandle(QGraphicsRectItem):
         new_handle_y = self.pos().y()
 
         if move_by_amount_px < 0:
-            if new_parent_rect_width > 0:
+            new_handle_x -= abs(move_by_amount_px)
+            if new_handle_x > self.__get_min_possible_x():
                 new_parent_rect_x -= abs(move_by_amount_px)
                 new_parent_rect_width += abs(move_by_amount_px)
-                new_handle_x -= abs(move_by_amount_px)
+            else:
+                new_handle_x = self.__get_min_possible_x()
+
         elif move_by_amount_px > 0:
-            if new_parent_rect_width > 0:
-                new_parent_rect_x += abs(move_by_amount_px)
-                new_parent_rect_width -= abs(move_by_amount_px)
-                new_handle_x += abs(move_by_amount_px)
+            new_parent_rect_x += abs(move_by_amount_px)
+            new_parent_rect_width -= abs(move_by_amount_px)
+            new_handle_x += abs(move_by_amount_px)
 
         if (
             new_parent_rect_width > 0
