@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, Slot, QRectF
-from PySide6.QtGui import QPen
+from PySide6.QtGui import QPen, QColor
 from PySide6.QtWidgets import (
     QGraphicsItem
 )
@@ -22,10 +22,13 @@ class Ruler(QGraphicsItem):
         self.setPos(self.initial_x, self.initial_y)
         self.media_duration = media_duration
         self.initial_width = self.__get_max_possible_width()
-        self.initial_height = 18
+        self.initial_height = 16
         self.width = self.initial_width
         self.height = self.initial_height
         self.tick_amount = 10
+        self.tick_color = QColor(255, 255, 255)
+        self.tick_width = 2
+        self.times_point_size = 9
         self.ruler_handle = RulerHandle(self, self.media_duration)
 
     """Override"""
@@ -36,11 +39,10 @@ class Ruler(QGraphicsItem):
     """Override"""
     def paint(self, painter, option, widget):
         font = painter.font()
-        font.setPointSize(10)
+        font.setPointSize(self.times_point_size)
         painter.setFont(font)
-
-        pen = QPen(Qt.black)
-        pen.setWidth(2)
+        pen = QPen(self.tick_color)
+        pen.setWidth(self.tick_width)
         painter.setPen(pen)
 
         # Draw main tick marks and labels
@@ -54,11 +56,6 @@ class Ruler(QGraphicsItem):
             text_x = tick_pos - text_width // 2
             text_y = self.height + text_height
             painter.drawText(text_x, text_y, text)
-
-        # Draw intermediate (smaller) tick marks
-        i_tick_positions = self.__get_intermediate_tick_positions(tick_positions)
-        for tick_pos in i_tick_positions:
-            painter.drawLine(tick_pos, 0, tick_pos, self.height / 2)
 
     """Override"""
     def mousePressEvent(self, event):
