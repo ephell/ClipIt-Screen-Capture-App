@@ -17,9 +17,11 @@ class EditorWindow(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowFlag(Qt.Window)
         self.preview = Preview(file_path, self)
+        self.preview_controls = self.preview.media_player_controls
         self.timeline = Timeline(self.preview.media_player, self)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.preview)
+        self.layout.addWidget(self.preview_controls)
         self.layout.addWidget(self.timeline)
         self.setLayout(self.layout)
         self.__connect_signals_and_slots()

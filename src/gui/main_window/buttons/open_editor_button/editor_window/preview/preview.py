@@ -22,7 +22,6 @@ class Preview(QWidget):
         self.media_player_controls = MediaPlayerControls(self.media_player, self)
         self.layoutas = QVBoxLayout()
         self.layoutas.addWidget(self.view)
-        self.layoutas.addWidget(self.media_player_controls)
         self.setLayout(self.layoutas)
         self.__connect_signals_and_slots()
         # Required to trigger the initial paint event.
