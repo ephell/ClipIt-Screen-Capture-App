@@ -1,6 +1,6 @@
 from PySide6.QtCore import Slot, Signal
 from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import QMenu, QSystemTrayIcon
+from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QMessageBox
 
 
 class SystemTray(QSystemTrayIcon):
@@ -38,7 +38,15 @@ class SystemTray(QSystemTrayIcon):
         self.__tray_menu.addAction(self.action_exit)
 
     def __request_exit(self):
-        self.request_exit_signal.emit()
+        msg_box = QMessageBox.question(
+            self.main_window,
+            "Exit",
+            "Are you sure you want to exit the application?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        if msg_box == QMessageBox.Yes:
+            self.request_exit_signal.emit()
 
     @Slot()
     def on_ready_to_exit(self):
