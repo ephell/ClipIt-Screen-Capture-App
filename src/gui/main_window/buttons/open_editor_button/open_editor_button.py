@@ -24,6 +24,11 @@ class OpenEditorButton(QPushButton):
             return widget
         return None
 
+    def __show_editor(self):
+        self.editor.show()
+        self.editor.setWindowState(self.editor.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        self.editor.activateWindow()
+
     @Slot()
     def on_open_editor_button_clicked(self):
         if self.get_editor_window_widget() is None:
@@ -36,7 +41,7 @@ class OpenEditorButton(QPushButton):
                         self.editor.source_file_changed_signal.connect(
                             self.__on_editor_source_file_changed
                         )
-                        self.editor.show()
+                        self.__show_editor()
                         break
                     else:
                         QMessageBox.critical(
@@ -57,7 +62,7 @@ class OpenEditorButton(QPushButton):
             self.editor.source_file_changed_signal.connect(
                 self.__on_editor_source_file_changed
             )
-            self.editor.show()
+            self.__show_editor()
         else:
             _EditorAlreadyOpenMessageBox(self).exec()
 
@@ -67,7 +72,7 @@ class OpenEditorButton(QPushButton):
         self.editor.source_file_changed_signal.connect(
             self.__on_editor_source_file_changed
         )
-        self.editor.show()            
+        self.__show_editor()
 
 
 class _OpenFileInEditorDialog(QFileDialog):
