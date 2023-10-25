@@ -1,4 +1,4 @@
-from PySide6.QtCore import Slot, Signal
+from PySide6.QtCore import Slot, Signal, Qt
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QMessageBox
 
@@ -18,6 +18,7 @@ class SystemTray(QSystemTrayIcon):
         self.__connect_signals_and_slots()
 
     def __connect_signals_and_slots(self):
+        self.activated.connect(self.__on_tray_icon_activated)
         self.action_exit.triggered.connect(self.__request_exit)
 
     def __initialize_actions(self):
@@ -51,3 +52,12 @@ class SystemTray(QSystemTrayIcon):
     @Slot()
     def on_ready_to_exit(self):
         self.main_window.app.quit()
+
+    @Slot()
+    def __on_tray_icon_activated(self, reason):
+        if reason == QSystemTrayIcon.Trigger:
+            self.main_window.show()
+            self.main_window.setWindowState(
+                self.main_window.windowState() & ~Qt.WindowMinimized | Qt.WindowActive
+            )
+            self.main_window.activateWindow()
