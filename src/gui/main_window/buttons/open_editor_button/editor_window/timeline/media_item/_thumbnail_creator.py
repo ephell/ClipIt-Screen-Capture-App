@@ -4,7 +4,7 @@ import threading
 from moviepy.editor import VideoFileClip
 import numpy as np
 from PySide6.QtCore import Qt, QRect, QThread, Signal, Slot, QTimer
-from PySide6.QtGui import QImage, QPixmap, QPainter, QColor, QBrush
+from PySide6.QtGui import QImage, QPixmap, QPainter, QColor, QBrush, QPen
 
 
 class ThumbnailCreator:
@@ -13,7 +13,6 @@ class ThumbnailCreator:
         self.media_item = media_item
         self.__q_pixmaps = {}
         self.__q_pixmap_w, self.__q_pixmap_h = self.__get_scaled_q_pixmap_dimensions()
-        self.__filler_color = QColor(Qt.gray)
         self.__resize_event_timer = QTimer()
         self.__resize_event_timer.setSingleShot(True)
         self.__resize_event_timer.timeout.connect(self.__on_resize_event_timer_expired)
@@ -25,6 +24,9 @@ class ThumbnailCreator:
         )
         self.__extractor.finished_signal.connect(self.__on_extraction_finished)
         self.__extractor.start()
+        self.__filler_color = QColor(135, 135, 135)
+        self.__filler_line_color = QColor(255, 255, 255)
+        self.__filler_line_width = 2
 
     def get_thumbnail(self):
         if len(self.__q_pixmaps) == 0:
@@ -78,7 +80,22 @@ class ThumbnailCreator:
                 q_pixmap.height()
             )
             painter = QPainter(q_pixmap_with_filler)
-            q_pixmap_with_filler.fill(self.__filler_color)
+            
+            painter.fillRect(
+                0, 0, 
+                q_pixmap_with_filler.width(), q_pixmap_with_filler.height(), 
+                self.__filler_color
+            )
+            
+            pen = QPen()
+            pen.setColor(self.__filler_line_color)
+            pen.setWidth(self.__filler_line_width)
+            painter.setPen(pen)
+            painter.drawLine(
+                0, q_pixmap.height() // 2, 
+                q_pixmap_with_filler.width(), q_pixmap.height() // 2
+            )
+            
             painter.drawPixmap(0, 0, q_pixmap)
             q_pixmaps_with_fillers.append(q_pixmap_with_filler)
             painter.end()
