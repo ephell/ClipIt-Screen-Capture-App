@@ -1,16 +1,24 @@
-from PySide6.QtWidgets import QMenu, QSystemTrayIcon
+from PySide6.QtCore import Slot, Signal
 from PySide6.QtGui import QIcon, QAction
+from PySide6.QtWidgets import QMenu, QSystemTrayIcon
 
 
 class SystemTray(QSystemTrayIcon):
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    request_exit_signal = Signal()
+
+    def __init__(self, main_window):
+        super().__init__(main_window)
+        self.main_window = main_window
         self.setIcon(QIcon("testicon.png"))
         self.__tray_menu = QMenu()
         self.__initialize_actions()
         self.__add_actions_to_tray()
         self.setContextMenu(self.__tray_menu)
+        self.__connect_signals_and_slots()
+
+    def __connect_signals_and_slots(self):
+        self.action_exit.triggered.connect(self.__request_exit)
 
     def __initialize_actions(self):
         self.action_start_stop_recording = QAction("Start/Stop Recording")
@@ -28,3 +36,10 @@ class SystemTray(QSystemTrayIcon):
         self.__tray_menu.addAction(self.action_settings)
         self.__tray_menu.addSeparator()
         self.__tray_menu.addAction(self.action_exit)
+
+    def __request_exit(self):
+        self.request_exit_signal.emit()
+
+    @Slot()
+    def on_ready_to_exit(self):
+        self.main_window.app.quit()

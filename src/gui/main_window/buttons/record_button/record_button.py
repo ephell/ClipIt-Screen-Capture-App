@@ -17,6 +17,7 @@ class RecordButton(QPushButton):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.recorder = None
         self.recorder_stop_event = None
         self.file_generation_choice_event = None
         self.recording_area_selector = None
@@ -25,6 +26,11 @@ class RecordButton(QPushButton):
         self.recording_area_selector.area_selection_finished_signal.connect(
             self.__on_area_selection_finished
         )
+
+    def is_recording_thread_alive(self):
+        if self.recorder is not None:
+            return self.recorder.is_alive()
+        return False
 
     """Override"""
     def keyPressEvent(self, event):
@@ -36,7 +42,7 @@ class RecordButton(QPushButton):
                     # Catches 'Internal C++ object (AreaSelector) already deleted'.
                     # Not a good solution, but passing is not a problem here.
                     pass 
-                    
+                 
     def __start_recording(self):
         self.__get_capture_duration_label_widget().setText("Starting...")
         self.__set_stop_recording_icon()
