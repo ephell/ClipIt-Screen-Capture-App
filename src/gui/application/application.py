@@ -11,6 +11,7 @@ class Application(QApplication):
 
     def __init__(self, argv):
         super().__init__(argv)
+        self.setQuitOnLastWindowClosed(False)
         self.__create_directories()
         self.setStyle("Fusion")
         self.setPalette(self.__get_default_palette(self))
