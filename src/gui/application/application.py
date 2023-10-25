@@ -1,7 +1,7 @@
 import os
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QPalette, QColor
+from PySide6.QtGui import QPalette, QColor, QIcon
 from PySide6.QtCore import Qt
 
 from settings.settings import Settings
@@ -11,6 +11,7 @@ class Application(QApplication):
 
     def __init__(self, argv):
         super().__init__(argv)
+        self.setWindowIcon(QIcon("src/gui/application/logo.svg"))
         self.setQuitOnLastWindowClosed(False)
         self.__create_directories()
         self.setStyle("Fusion")

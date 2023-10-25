@@ -30,7 +30,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.__connect_signals_and_slots()
         # Debug button for various prints to console (not in MainWindow.ui)
         # self.debug_button = DebugButton(self)
-        # self.central_layout.addWidget(self.debug_button)
+        # self.verticalLayout_4.addWidget(self.debug_button)
         # self.debug_button.clicked.connect(self.debug_button.on_debug_button_clicked)
     
     def __set_stylesheet(self, qss_file_path: str):

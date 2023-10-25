@@ -1,4 +1,4 @@
-from PySide6.QtCore import Slot, Signal, Qt
+from PySide6.QtCore import Slot, Signal, Qt, QTimer
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QMessageBox
 
@@ -10,7 +10,7 @@ class SystemTray(QSystemTrayIcon):
     def __init__(self, main_window):
         super().__init__(main_window)
         self.main_window = main_window
-        self.setIcon(QIcon("testicon.png"))
+        self.setIcon(QIcon("src/gui/application/logo.svg"))
         self.__tray_menu = QMenu()
         self.__initialize_actions()
         self.__add_actions_to_tray()
@@ -57,7 +57,5 @@ class SystemTray(QSystemTrayIcon):
     def __on_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.Trigger:
             self.main_window.show()
-            self.main_window.setWindowState(
-                self.main_window.windowState() & ~Qt.WindowMinimized | Qt.WindowActive
-            )
+            self.main_window.setWindowState(self.main_window.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
             self.main_window.activateWindow()
