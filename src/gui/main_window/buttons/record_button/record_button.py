@@ -39,6 +39,7 @@ class RecordButton(QPushButton):
                     
     def __start_recording(self):
         self.__get_capture_duration_label_widget().setText("Starting...")
+        self.__set_stop_recording_icon()
         self.setEnabled(False)
         self.recorder_stop_event = threading.Event()
         self.file_generation_choice_event = threading.Event()
@@ -74,6 +75,7 @@ class RecordButton(QPushButton):
             self.has_recording_started = False
             self.recording_area_selector.recording_area_border.destroy()
             self.recording_area_selector.recording_area_border = None
+            self.__set_start_recording_icon()
 
     def __get_main_window_widget(self):
         widget = self.parent()
@@ -88,6 +90,20 @@ class RecordButton(QPushButton):
             if isinstance(w, QLabel) and w.objectName() == "capture_duration_label":
                 return w
         return None
+
+    def __set_start_recording_icon(self):
+        self.setStyleSheet("""
+            #record_button {
+                image: url(:/icons/buttons/icons/record_button/1x/baseline_videocam_white_24dp.png);
+            }
+        """)
+
+    def __set_stop_recording_icon(self):
+        self.setStyleSheet("""
+            #record_button {
+                image: url(:/icons/buttons/icons/record_button/1x/baseline_videocam_off_white_24dp.png);
+            }
+        """)
 
     @Slot()
     def on_record_button_clicked(self):

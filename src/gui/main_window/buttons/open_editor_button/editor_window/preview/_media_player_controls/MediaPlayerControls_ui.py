@@ -15,27 +15,39 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QPushButton, QSizePolicy,
-    QSpacerItem, QWidget)
+from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QPushButton,
+    QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
 
 from ._crop_button.crop_button import CropButton
 from ._render_and_save_button.render_and_save_button import RenderAndSaveButton
 from ._upload_button.upload_button import UploadButton
 from ._volume_button.volume_button import VolumeButton
-from . import resource_rc
+from . import media_player_controls_icons_rc
 
 class Ui_MediaPlayerControls(object):
     def setupUi(self, MediaPlayerControls):
         if not MediaPlayerControls.objectName():
             MediaPlayerControls.setObjectName(u"MediaPlayerControls")
-        MediaPlayerControls.resize(494, 190)
-        self.horizontalLayout = QHBoxLayout(MediaPlayerControls)
+        MediaPlayerControls.resize(653, 78)
+        MediaPlayerControls.setMinimumSize(QSize(0, 78))
+        MediaPlayerControls.setMaximumSize(QSize(16777215, 78))
+        self.verticalLayout_2 = QVBoxLayout(MediaPlayerControls)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.horizontalSpacer_4 = QSpacerItem(80, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_3.addItem(self.horizontalSpacer_4)
+
+        self.button_frame = QFrame(MediaPlayerControls)
+        self.button_frame.setObjectName(u"button_frame")
+        self.button_frame.setMinimumSize(QSize(425, 0))
+        self.button_frame.setMaximumSize(QSize(425, 16777215))
+        self.button_frame.setFrameShape(QFrame.StyledPanel)
+        self.button_frame.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout = QHBoxLayout(self.button_frame)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalSpacer_4 = QSpacerItem(136, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout.addItem(self.horizontalSpacer_4)
-
-        self.play_button = QPushButton(MediaPlayerControls)
+        self.play_button = QPushButton(self.button_frame)
         self.play_button.setObjectName(u"play_button")
         icon = QIcon()
         icon.addFile(u":/icons/play.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -44,7 +56,7 @@ class Ui_MediaPlayerControls(object):
 
         self.horizontalLayout.addWidget(self.play_button)
 
-        self.pause_button = QPushButton(MediaPlayerControls)
+        self.pause_button = QPushButton(self.button_frame)
         self.pause_button.setObjectName(u"pause_button")
         icon1 = QIcon()
         icon1.addFile(u":/icons/pause.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -53,7 +65,7 @@ class Ui_MediaPlayerControls(object):
 
         self.horizontalLayout.addWidget(self.pause_button)
 
-        self.reset_button = QPushButton(MediaPlayerControls)
+        self.reset_button = QPushButton(self.button_frame)
         self.reset_button.setObjectName(u"reset_button")
         icon2 = QIcon()
         icon2.addFile(u":/icons/reset.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -62,7 +74,7 @@ class Ui_MediaPlayerControls(object):
 
         self.horizontalLayout.addWidget(self.reset_button)
 
-        self.volume_button = VolumeButton(MediaPlayerControls)
+        self.volume_button = VolumeButton(self.button_frame)
         self.volume_button.setObjectName(u"volume_button")
         icon3 = QIcon()
         icon3.addFile(u":/icons/volume_slider_icon.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -71,8 +83,9 @@ class Ui_MediaPlayerControls(object):
 
         self.horizontalLayout.addWidget(self.volume_button)
 
-        self.crop_button = CropButton(MediaPlayerControls)
+        self.crop_button = CropButton(self.button_frame)
         self.crop_button.setObjectName(u"crop_button")
+        self.crop_button.setStyleSheet(u"")
         icon4 = QIcon()
         icon4.addFile(u":/icons/crop.png", QSize(), QIcon.Normal, QIcon.Off)
         self.crop_button.setIcon(icon4)
@@ -81,7 +94,7 @@ class Ui_MediaPlayerControls(object):
 
         self.horizontalLayout.addWidget(self.crop_button)
 
-        self.render_and_save_button = RenderAndSaveButton(MediaPlayerControls)
+        self.render_and_save_button = RenderAndSaveButton(self.button_frame)
         self.render_and_save_button.setObjectName(u"render_and_save_button")
         icon5 = QIcon()
         icon5.addFile(u":/icons/save.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -90,7 +103,7 @@ class Ui_MediaPlayerControls(object):
 
         self.horizontalLayout.addWidget(self.render_and_save_button)
 
-        self.upload_button = UploadButton(MediaPlayerControls)
+        self.upload_button = UploadButton(self.button_frame)
         self.upload_button.setObjectName(u"upload_button")
         icon6 = QIcon()
         icon6.addFile(u":/icons/upload.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -99,9 +112,15 @@ class Ui_MediaPlayerControls(object):
 
         self.horizontalLayout.addWidget(self.upload_button)
 
-        self.horizontalSpacer_5 = QSpacerItem(135, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.horizontalLayout.addItem(self.horizontalSpacer_5)
+        self.horizontalLayout_3.addWidget(self.button_frame, 0, Qt.AlignHCenter|Qt.AlignVCenter)
+
+        self.horizontalSpacer_5 = QSpacerItem(80, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_3.addItem(self.horizontalSpacer_5)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_3)
 
 
         self.retranslateUi(MediaPlayerControls)
@@ -111,12 +130,40 @@ class Ui_MediaPlayerControls(object):
 
     def retranslateUi(self, MediaPlayerControls):
         MediaPlayerControls.setWindowTitle(QCoreApplication.translate("MediaPlayerControls", u"Media Player Controls", None))
+#if QT_CONFIG(tooltip)
+        self.play_button.setToolTip(QCoreApplication.translate("MediaPlayerControls", u"Play", None))
+#endif // QT_CONFIG(tooltip)
         self.play_button.setText("")
+        self.play_button.setProperty("class", QCoreApplication.translate("MediaPlayerControls", u"MediaPlayerControls_play_button", None))
+#if QT_CONFIG(tooltip)
+        self.pause_button.setToolTip(QCoreApplication.translate("MediaPlayerControls", u"Pause", None))
+#endif // QT_CONFIG(tooltip)
         self.pause_button.setText("")
+        self.pause_button.setProperty("class", QCoreApplication.translate("MediaPlayerControls", u"MediaPlayerControls_pause_button", None))
+#if QT_CONFIG(tooltip)
+        self.reset_button.setToolTip(QCoreApplication.translate("MediaPlayerControls", u"Reset", None))
+#endif // QT_CONFIG(tooltip)
         self.reset_button.setText("")
+        self.reset_button.setProperty("class", QCoreApplication.translate("MediaPlayerControls", u"MediaPlayerControls_reset_button", None))
+#if QT_CONFIG(tooltip)
+        self.volume_button.setToolTip(QCoreApplication.translate("MediaPlayerControls", u"Set Volume", None))
+#endif // QT_CONFIG(tooltip)
         self.volume_button.setText("")
+        self.volume_button.setProperty("class", QCoreApplication.translate("MediaPlayerControls", u"MediaPlayerControls_volume_button", None))
+#if QT_CONFIG(tooltip)
+        self.crop_button.setToolTip(QCoreApplication.translate("MediaPlayerControls", u"Crop", None))
+#endif // QT_CONFIG(tooltip)
         self.crop_button.setText("")
+        self.crop_button.setProperty("class", QCoreApplication.translate("MediaPlayerControls", u"MediaPlayerControls_crop_button", None))
+#if QT_CONFIG(tooltip)
+        self.render_and_save_button.setToolTip(QCoreApplication.translate("MediaPlayerControls", u"Render And Save", None))
+#endif // QT_CONFIG(tooltip)
         self.render_and_save_button.setText("")
+        self.render_and_save_button.setProperty("class", QCoreApplication.translate("MediaPlayerControls", u"MediaPlayerControls_render_and_save_button", None))
+#if QT_CONFIG(tooltip)
+        self.upload_button.setToolTip(QCoreApplication.translate("MediaPlayerControls", u"Upload File", None))
+#endif // QT_CONFIG(tooltip)
         self.upload_button.setText("")
+        self.upload_button.setProperty("class", QCoreApplication.translate("MediaPlayerControls", u"MediaPlayerControls_upload_button", None))
     # retranslateUi
 

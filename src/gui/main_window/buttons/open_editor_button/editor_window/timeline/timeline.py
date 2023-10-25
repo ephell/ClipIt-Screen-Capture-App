@@ -1,6 +1,7 @@
 """Importable widget containing all timeline related components."""
 
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QSizePolicy, QGraphicsScene, QGraphicsView, QWidget, QVBoxLayout
 )
@@ -59,6 +60,7 @@ class _GraphicsScene(QGraphicsScene):
         self.media_item_y = 50
         self.ruler_x = 50
         self.ruler_y = 0
+        self.setBackgroundBrush(QColor(65, 65, 65))
 
 
 class _GraphicsView(QGraphicsView):

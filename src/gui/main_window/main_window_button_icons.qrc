@@ -1,0 +1,18 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>buttons/icons/record_button/1x/baseline_videocam_off_white_24dp.png</file>
+    <file>buttons/icons/record_button/2x/baseline_videocam_off_white_24dp.png</file>
+    <file>buttons/icons/screenshot_button/1x/baseline_camera_alt_white_24dp.png</file>
+    <file>buttons/icons/screenshot_button/2x/baseline_camera_alt_white_24dp.png</file>
+    <file>buttons/icons/settings_button/1x/baseline_settings_white_24dp.png</file>
+    <file>buttons/icons/settings_button/2x/baseline_settings_white_24dp.png</file>
+    <file>buttons/icons/open_capture_folder_button/1x/baseline_folder_white_24dp.png</file>
+    <file>buttons/icons/open_capture_folder_button/2x/baseline_folder_white_24dp.png</file>
+    <file>buttons/icons/open_editor_button/1x/baseline_movie_edit_white_24dp.png</file>
+    <file>buttons/icons/open_editor_button/2x/baseline_movie_edit_white_24dp.png</file>
+    <file>buttons/icons/screenshot_button/1x/baseline_screenshot_monitor_white_24dp.png</file>
+    <file>buttons/icons/screenshot_button/2x/baseline_screenshot_monitor_white_24dp.png</file>
+    <file>buttons/icons/record_button/2x/baseline_videocam_white_24dp.png</file>
+    <file>buttons/icons/record_button/1x/baseline_videocam_white_24dp.png</file>
+  </qresource>
+</RCC>

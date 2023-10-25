@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>225</width>
-    <height>280</height>
+    <width>320</width>
+    <height>170</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,142 +18,153 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>225</width>
-    <height>280</height>
+    <width>320</width>
+    <height>170</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>225</width>
-    <height>280</height>
+    <width>320</width>
+    <height>170</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>ClipIt</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <widget class="QWidget" name="central_widget">
-   <layout class="QVBoxLayout" name="central_layout">
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,0,1">
     <item>
-     <widget class="QFrame" name="capture_timer_frame">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <layout class="QHBoxLayout" name="video_capture_timer_frame_layout">
-       <property name="topMargin">
-        <number>9</number>
-       </property>
-       <property name="bottomMargin">
-        <number>9</number>
-       </property>
-       <item>
-        <spacer name="capture_timer_left_h_spacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>113</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="capture_duration_label">
-         <property name="font">
-          <font>
-           <pointsize>23</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>00:00</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="capture_timer_right_h_spacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>113</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+       <widget class="QLabel" name="capture_duration_label">
+        <property name="font">
+         <font>
+          <pointsize>32</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>00:00</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
-     <widget class="QFrame" name="button_frame">
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>0</number>
       </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="RecordButton" name="record_button">
-         <property name="text">
-          <string>Start/Stop Recording</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="ScreenshotButton" name="screenshot_button">
-         <property name="text">
-          <string>Screenshot</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="OpenEditorButton" name="open_editor_button">
-         <property name="text">
-          <string>Open Editor</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="OpenCaptureFolderButton" name="open_capture_folder_button">
-         <property name="text">
-          <string>Open Capture Folder</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="SettingsButton" name="settings_button">
-         <property name="text">
-          <string>Settings</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
+      <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+       <widget class="Line" name="separator_line">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: gray;</string>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QFrame" name="button_frame">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="RecordButton" name="record_button">
+           <property name="toolTip">
+            <string>Start/Stop Recording</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="ScreenshotButton" name="screenshot_button">
+           <property name="toolTip">
+            <string>Take A Screenshot</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="OpenEditorButton" name="open_editor_button">
+           <property name="toolTip">
+            <string>Open Editor</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="OpenCaptureFolderButton" name="open_capture_folder_button">
+           <property name="toolTip">
+            <string>Open Captures Directory</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="SettingsButton" name="settings_button">
+           <property name="toolTip">
+            <string>Open Settings</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -185,6 +196,8 @@
    <header>.buttons.open_editor_button.open_editor_button</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="main_window_button_icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

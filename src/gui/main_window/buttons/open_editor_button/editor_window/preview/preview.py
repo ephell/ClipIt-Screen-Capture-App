@@ -22,7 +22,6 @@ class Preview(QWidget):
         self.media_player_controls = MediaPlayerControls(self.media_player, self)
         self.layoutas = QVBoxLayout()
         self.layoutas.addWidget(self.view)
-        self.layoutas.addWidget(self.media_player_controls)
         self.setLayout(self.layoutas)
         self.__connect_signals_and_slots()
         # Required to trigger the initial paint event.
@@ -72,7 +71,7 @@ class _GraphicsScene(QGraphicsScene):
         self.setSceneRect(0, 0, width, height)
         self.initial_width = width
         self.initial_height = height
-        self.setBackgroundBrush(QColor(70, 70, 70))
+        self.setBackgroundBrush(QColor(65, 65, 65))
 
 
 class _GraphicsView(QGraphicsView):

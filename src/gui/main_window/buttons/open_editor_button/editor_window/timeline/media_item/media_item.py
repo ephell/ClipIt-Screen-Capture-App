@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtGui import QBrush
+from PySide6.QtGui import QBrush, QColor
 from PySide6.QtWidgets import QGraphicsRectItem
 
 from ._media_item_left_handle import LeftHandle
@@ -29,6 +29,7 @@ class MediaItem(QGraphicsRectItem):
         )
         self.initial_height = 70
         self.setRect(0, 0, self.initial_width, self.initial_height)
+        self.contour_color = QColor(0, 0, 0)
         self.left_handle = LeftHandle(self)
         self.right_handle = RightHandle(self)
         self.time_edits = TimeEdits(scene, self.media_duration)
@@ -48,8 +49,12 @@ class MediaItem(QGraphicsRectItem):
         if self.__thumbnail_creator is not None:
             painter.setBrush(QBrush(self.__thumbnail_creator.get_thumbnail()))
             painter.drawRect(self.boundingRect())
+            painter.setPen(self.contour_color)
+            painter.drawRect(self.boundingRect())
         else:
             painter.setBrush(QBrush(Qt.gray))
+            painter.drawRect(self.boundingRect())
+            painter.setPen(self.contour_color)
             painter.drawRect(self.boundingRect())
     
     def update_start_time(self, time):

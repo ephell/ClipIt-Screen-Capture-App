@@ -4,7 +4,7 @@ log = GlobalLogger.LOGGER
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QMainWindow
 
-from .Ui_MainWindow import Ui_MainWindow
+from .MainWindow_ui import Ui_MainWindow
 from .buttons.settings_button.settings_window.hotkeys.hotkey_listener import HotkeyListener
 from gui.main_window.buttons.debug_button.debug_button import DebugButton
 
@@ -14,6 +14,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, app):
         super().__init__()
         self.setupUi(self)
+        self.__set_stylesheet("src/gui/main_window/MainWindow.qss")
         self.app = app
         self.first_window_resize_event = True
         self.hotkey_listener = HotkeyListener()
@@ -23,6 +24,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.debug_button = DebugButton(self)
         # self.central_layout.addWidget(self.debug_button)
         # self.debug_button.clicked.connect(self.debug_button.on_debug_button_clicked)
+    
+    def __set_stylesheet(self, qss_file_path: str):
+        with open(qss_file_path, "r") as qss_file:
+            self.setStyleSheet(qss_file.read())
 
     def __connect_signals_and_slots(self):
         self.record_button.clicked.connect(
@@ -66,7 +71,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.setFixedSize(event.size())
             self.first_window_resize_event = False
         super().resizeEvent(event)
-
 
     @Slot()
     def __on_hotkey_detected(self, hotkey_name: str):

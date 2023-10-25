@@ -23,7 +23,7 @@ class Ui_RenderingProgressDialog(object):
     def setupUi(self, RenderingProgressDialog):
         if not RenderingProgressDialog.objectName():
             RenderingProgressDialog.setObjectName(u"RenderingProgressDialog")
-        RenderingProgressDialog.resize(500, 169)
+        RenderingProgressDialog.resize(487, 157)
         self.verticalLayout = QVBoxLayout(RenderingProgressDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.main_widget_frame = QFrame(RenderingProgressDialog)
@@ -94,7 +94,7 @@ class Ui_RenderingProgressDialog(object):
         self.close_button = QPushButton(self.close_button_frame)
         self.close_button.setObjectName(u"close_button")
         self.close_button.setEnabled(False)
-        self.close_button.setMinimumSize(QSize(100, 30))
+        self.close_button.setMinimumSize(QSize(0, 0))
 
         self.close_button_frame_h_layout.addWidget(self.close_button)
 
