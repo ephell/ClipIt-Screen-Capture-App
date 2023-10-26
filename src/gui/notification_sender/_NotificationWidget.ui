@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
-    <widget class="QLabel" name="notification_text">
+    <widget class="QLabel" name="notification_label">
      <property name="font">
       <font>
        <pointsize>20</pointsize>

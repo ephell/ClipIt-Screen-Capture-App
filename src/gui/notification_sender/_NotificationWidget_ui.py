@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file '_notification_widget.ui'
+## Form generated from reading UI file '_NotificationWidget.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.5.2
 ##
@@ -25,14 +25,14 @@ class Ui_NotificationWidget(object):
         NotificationWidget.resize(227, 54)
         self.verticalLayout = QVBoxLayout(NotificationWidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.notification_text = QLabel(NotificationWidget)
-        self.notification_text.setObjectName(u"notification_text")
+        self.notification_label = QLabel(NotificationWidget)
+        self.notification_label.setObjectName(u"notification_label")
         font = QFont()
         font.setPointSize(20)
         font.setBold(True)
-        self.notification_text.setFont(font)
+        self.notification_label.setFont(font)
 
-        self.verticalLayout.addWidget(self.notification_text, 0, Qt.AlignHCenter|Qt.AlignVCenter)
+        self.verticalLayout.addWidget(self.notification_label, 0, Qt.AlignHCenter|Qt.AlignVCenter)
 
 
         self.retranslateUi(NotificationWidget)
@@ -42,6 +42,6 @@ class Ui_NotificationWidget(object):
 
     def retranslateUi(self, NotificationWidget):
         NotificationWidget.setWindowTitle(QCoreApplication.translate("NotificationWidget", u"ClipIt - Notification", None))
-        self.notification_text.setText(QCoreApplication.translate("NotificationWidget", u"Starting", None))
+        self.notification_label.setText(QCoreApplication.translate("NotificationWidget", u"Starting", None))
     # retranslateUi
 

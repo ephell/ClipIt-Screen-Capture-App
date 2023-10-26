@@ -1,16 +1,18 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QApplication
 
-from ._notification_widget_ui import Ui_NotificationWidget
+from ._NotificationWidget_ui import Ui_NotificationWidget
 
 
 class Notification(QWidget, Ui_NotificationWidget):
 
-    def __init__(self, app: QApplication):
+    def __init__(self, notification_message):
         super().__init__()
         self.setupUi(self)
+        self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowFlags(Qt.WindowCloseButtonHint)
-        self.app = app
+        self.notification_label.setText(notification_message)
+        self.__app = QApplication.instance() or QApplication([])
         self.__x_padding = 25
         self.__y_padding = 0
         self.move(*self.__calculate_position())
@@ -24,10 +26,10 @@ class Notification(QWidget, Ui_NotificationWidget):
         )
 
     def __get_available_screen_size(self):
-        return self.app.primaryScreen().availableSize().toTuple()
+        return self.__app.primaryScreen().availableSize().toTuple()
 
     def __get_total_screen_size(self):
-        return self.app.primaryScreen().size().toTuple()
+        return self.__app.primaryScreen().size().toTuple()
 
     def __get_screen_size_difference(self):
         total_w, total_h = self.__get_total_screen_size()
