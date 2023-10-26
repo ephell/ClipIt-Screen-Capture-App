@@ -22,16 +22,16 @@ class NotificationSender:
             self.__get_icon_pixmaps()
 
     def send_information(self, message, time_ms):
-        self.__send_notification(message, time_ms, self.__icons["INFORMATION_ICON_32x32"])
+        self.__send_notification(message, time_ms, self.__icons["INFORMATION_ICON_16x16"])
 
     def send_warning(self, message, time_ms):
-        self.__send_notification(message, time_ms, self.__icons["WARNING_ICON_32x32"])
+        self.__send_notification(message, time_ms, self.__icons["WARNING_ICON_16x16"])
 
     def send_critical(self, message, time_ms):
-        self.__send_notification(message, time_ms, self.__icons["CRITICAL_ICON_32x32"])
+        self.__send_notification(message, time_ms, self.__icons["CRITICAL_ICON_16x16"])
 
     def send_question(self, message, time_ms):
-        self.__send_notification(message, time_ms, self.__icons["QUESTION_ICON_32x32"])
+        self.__send_notification(message, time_ms, self.__icons["QUESTION_ICON_16x16"])
 
     def __send_notification(self, message, time_ms, icon):
         notification = Notification(message, time_ms, icon)

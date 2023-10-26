@@ -22,17 +22,28 @@ class Ui_NotificationWidget(object):
     def setupUi(self, NotificationWidget):
         if not NotificationWidget.objectName():
             NotificationWidget.setObjectName(u"NotificationWidget")
-        NotificationWidget.resize(227, 54)
+        NotificationWidget.resize(200, 34)
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(NotificationWidget.sizePolicy().hasHeightForWidth())
+        NotificationWidget.setSizePolicy(sizePolicy)
+        NotificationWidget.setMinimumSize(QSize(200, 0))
+        NotificationWidget.setMaximumSize(QSize(200, 16777215))
         self.verticalLayout = QVBoxLayout(NotificationWidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.notification_label = QLabel(NotificationWidget)
-        self.notification_label.setObjectName(u"notification_label")
+        self.message_label = QLabel(NotificationWidget)
+        self.message_label.setObjectName(u"message_label")
+        sizePolicy.setHeightForWidth(self.message_label.sizePolicy().hasHeightForWidth())
+        self.message_label.setSizePolicy(sizePolicy)
+        self.message_label.setMinimumSize(QSize(0, 0))
         font = QFont()
-        font.setPointSize(20)
-        font.setBold(True)
-        self.notification_label.setFont(font)
+        font.setPointSize(12)
+        self.message_label.setFont(font)
+        self.message_label.setTextFormat(Qt.AutoText)
+        self.message_label.setWordWrap(True)
 
-        self.verticalLayout.addWidget(self.notification_label, 0, Qt.AlignHCenter|Qt.AlignVCenter)
+        self.verticalLayout.addWidget(self.message_label)
 
 
         self.retranslateUi(NotificationWidget)
@@ -42,6 +53,6 @@ class Ui_NotificationWidget(object):
 
     def retranslateUi(self, NotificationWidget):
         NotificationWidget.setWindowTitle(QCoreApplication.translate("NotificationWidget", u"ClipIt - Notification", None))
-        self.notification_label.setText(QCoreApplication.translate("NotificationWidget", u"Starting", None))
+        self.message_label.setText("")
     # retranslateUi
 
