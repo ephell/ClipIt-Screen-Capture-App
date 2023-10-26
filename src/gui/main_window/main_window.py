@@ -83,6 +83,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.ready_to_exit_signal.connect(
             self.system_tray.on_ready_to_exit
         )
+        self.record_button.recording_started_signal.connect(
+            self.system_tray.on_recording_started
+        )
+        self.record_button.recording_stopped_signal.connect(
+            self.system_tray.on_recording_stopped
+        )
 
     """Override"""
     def closeEvent(self, event):

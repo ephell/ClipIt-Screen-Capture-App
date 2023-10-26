@@ -14,6 +14,8 @@ from ._recording_area_selector import RecordingAreaSelector
 class RecordButton(QPushButton):
 
     open_editor_after_file_generation_finished_signal = Signal(str)
+    recording_started_signal = Signal()
+    recording_stopped_signal = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -132,6 +134,7 @@ class RecordButton(QPushButton):
 
     @Slot()
     def __on_recording_started(self, start_time):
+        self.recording_started_signal.emit()
         self.setEnabled(True)
         self.duration_label_updater = _CaptureDurationLabelUpdater(
             self.__get_capture_duration_label_widget(),
@@ -145,6 +148,7 @@ class RecordButton(QPushButton):
 
     @Slot()
     def __on_recorder_stop_event_set(self):
+        self.recording_stopped_signal.emit()
         message_box = _FileGenerationChoiceMessageBox(self)
         user_choice = message_box.exec()
         if user_choice == QMessageBox.Yes:
