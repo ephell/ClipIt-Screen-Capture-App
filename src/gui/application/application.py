@@ -1,7 +1,7 @@
 import os
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QPalette, QColor
+from PySide6.QtGui import QPalette, QColor, QIcon
 from PySide6.QtCore import Qt
 
 from settings.settings import Settings
@@ -9,16 +9,22 @@ from settings.settings import Settings
 
 class Application(QApplication):
 
+    __ICON_PATH = "src/gui/application/logo.svg"
+    __STYLE = "Fusion"
+    __CAPTURES_DIR_NAME = "captures"
+
     def __init__(self, argv):
         super().__init__(argv)
+        self.setWindowIcon(QIcon(self.__ICON_PATH))
+        self.setQuitOnLastWindowClosed(False)
         self.__create_directories()
-        self.setStyle("Fusion")
+        self.setStyle(self.__STYLE)
         self.setPalette(self.__get_default_palette(self))
 
     def __create_directories(self):
         """Creates directories for temporary files and final output."""
         if not os.path.exists(Settings.get_capture_dir_path()):
-            Settings.set_capture_dir_path(os.path.join(os.getcwd(), "captures"))
+            Settings.set_capture_dir_path(os.path.join(os.getcwd(), self.__CAPTURES_DIR_NAME))
             if not os.path.exists(Settings.get_capture_dir_path()):
                 os.makedirs(Settings.get_capture_dir_path())
         if not os.path.exists(Settings.get_temp_dir_path()):

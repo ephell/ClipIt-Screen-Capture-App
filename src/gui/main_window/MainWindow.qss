@@ -34,17 +34,16 @@
 #record_button {
  	image: url(:/icons/buttons/icons/record_button/1x/baseline_videocam_white_24dp.png);
 }
-#screenshot_button{
-	/* image: url(:/icons/buttons/icons/screenshot_button/1x/baseline_screenshot_monitor_white_24dp.png); */
+#screenshot_button {
     image: url(:/icons/buttons/icons/screenshot_button/1x/baseline_camera_alt_white_24dp.png);
 }
-#open_editor_button{
+#open_editor_button {
 	image: url(:/icons/buttons/icons/open_editor_button/1x/baseline_movie_edit_white_24dp.png);
 }
-#open_capture_folder_button{
+#open_capture_folder_button {
 	image: url(:/icons/buttons/icons/open_capture_folder_button/1x/baseline_folder_white_24dp.png);
 }
-#settings_button{
+#settings_button {
 	image: url(:/icons/buttons/icons/settings_button/1x/baseline_settings_white_24dp.png);
 }
 

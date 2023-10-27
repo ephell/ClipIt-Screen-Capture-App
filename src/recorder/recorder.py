@@ -45,6 +45,7 @@ class Recorder(QObject, threading.Thread):
             file_generation_choice_event: threading.Event=None
         ):
         super().__init__()
+        self.setName("Recorder")
         self.record_video = record_video
         self.record_loopback = record_loopback
         self.record_microphone = record_microphone
