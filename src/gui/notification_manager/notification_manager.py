@@ -5,8 +5,8 @@ from ._notification_widget import Notification
 
 
 class NotificationManager:
+
     __instance = None
-    
     __notifications = []
     __app = None
     __x_padding = 25

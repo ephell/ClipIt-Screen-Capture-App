@@ -22,7 +22,7 @@ class Ui_NotificationWidget(object):
     def setupUi(self, NotificationWidget):
         if not NotificationWidget.objectName():
             NotificationWidget.setObjectName(u"NotificationWidget")
-        NotificationWidget.resize(200, 34)
+        NotificationWidget.resize(200, 39)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -38,7 +38,8 @@ class Ui_NotificationWidget(object):
         self.message_label.setSizePolicy(sizePolicy)
         self.message_label.setMinimumSize(QSize(0, 0))
         font = QFont()
-        font.setPointSize(12)
+        font.setFamilies([u"Arial"])
+        font.setPointSize(11)
         self.message_label.setFont(font)
         self.message_label.setTextFormat(Qt.AutoText)
         self.message_label.setWordWrap(True)

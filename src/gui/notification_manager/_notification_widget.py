@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtWidgets import QWidget
 
@@ -15,7 +17,7 @@ class Notification(QWidget, Ui_NotificationWidget):
         self.setWindowFlags(Qt.WindowCloseButtonHint)
         self.message_label.setMaximumSize(self.maximumSize())
         self.message_label.setMinimumSize(self.minimumSize())
-        self.message_label.setText(message)
+        self.message_label.setText(f"<b><i>[{self.__get_current_time()}]</i></b> <i>{message}</i>")
         self.time_ms = time_ms
         self.setWindowIcon(icon_q_pixmap)
         # This is needed so that self.width() and self.height() return
@@ -40,3 +42,6 @@ class Notification(QWidget, Ui_NotificationWidget):
 
     def set_position(self, x, y):
         self.move(x, y)
+
+    def __get_current_time(self):
+        return datetime.now().strftime('%H:%M:%S.%f')[:-3]
