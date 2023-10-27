@@ -1,16 +1,15 @@
-from PySide6.QtCore import Slot
+import threading
+import queue
+
+from PySide6.QtCore import QThread, Slot, Signal
 from PySide6.QtWidgets import QApplication, QStyle
 
 from ._notification_widget import Notification
 
 
-class NotificationManager:
+class NotificationManager(QThread):
 
-    __instance = None
-    __notifications = []
-    __app = None
-    __x_padding = 25
-    __y_padding = 0
+    ready_to_display_signal = Signal(object)
 
     __INFORMATION_ICON_16x16 = None
     __INFORMATION_ICON_32x32 = None
@@ -21,43 +20,49 @@ class NotificationManager:
     __QUESTION_ICON_16x16 = None
     __QUESTION_ICON_32x32 = None
 
-    def __new__(self):
-        if self.__instance is None:
-            self.__instance = super().__new__(self)
-            self.__instance.__init()
-        return self.__instance
-
-    def __init(self):
+    def __init__(self):
+        super().__init__()
         self.__app = QApplication.instance() or QApplication([])
+        self.__set_icon_pixmaps()
         self.__notifications = []
         self.__x_padding = 25
         self.__y_padding = 0
-        self.__set_icon_pixmaps()
+        self.__notification_queue = queue.Queue()
+        self.__notification_available_flag = threading.Event()
 
-    def send_notification(self, message, time_ms, type="information"):
+    def run(self):
+        while True:
+            self.__notification_available_flag.wait()
+            if not self.__notification_queue.empty():
+                notification = self.__notification_queue.get()
+                last_notification = self.__notifications[-1] if self.__notifications else None
+                notification.set_position(
+                    *self.__calculate_position(
+                        notification,
+                        last_notification
+                    )
+                )
+                notification.closed_signal.connect(self.__on_notification_closed)
+                self.__notifications.append(notification)
+                self.ready_to_display_signal.emit(notification)
+            else:
+                self.__notification_available_flag.clear()
+
+    def put_in_queue(self, message, time_ms, type):
         if type == "information":
-            self.__send_notification(message, time_ms, self.__INFORMATION_ICON_16x16)
+            notification = Notification(message, time_ms, self.__INFORMATION_ICON_16x16)
         elif type == "warning":
-            self.__send_notification(message, time_ms, self.__WARNING_ICON_16x16)
+            notification = Notification(message, time_ms, self.__WARNING_ICON_16x16)
         elif type == "critical":
-            self.__send_notification(message, time_ms, self.__CRITICAL_ICON_16x16)
+            notification = Notification(message, time_ms, self.__CRITICAL_ICON_16x16)
         elif type == "question":
-            self.__send_notification(message, time_ms, self.__QUESTION_ICON_16x16)
+            notification = Notification(message, time_ms, self.__QUESTION_ICON_16x16)
         else:
             raise ValueError(f"Invalid notification type: {type}")
 
-    def __send_notification(self, message, time_ms, icon):
-        last_notification = self.__notifications[-1] if self.__notifications else None
-        new_notification = Notification(message, time_ms, icon)
-        new_notification.set_position(
-            *self.__calculate_position(
-                new_notification,
-                last_notification
-            )
-        )
-        new_notification.closed_signal.connect(self.__on_notification_closed)
-        self.__notifications.append(new_notification)
-        new_notification.show()
+        self.__notification_queue.put(notification)
+        if not self.__notification_available_flag.is_set():
+            self.__notification_available_flag.set()
 
     @Slot()
     def __on_notification_closed(self, notification):
