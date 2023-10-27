@@ -17,9 +17,12 @@ class NotificationSender:
     }
 
     def __init__(self):
-        self.notifications = []
         if any(icon is None for icon in self.__icons.values()):
             self.__get_icon_pixmaps()
+        self.__notifications = []
+        self.__app = QApplication.instance() or QApplication([])
+        self.__x_padding = 25
+        self.__y_padding = 0
 
     def send_information(self, message, time_ms):
         self.__send_notification(message, time_ms, self.__icons["INFORMATION_ICON_16x16"])
@@ -34,9 +37,49 @@ class NotificationSender:
         self.__send_notification(message, time_ms, self.__icons["QUESTION_ICON_16x16"])
 
     def __send_notification(self, message, time_ms, icon):
-        notification = Notification(message, time_ms, icon)
-        notification.closed_signal.connect(lambda: self.notifications.remove(notification))
-        self.notifications.append(notification)
+        last_notification = self.__notifications[-1] if self.__notifications else None
+        new_notification = Notification(message, time_ms, icon)
+        new_notification.set_position(
+            *self.__calculate_position(
+                new_notification,
+                last_notification
+            )
+        )
+        new_notification.closed_signal.connect(lambda: self.__notifications.remove(new_notification))
+        self.__notifications.append(new_notification)
+        new_notification.show()
+
+    def __calculate_position(self, new_notification, last_notification):
+        if last_notification is None:
+            return self.__calculate_bottom_most_position(new_notification)
+
+        last_notification_x = last_notification.x()
+        last_notification_y = last_notification.y()
+        new_notification_h = new_notification.height()
+        _, screen_size_diff_h = self.__get_screen_size_difference()
+        return (
+            last_notification_x,
+            last_notification_y - new_notification_h - self.__y_padding - screen_size_diff_h
+        )
+
+    def __calculate_bottom_most_position(self, notification):
+        available_w, available_h = self.__get_available_screen_size()
+        size_diff_w, size_diff_h = self.__get_screen_size_difference()
+        return (
+            available_w - notification.width() - size_diff_w - self.__x_padding,
+            available_h - notification.height() - size_diff_h - self.__y_padding
+        )
+
+    def __get_available_screen_size(self):
+        return self.__app.primaryScreen().availableSize().toTuple()
+
+    def __get_total_screen_size(self):
+        return self.__app.primaryScreen().size().toTuple()
+
+    def __get_screen_size_difference(self):
+        total_w, total_h = self.__get_total_screen_size()
+        available_w, available_h = self.__get_available_screen_size()
+        return total_w - available_w, total_h - available_h
 
     @classmethod
     def __get_icon_pixmaps(cls):

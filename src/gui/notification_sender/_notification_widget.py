@@ -16,10 +16,8 @@ class Notification(QWidget, Ui_NotificationWidget):
         self.message_label.setMaximumSize(self.maximumSize())
         self.message_label.setMinimumSize(self.minimumSize())
         self.message_label.setText(message)
+        self.time_ms = time_ms
         self.setWindowIcon(icon_q_pixmap)
-        self.__app = QApplication.instance() or QApplication([])
-        self.__x_padding = 25
-        self.__y_padding = 0
         # This is needed so that self.width() and self.height() return
         # the correct values with wrapped text taken into account.
         # If omitted, these methods will return the original size and 
@@ -27,30 +25,16 @@ class Notification(QWidget, Ui_NotificationWidget):
         self.setMinimumSize(self.sizeHint())
         # ------------------------------------------------------------
         self.setMaximumHeight(self.height())
-        self.move(*self.__calculate_position())
-        self.show()
-        QTimer.singleShot(time_ms, self.close)
 
     """Override"""
     def closeEvent(self, event):
         self.closed_signal.emit()
         super().closeEvent(event)
 
-    def __calculate_position(self):
-        available_w, available_h = self.__get_available_screen_size()
-        size_diff_w, size_diff_h = self.__get_screen_size_difference()
-        return (
-            available_w - self.width() - size_diff_w - self.__x_padding,
-            available_h - self.height() - size_diff_h - self.__y_padding
-        )
+    """Override"""
+    def show(self):
+        super().show()
+        QTimer.singleShot(self.time_ms, self.close)
 
-    def __get_available_screen_size(self):
-        return self.__app.primaryScreen().availableSize().toTuple()
-
-    def __get_total_screen_size(self):
-        return self.__app.primaryScreen().size().toTuple()
-
-    def __get_screen_size_difference(self):
-        total_w, total_h = self.__get_total_screen_size()
-        available_w, available_h = self.__get_available_screen_size()
-        return total_w - available_w, total_h - available_h
+    def set_position(self, x, y):
+        self.move(x, y)
