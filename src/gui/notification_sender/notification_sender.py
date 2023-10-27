@@ -15,12 +15,12 @@ class NotificationSender:
 
     def __init(self):
         self.__manager = NotificationManager()
-        self.__manager.ready_to_display_signal.connect(self.on_ready_to_display)
+        self.__manager.ready_to_display_signal.connect(self.__on_ready_to_display)
         self.__manager.start()
 
-    def send_notification(self, message, time_ms, type="information"):
+    def send(self, message, time_ms, type="information"):
         self.__manager.put_in_queue(message, time_ms, type)
 
     @Slot()
-    def on_ready_to_display(self, notification):
+    def __on_ready_to_display(self, notification):
         notification.show()
