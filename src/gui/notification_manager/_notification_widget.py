@@ -34,6 +34,8 @@ class Notification(QWidget, Ui_NotificationWidget):
     """Override"""
     def show(self):
         super().show()
+        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        self.activateWindow()
         QTimer.singleShot(self.time_ms, self.close)
 
     def set_position(self, x, y):
