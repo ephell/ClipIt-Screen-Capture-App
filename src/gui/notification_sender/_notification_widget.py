@@ -6,7 +6,7 @@ from ._NotificationWidget_ui import Ui_NotificationWidget
 
 class Notification(QWidget, Ui_NotificationWidget):
 
-    closed_signal = Signal()
+    closed_signal = Signal(object)
 
     def __init__(self, message, time_ms, icon_q_pixmap):
         super().__init__()
@@ -28,7 +28,7 @@ class Notification(QWidget, Ui_NotificationWidget):
 
     """Override"""
     def closeEvent(self, event):
-        self.closed_signal.emit()
+        self.closed_signal.emit(self)
         super().closeEvent(event)
 
     """Override"""

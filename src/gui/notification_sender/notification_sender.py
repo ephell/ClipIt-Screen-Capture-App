@@ -1,3 +1,4 @@
+from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QApplication, QStyle
 
 from ._notification_widget import Notification
@@ -45,7 +46,7 @@ class NotificationSender:
                 last_notification
             )
         )
-        new_notification.closed_signal.connect(lambda: self.__notifications.remove(new_notification))
+        new_notification.closed_signal.connect(self.__on_notification_closed)
         self.__notifications.append(new_notification)
         new_notification.show()
 
@@ -69,6 +70,26 @@ class NotificationSender:
             available_w - notification.width() - size_diff_w - self.__x_padding,
             available_h - notification.height() - size_diff_h - self.__y_padding
         )
+
+    @Slot()
+    def __on_notification_closed(self, notification):
+        self.__notifications.remove(notification)
+        self.__rearrange_notifications()
+
+    def __rearrange_notifications(self):
+        for i, notification in enumerate(self.__notifications):
+            if i == 0:
+                notification.set_position(
+                    *self.__calculate_bottom_most_position(notification)
+                )
+            else:
+                last_notification = self.__notifications[i-1]
+                notification.set_position(
+                    *self.__calculate_position(
+                        notification,
+                        last_notification
+                    )
+                )
 
     def __get_available_screen_size(self):
         return self.__app.primaryScreen().availableSize().toTuple()
