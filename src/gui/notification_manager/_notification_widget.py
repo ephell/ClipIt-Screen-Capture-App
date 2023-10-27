@@ -1,5 +1,5 @@
-from PySide6.QtCore import Qt, QTimer, Slot, Signal
-from PySide6.QtWidgets import QWidget, QApplication
+from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtWidgets import QWidget
 
 from ._NotificationWidget_ui import Ui_NotificationWidget
 
