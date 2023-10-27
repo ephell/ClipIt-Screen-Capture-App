@@ -158,10 +158,7 @@ class EditorWindow(QWidget):
         self.__initial_video_height = self.preview.media_player.video_output.height
 
     def __has_file_been_edited(self):
-        if self.__has_duration_changed():
-            return True
-        if self.__has_resolution_changed():
-            return True
+        return self.__has_duration_changed() or self.__has_resolution_changed()
 
     def __has_duration_changed(self):
         return (
