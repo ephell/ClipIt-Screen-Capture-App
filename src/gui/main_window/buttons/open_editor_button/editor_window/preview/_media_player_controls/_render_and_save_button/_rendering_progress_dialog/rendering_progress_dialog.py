@@ -62,3 +62,6 @@ class RenderingProgressDialog(QDialog, Ui_RenderingProgressDialog):
         self.__is_rendering_finished = True
         dir_path = os.path.dirname(file_path)
         os.startfile(dir_path)
+        # Bring dialog to front
+        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+        self.show()
