@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from PySide6.QtCore import Qt, QTimer, Signal
-from PySide6.QtWidgets import QWidget
+from PySide6.QtCore import Qt, QTimer, Signal, QSize
+from PySide6.QtWidgets import QWidget, QLabel, QSizePolicy
+from PySide6.QtGui import QPixmap
 
 from ._NotificationWidget_ui import Ui_NotificationWidget
 
@@ -10,7 +11,7 @@ class Notification(QWidget, Ui_NotificationWidget):
 
     closed_signal = Signal(object)
 
-    def __init__(self, message, time_ms, icon_q_pixmap):
+    def __init__(self, message, time_ms, icon_q_pixmap, q_image):
         super().__init__()
         self.setupUi(self)
         self.setAttribute(Qt.WA_DeleteOnClose)
@@ -20,6 +21,20 @@ class Notification(QWidget, Ui_NotificationWidget):
         self.message_label.setText(f"<b><i>[{self.__get_current_time()}]</i></b> <i>{message}</i>")
         self.time_ms = time_ms
         self.setWindowIcon(icon_q_pixmap)
+
+        if q_image is not None:
+            self.image_label = QLabel(self)
+            self.image_label.setMaximumHeight(500)
+            self.image_label.setMinimumSize(self.minimumSize())
+            q_image = q_image.scaled(
+                self.image_label.width(),
+                self.image_label.width(),
+                Qt.KeepAspectRatio,
+                Qt.SmoothTransformation
+            )
+            self.image_label.setPixmap(QPixmap.fromImage(q_image))
+            self.verticalLayout.addWidget(self.image_label)
+    
         # This is needed so that self.width() and self.height() return
         # the correct values with wrapped text taken into account.
         # If omitted, these methods will return the original size and 

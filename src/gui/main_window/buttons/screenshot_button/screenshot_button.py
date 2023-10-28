@@ -4,8 +4,10 @@ import mss
 from playsound import playsound
 from PySide6.QtCore import Slot, Qt
 from PySide6.QtWidgets import QPushButton
+from PySide6.QtGui import QImage
 
 from gui.area_widgets.area_selector import AreaSelector
+from gui.notification_sender.notification_sender import NotificationSender
 from settings.settings import Settings
 
 
@@ -14,6 +16,7 @@ class ScreenshotButton(QPushButton):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.area_selector = None
+        self.__notification_sender = NotificationSender()
 
     """Override"""
     def keyPressEvent(self, event):
@@ -40,7 +43,14 @@ class ScreenshotButton(QPushButton):
                 'height': int(y1 - y0)
             })
         playsound("src/gui/main_window/buttons/screenshot_button/camera-click.wav")
-        mss.tools.to_png(sc.rgb, sc.size, output=self.__generate_file_path())
+        file_path = self.__generate_file_path()
+        mss.tools.to_png(sc.rgb, sc.size, output=file_path)
+        self.__notification_sender.send(
+            f"Screenshot saved to: {file_path}",
+            3000,
+            "information",
+            QImage(file_path)
+        )
 
     def __generate_file_path(self):
         now = datetime.datetime.now()
