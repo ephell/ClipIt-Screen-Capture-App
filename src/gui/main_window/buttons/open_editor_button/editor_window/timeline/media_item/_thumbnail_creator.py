@@ -3,7 +3,7 @@ import threading
 
 from moviepy.editor import VideoFileClip
 import numpy as np
-from PySide6.QtCore import Qt, QRect, QThread, Signal, Slot, QTimer
+from PySide6.QtCore import Qt, QRect, Signal, Slot, QTimer, QObject
 from PySide6.QtGui import QImage, QPixmap, QPainter, QColor, QBrush, QPen
 
 
@@ -40,6 +40,9 @@ class ThumbnailCreator:
                         )
                     )
         return self.__crop_to_fit(self.__create_thumbnail(frame_amount))
+
+    def kill_extraction_thread(self):
+        self.__extractor.kill()
 
     def __calculate_required_frame_amount(self):
         return max(
@@ -159,7 +162,7 @@ class ThumbnailCreator:
         self.__resize_event_timer.start(self.__resize_event_timer_interval)
 
 
-class _QPixmapsExtractor(QThread):
+class _QPixmapsExtractor(QObject, threading.Thread):
 
     finished_signal = Signal(int, list)
 
@@ -170,6 +173,7 @@ class _QPixmapsExtractor(QThread):
             scale_q_pixmap_to_h,
         ):
         super().__init__()
+        self.setDaemon(True)
         self.__media_item = media_item
         self.__scale_q_pixmap_to_w = scale_q_pixmap_to_w
         self.__scale_q_pixmap_to_h = scale_q_pixmap_to_h
@@ -178,9 +182,10 @@ class _QPixmapsExtractor(QThread):
         self.__frame_amount_queue = queue.Queue()
         self.__work_available_flag = threading.Event()
         self.__extracted_frame_amounts = []
+        self.is_kill_flag_set = False
 
     def run(self):
-        while True:
+        while not self.is_kill_flag_set:
             self.__work_available_flag.wait()
             if not self.__frame_amount_queue.empty():
                 frame_amount = self.__frame_amount_queue.get()
@@ -198,6 +203,10 @@ class _QPixmapsExtractor(QThread):
             self.__frame_amount_queue.put(frame_amount)
             if not self.__work_available_flag.is_set():
                 self.__work_available_flag.set()
+
+    def kill(self):
+        self.is_kill_flag_set = True
+        self.__work_available_flag.set()
 
     def __calculate_extraction_timestamps(self, frame_amount):
         interval = int(self.__video_duration / frame_amount)

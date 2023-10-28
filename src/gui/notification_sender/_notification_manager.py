@@ -1,18 +1,19 @@
 import threading
 import queue
 
-from PySide6.QtCore import QThread, Signal, Slot
+from PySide6.QtCore import Signal, Slot, QObject
 from PySide6.QtWidgets import QApplication
 
 from ._notification_widget import Notification
 
 
-class NotificationManager(QThread):
+class NotificationManager(QObject, threading.Thread):
 
     ready_to_display_signal = Signal(object)
 
     def __init__(self):
         super().__init__()
+        self.setDaemon(True)
         self.__app = QApplication.instance() or QApplication([])
         self.__notifications = []
         self.__x_padding = 25

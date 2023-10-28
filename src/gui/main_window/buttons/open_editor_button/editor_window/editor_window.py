@@ -10,6 +10,7 @@ class EditorWindow(QWidget):
     editor_position_changed_signal = Signal()
     editor_resized_signal = Signal()
     source_file_changed_signal = Signal(str)
+    editor_closed_signal = Signal()
 
     def __init__(self, file_path, parent=None):
         super().__init__(parent)
@@ -62,6 +63,9 @@ class EditorWindow(QWidget):
         self.preview.scene.video_output_native_size_changed_signal.connect(
             self.__on_video_output_native_size_changed
         )
+        self.editor_closed_signal.connect(
+            self.timeline.media_item.on_editor_closed
+        )
 
     """Override"""
     def closeEvent(self, event):
@@ -75,10 +79,15 @@ class EditorWindow(QWidget):
                 QMessageBox.No
             )
             if user_choice == QMessageBox.Yes:
+                self.editor_closed_signal.emit()
                 event.accept()
                 super().closeEvent(event)
             else:
                 event.ignore()
+        else:
+            self.editor_closed_signal.emit()
+            event.accept()
+            super().closeEvent(event)
 
         # Delete the editor object from the parent if parent exists.
         if self.parent() is not None:
