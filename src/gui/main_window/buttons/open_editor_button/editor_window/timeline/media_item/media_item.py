@@ -102,6 +102,10 @@ class MediaItem(QGraphicsRectItem):
             )
 
     @Slot()
+    def on_editor_closed(self):
+        self.__thumbnail_creator.kill_extraction_thread()
+
+    @Slot()
     def __on_left_handle_time_edit_time_changed_signal(self, time):
         self.update_start_time(time)
         self.__resize_based_on_time_interval(time, self.end_time)
