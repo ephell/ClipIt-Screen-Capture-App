@@ -48,15 +48,15 @@ class NotificationManager(QThread):
             else:
                 self.__notification_available_flag.clear()
 
-    def put_in_queue(self, message, time_ms, type):
+    def put_in_queue(self, message, time_ms, type, image):
         if type == "information":
-            notification = Notification(message, time_ms, self.__INFORMATION_ICON_16x16)
+            notification = Notification(message, time_ms, self.__INFORMATION_ICON_16x16, image)
         elif type == "warning":
-            notification = Notification(message, time_ms, self.__WARNING_ICON_16x16)
+            notification = Notification(message, time_ms, self.__WARNING_ICON_16x16, image)
         elif type == "critical":
-            notification = Notification(message, time_ms, self.__CRITICAL_ICON_16x16)
+            notification = Notification(message, time_ms, self.__CRITICAL_ICON_16x16, image)
         elif type == "question":
-            notification = Notification(message, time_ms, self.__QUESTION_ICON_16x16)
+            notification = Notification(message, time_ms, self.__QUESTION_ICON_16x16, image)
         else:
             raise ValueError(f"Invalid notification type: {type}")
 
