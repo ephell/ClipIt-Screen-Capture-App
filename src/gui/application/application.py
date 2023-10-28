@@ -17,7 +17,7 @@ class Application(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
         self.setWindowIcon(QIcon(self.__ICON_PATH))
-        # self.setQuitOnLastWindowClosed(False)
+        self.setQuitOnLastWindowClosed(False)
         self.__set_app_id()
         self.__create_directories()
         self.setStyle(self.__STYLE)

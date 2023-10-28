@@ -18,8 +18,8 @@ class NotificationSender:
         self.__manager.ready_to_display_signal.connect(self.__on_ready_to_display)
         self.__manager.start()
 
-    def send(self, message, time_ms, type="information", image=None):
-        self.__manager.put_in_queue(message, time_ms, type, image)
+    def send(self, message, time_ms, image=None):
+        self.__manager.put_in_queue(message, time_ms, image)
 
     @Slot()
     def __on_ready_to_display(self, notification):

@@ -52,7 +52,6 @@ class ScreenshotButton(QPushButton):
         self.__notification_sender.send(
             f"Screenshot saved to: {file_path}",
             3000,
-            "information",
             QImage(file_path)
         )
 
