@@ -1,10 +1,13 @@
 import datetime
 
+from io import BytesIO
 import mss
 from playsound import playsound
+from PIL import Image
 from PySide6.QtCore import Slot, Qt
 from PySide6.QtWidgets import QPushButton
 from PySide6.QtGui import QImage
+import win32clipboard
 
 from gui.area_widgets.area_selector import AreaSelector
 from gui.notification_sender.notification_sender import NotificationSender
@@ -45,6 +48,7 @@ class ScreenshotButton(QPushButton):
         playsound("src/gui/main_window/buttons/screenshot_button/camera-click.wav")
         file_path = self.__generate_file_path()
         mss.tools.to_png(sc.rgb, sc.size, output=file_path)
+        self.__send_to_clipboard(file_path)
         self.__notification_sender.send(
             f"Screenshot saved to: {file_path}",
             3000,
@@ -56,6 +60,17 @@ class ScreenshotButton(QPushButton):
         now = datetime.datetime.now()
         timestamp = now.strftime("%Y-%m-%d [] %H-%M-%S")
         return f"{Settings.get_capture_dir_path()}/{timestamp}.png"
+
+    def __send_to_clipboard(self, screenshot_path):
+        screenshot = Image.open(screenshot_path)
+        output = BytesIO()
+        screenshot.convert("RGB").save(output, "DIB")
+        data = output.getvalue()
+        output.close()
+        win32clipboard.OpenClipboard()
+        win32clipboard.EmptyClipboard()
+        win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
+        win32clipboard.CloseClipboard()
 
     @Slot()
     def on_screenshot_button_clicked(self):
