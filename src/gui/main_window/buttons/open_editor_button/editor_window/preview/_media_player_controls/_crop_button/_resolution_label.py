@@ -1,4 +1,4 @@
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, Qt
 from PySide6.QtWidgets import QLabel
 
 
@@ -6,7 +6,10 @@ class ResolutionLabel(QLabel):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.label_text = "Width: {} | Height: {}"
+        font = self.font()
+        font.setBold(True)
+        self.setFont(font)
+        self.label_text = "W: {} H: {}"
         self.setText(self.label_text.format(0, 0))
 
     @Slot()

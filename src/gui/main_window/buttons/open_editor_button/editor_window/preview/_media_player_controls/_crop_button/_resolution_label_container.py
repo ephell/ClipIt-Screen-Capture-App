@@ -15,6 +15,7 @@ class ResolutionLabelContainer(QDialog):
         ):
         super().__init__(parent)
         self.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
         self.button_position = button_position
         self.button_width = button_width
         self.button_height = button_height
@@ -27,11 +28,11 @@ class ResolutionLabelContainer(QDialog):
         self.button_position = button_position
         self.button_width = button_width
         self.button_height = button_height
-        slider_x = self.button_position.x() \
-                   + (self.button_width - self.rect().width()) \
-                   // 2
-        slider_y = self.button_position.y() - self.rect().height()
-        self.move(slider_x, slider_y)
+        new_x = self.button_position.x() \
+                + (self.button_width - self.rect().width()) \
+                // 2
+        new_y = self.button_position.y() - self.rect().height()
+        self.move(new_x, new_y)
 
     """Override"""
     def showEvent(self, event):
