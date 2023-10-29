@@ -54,6 +54,12 @@ class EditorWindow(QWidget):
         self.editor_resized_signal.connect(
             self.preview.media_player_controls.volume_button.on_editor_resized
         )
+        self.editor_position_changed_signal.connect(
+            self.preview.media_player_controls.crop_button.on_editor_position_changed
+        )
+        self.editor_resized_signal.connect(
+            self.preview.media_player_controls.crop_button.on_editor_resized
+        )
         self.preview.media_player_controls.upload_button.upload_file_signal.connect(
             self.__on_upload_file_signal
         )

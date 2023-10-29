@@ -40,8 +40,14 @@ class Preview(QWidget):
         self.scene.video_output_native_size_changed_signal.connect(
             self.__stretch_and_center_video_output_and_cropper
         )
+        self.scene.video_output_native_size_changed_signal.connect(
+            self.media_player_controls.crop_button.resolution_label_container.resolution_label.on_video_output_native_size_changed_signal
+        )
         self.scene.cropper_resized_signal.connect(
             self.media_player.video_output.on_cropper_resized_signal
+        )
+        self.scene.cropper_resized_signal.connect(
+            self.media_player_controls.crop_button.resolution_label_container.resolution_label.on_cropper_resized_signal
         )
         self.view.view_resized.connect(
             self.__stretch_and_center_video_output_and_cropper
