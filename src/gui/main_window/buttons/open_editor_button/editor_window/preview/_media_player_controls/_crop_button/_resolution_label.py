@@ -11,6 +11,7 @@ class ResolutionLabel(QLabel):
         self.setFont(font)
         self.label_text = "W: {} H: {}"
         self.setText(self.label_text.format(0, 0))
+        self.setAlignment(Qt.AlignCenter)
 
     @Slot()
     def on_cropper_resized_signal(self, top_x, top_y, width, height):
