@@ -13,15 +13,14 @@ class Notification(QWidget, Ui_NotificationWidget):
 
     closed_signal = Signal(object)
 
-    def __init__(self, message, time_ms, icon_q_pixmap, q_image):
-        super().__init__()
+    def __init__(self, message, time_ms, q_image, parent=None):
+        super().__init__(parent)
         self.setupUi(self)
         self.setAttribute(Qt.WA_DeleteOnClose)
-        self.setWindowFlags(Qt.Dialog | Qt.MSWindowsFixedSizeDialogHint)
+        self.setWindowFlags(Qt.Tool | Qt.MSWindowsFixedSizeDialogHint)
         self.message_label.setMaximumSize(self.maximumSize())
         self.message_label.setMinimumSize(self.minimumSize())
         self.message_label.setText(f"<b><i>[{self.__get_current_time()}]</i></b> <i>{message}</i>")
-        self.setWindowIcon(icon_q_pixmap)
         self.time_ms = time_ms
 
         self.q_image = q_image
@@ -50,9 +49,8 @@ class Notification(QWidget, Ui_NotificationWidget):
 
     """Override"""
     def show(self):
+        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
         super().show()
-        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
-        self.activateWindow()
         QTimer.singleShot(self.time_ms, self.close)
 
     """Override"""

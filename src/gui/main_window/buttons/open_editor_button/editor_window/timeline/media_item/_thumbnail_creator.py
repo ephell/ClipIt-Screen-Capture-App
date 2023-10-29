@@ -3,7 +3,7 @@ import threading
 
 from moviepy.editor import VideoFileClip
 import numpy as np
-from PySide6.QtCore import Qt, QRect, QThread, Signal, Slot, QTimer
+from PySide6.QtCore import Qt, QRect, Signal, Slot, QTimer, QObject
 from PySide6.QtGui import QImage, QPixmap, QPainter, QColor, QBrush, QPen
 
 
@@ -41,6 +41,9 @@ class ThumbnailCreator:
                     )
         return self.__crop_to_fit(self.__create_thumbnail(frame_amount))
 
+    def kill_extraction_thread(self):
+        self.__extractor.kill()
+
     def __calculate_required_frame_amount(self):
         return max(
             1,
@@ -62,7 +65,7 @@ class ThumbnailCreator:
             QRect(
                 self.media_item.scenePos().x() - self.media_item.initial_x,
                 0,
-                self.media_item.right_handle.scenePos().x() - self.media_item.scenePos().x(),
+                self.media_item.boundingRect().width(),
                 self.media_item.boundingRect().height()
             )
         )
@@ -70,7 +73,10 @@ class ThumbnailCreator:
     def __create_thumbnail(self, frame_amount):
         q_pixmaps = self.__q_pixmaps.get(frame_amount)
         q_pixmaps_with_fillers = self.__add_filler_to_each_q_pixmap(q_pixmaps)
-        return self.__combine_q_pixmaps(q_pixmaps_with_fillers)
+        thumbnail = self.__combine_q_pixmaps(q_pixmaps_with_fillers)
+        if not thumbnail.width() == self.media_item.get_max_possible_width():
+            thumbnail = self.__add_filler_to_end(thumbnail)
+        return thumbnail
 
     def __add_filler_to_each_q_pixmap(self, q_pixmaps: list[QPixmap]):
         q_pixmaps_with_fillers = []
@@ -102,7 +108,6 @@ class ThumbnailCreator:
         return q_pixmaps_with_fillers
 
     def __combine_q_pixmaps(self, q_pixmaps: list[QPixmap]):
-        """Creates a QPixmap image object that can fully cover the MediaItem."""
         final_q_pixmap = QPixmap(
             q_pixmaps[0].width() * len(q_pixmaps),
             q_pixmaps[0].height()
@@ -112,6 +117,52 @@ class ThumbnailCreator:
             painter.drawPixmap(i * q_pixmap.width(), 0, q_pixmap)
         painter.end()
         return final_q_pixmap
+
+    def __add_filler_to_end(self, thumbnail: QPixmap):
+        """
+        Adds a filler to the end of the thumbnail to fully cover the MediaItem.
+
+        Typically, '__add_filler_to_each_q_pixmap()' creates QPixmaps with 
+        equal widths that when combined can fully cover the MediaItem. However, 
+        in some cases, these combined QPixmaps fall slightly short of the 
+        MediaItem's maximum width. This discrepancy arises from the way each 
+        QPixmap's width is determined during creation. The method 
+        '__calculate_filler_width()' may return a float value, but the 
+        QPixmap() constructor only accepts integer values for width and height, 
+        causing the decimal portion to be truncated. This results in each 
+        QPixmap being slightly shorter than needed, ultimately causing the 
+        combined QPixmaps to be narrower than the MediaItem's maximum width. 
+        In such situations, calling this function becomes necessary to fill 
+        the remaining space.
+
+        """
+        extended_thumbnail = QPixmap(
+            thumbnail.width() + self.media_item.get_max_possible_width() - thumbnail.width(),
+            thumbnail.height()
+        )
+        painter = QPainter(extended_thumbnail)
+        painter.fillRect(
+            0, 
+            0, 
+            extended_thumbnail.width(), 
+            extended_thumbnail.height(), 
+            self.__filler_color
+        )
+
+        pen = QPen()
+        pen.setColor(self.__filler_line_color)
+        pen.setWidth(self.__filler_line_width)
+        painter.setPen(pen)
+        painter.drawLine(
+            0, 
+            extended_thumbnail.height() // 2,
+            extended_thumbnail.width(), 
+            extended_thumbnail.height() // 2
+        )
+
+        painter.drawPixmap(0, 0, thumbnail)
+        painter.end()
+        return extended_thumbnail
 
     def __calculate_filler_width(self, frame_amount):
         max_possible_thumbnail_width = frame_amount * self.__q_pixmap_w
@@ -159,7 +210,7 @@ class ThumbnailCreator:
         self.__resize_event_timer.start(self.__resize_event_timer_interval)
 
 
-class _QPixmapsExtractor(QThread):
+class _QPixmapsExtractor(QObject, threading.Thread):
 
     finished_signal = Signal(int, list)
 
@@ -170,6 +221,7 @@ class _QPixmapsExtractor(QThread):
             scale_q_pixmap_to_h,
         ):
         super().__init__()
+        self.setDaemon(True)
         self.__media_item = media_item
         self.__scale_q_pixmap_to_w = scale_q_pixmap_to_w
         self.__scale_q_pixmap_to_h = scale_q_pixmap_to_h
@@ -178,9 +230,10 @@ class _QPixmapsExtractor(QThread):
         self.__frame_amount_queue = queue.Queue()
         self.__work_available_flag = threading.Event()
         self.__extracted_frame_amounts = []
+        self.is_kill_flag_set = False
 
     def run(self):
-        while True:
+        while not self.is_kill_flag_set:
             self.__work_available_flag.wait()
             if not self.__frame_amount_queue.empty():
                 frame_amount = self.__frame_amount_queue.get()
@@ -198,6 +251,10 @@ class _QPixmapsExtractor(QThread):
             self.__frame_amount_queue.put(frame_amount)
             if not self.__work_available_flag.is_set():
                 self.__work_available_flag.set()
+
+    def kill(self):
+        self.is_kill_flag_set = True
+        self.__work_available_flag.set()
 
     def __calculate_extraction_timestamps(self, frame_amount):
         interval = int(self.__video_duration / frame_amount)

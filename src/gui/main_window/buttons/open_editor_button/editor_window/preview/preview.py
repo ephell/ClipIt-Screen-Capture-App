@@ -1,7 +1,7 @@
 """Importable widget containing all video preview related components."""
 
-from PySide6.QtCore import Qt, Slot, Signal
-from PySide6.QtGui import QPainter, QColor
+from PySide6.QtCore import Qt, Slot, Signal, QSize
+from PySide6.QtGui import QPainter, QColor, QResizeEvent
 from PySide6.QtMultimediaWidgets import QGraphicsVideoItem
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QGraphicsScene, QGraphicsView, QSizePolicy
@@ -40,8 +40,14 @@ class Preview(QWidget):
         self.scene.video_output_native_size_changed_signal.connect(
             self.__stretch_and_center_video_output_and_cropper
         )
+        self.scene.video_output_native_size_changed_signal.connect(
+            self.media_player_controls.crop_button.resolution_label_container.resolution_label.on_video_output_native_size_changed_signal
+        )
         self.scene.cropper_resized_signal.connect(
             self.media_player.video_output.on_cropper_resized_signal
+        )
+        self.scene.cropper_resized_signal.connect(
+            self.media_player_controls.crop_button.resolution_label_container.resolution_label.on_cropper_resized_signal
         )
         self.view.view_resized.connect(
             self.__stretch_and_center_video_output_and_cropper
@@ -94,6 +100,7 @@ class _GraphicsView(QGraphicsView):
         self.setMinimumHeight(self.scene.initial_height)
         self.max_scene_w = None
         self.max_scene_h = None
+        self.__is_first_set_max_scene_dimensions = True
 
     """Override"""
     def resizeEvent(self, event):
@@ -130,3 +137,11 @@ class _GraphicsView(QGraphicsView):
         """
         self.max_scene_w = width
         self.max_scene_h = height
+
+        # This is required to correctly center the video output on the first
+        # resize event (when the window is first shown). Videos with resolutions
+        # under 350x350 are not centered correctly and may even appear completely 
+        # off view if this is omitted.
+        if self.__is_first_set_max_scene_dimensions:
+            self.__is_first_set_max_scene_dimensions = False
+            self.resizeEvent(QResizeEvent(QSize(width, height), self.size()))

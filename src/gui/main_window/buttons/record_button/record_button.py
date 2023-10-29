@@ -153,7 +153,7 @@ class RecordButton(QPushButton):
     @Slot()
     def __on_recorder_stop_event_set(self):
         self.recording_stopped_signal.emit()
-        message_box = _FileGenerationChoiceMessageBox(self)
+        message_box = _FileGenerationChoiceMessageBox()
         user_choice = message_box.exec()
         if user_choice == QMessageBox.Yes:
             self.recorder.generate_final_file = True
@@ -177,7 +177,6 @@ class RecordButton(QPushButton):
         user_choice = message_box.exec()
         if user_choice == QMessageBox.Yes:
             self.open_editor_after_file_generation_finished_signal.emit(file_path)
-        message_box.deleteLater()
 
 
 class _FileGenerationChoiceMessageBox(QMessageBox):
@@ -185,6 +184,8 @@ class _FileGenerationChoiceMessageBox(QMessageBox):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("File Generation Choice")
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
         self.setText("Recording finished! Render and save the file?")
         self.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         self.setDefaultButton(QMessageBox.Yes)
@@ -197,6 +198,8 @@ class _FileGenerationCompleteMessageBox(QMessageBox):
         super().__init__(parent)
         self.file_path = file_path
         self.setWindowTitle("File Generation Complete")
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
         self.setText(
             "File saved to: \n"
             f"{file_path}"

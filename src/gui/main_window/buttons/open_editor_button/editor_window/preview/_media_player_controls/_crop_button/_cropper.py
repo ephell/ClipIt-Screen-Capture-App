@@ -5,7 +5,8 @@ from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsItem
 
 class Cropper(QGraphicsRectItem):
 
-    handle_size = 12.0
+    handle_size = None
+    min_handle_size = 2
     handle_space = 0
     handle_top_left = 1
     handle_top_middle = 2
@@ -33,6 +34,7 @@ class Cropper(QGraphicsRectItem):
         self.scene.addItem(self)
         self.max_rect = max_rect
         self.setRect(self.max_rect)
+        self.__set_handle_size()
         self.min_possible_size = 50 # 50x50
         self.handles = {}
         self.handle_selected = None
@@ -118,16 +120,26 @@ class Cropper(QGraphicsRectItem):
         """
         Paint the node in the graphic view.
         """
-        # painter.setBrush(QBrush(QColor(255, 0, 0, 100)))
-        painter.setPen(QPen(QColor(0, 0, 0), 1.0, Qt.SolidLine))
-        painter.drawRect(self.rect())
-
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.setBrush(QBrush(QColor(255, 0, 0, 255)))
-        painter.setPen(QPen(QColor(0, 0, 0, 255), 1.0, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+        painter.setBrush(QBrush(QColor(255, 0, 0)))
+        painter.setPen(
+            QPen(
+                QColor(0, 0, 0), 
+                1 if self.handle_size > self.min_handle_size else 0.1, 
+                Qt.SolidLine,
+                Qt.RoundCap, 
+                Qt.RoundJoin
+            )
+        )
+        
         for handle, rect in self.handles.items():
             if self.handle_selected is None or handle == self.handle_selected:
                 painter.drawEllipse(rect)
+
+    def __set_handle_size(self):
+        scaling_factor = min(self.max_rect.width(), self.max_rect.height()) / 140.0
+        scaled_handle_size = self.min_handle_size * scaling_factor
+        self.handle_size = max(scaled_handle_size, self.min_handle_size)
 
     def __handle_at(self, point):
         """

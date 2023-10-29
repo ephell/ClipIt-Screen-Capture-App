@@ -2,7 +2,7 @@
     color: white;
 }
 /* --- Frames --- */
-#button_frame {
+QFrame {
     border: 0px solid transparent;
 }
 

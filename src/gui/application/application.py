@@ -1,3 +1,4 @@
+import ctypes
 import os
 
 from PySide6.QtWidgets import QApplication
@@ -17,9 +18,18 @@ class Application(QApplication):
         super().__init__(argv)
         self.setWindowIcon(QIcon(self.__ICON_PATH))
         self.setQuitOnLastWindowClosed(False)
+        self.__set_app_id()
         self.__create_directories()
         self.setStyle(self.__STYLE)
         self.setPalette(self.__get_default_palette(self))
+
+    def __set_app_id(self):
+        """
+        Set AppUserModelID so that the app icon is displayed in the taskbar.
+        
+        https://stackoverflow.com/questions/1551605/how-to-set-applications-taskbar-icon-in-windows-7/1552105#1552105
+        """
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("ClipIt.Application")
 
     def __create_directories(self):
         """Creates directories for temporary files and final output."""

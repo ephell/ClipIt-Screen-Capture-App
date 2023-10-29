@@ -1,29 +1,20 @@
 import threading
 import queue
 
-from PySide6.QtCore import QThread, Slot, Signal
-from PySide6.QtWidgets import QApplication, QStyle
+from PySide6.QtCore import Signal, Slot, QObject
+from PySide6.QtWidgets import QApplication
 
 from ._notification_widget import Notification
 
 
-class NotificationManager(QThread):
+class NotificationManager(QObject, threading.Thread):
 
     ready_to_display_signal = Signal(object)
 
-    __INFORMATION_ICON_16x16 = None
-    __INFORMATION_ICON_32x32 = None
-    __WARNING_ICON_16x16 = None
-    __WARNING_ICON_32x32 = None
-    __CRITICAL_ICON_16x16 = None
-    __CRITICAL_ICON_32x32 = None
-    __QUESTION_ICON_16x16 = None
-    __QUESTION_ICON_32x32 = None
-
     def __init__(self):
         super().__init__()
+        self.setDaemon(True)
         self.__app = QApplication.instance() or QApplication([])
-        self.__set_icon_pixmaps()
         self.__notifications = []
         self.__x_padding = 25
         self.__y_padding = 0
@@ -48,19 +39,8 @@ class NotificationManager(QThread):
             else:
                 self.__notification_available_flag.clear()
 
-    def put_in_queue(self, message, time_ms, type, image):
-        if type == "information":
-            notification = Notification(message, time_ms, self.__INFORMATION_ICON_16x16, image)
-        elif type == "warning":
-            notification = Notification(message, time_ms, self.__WARNING_ICON_16x16, image)
-        elif type == "critical":
-            notification = Notification(message, time_ms, self.__CRITICAL_ICON_16x16, image)
-        elif type == "question":
-            notification = Notification(message, time_ms, self.__QUESTION_ICON_16x16, image)
-        else:
-            raise ValueError(f"Invalid notification type: {type}")
-
-        self.__notification_queue.put(notification)
+    def put_in_queue(self, message, time_ms, image):
+        self.__notification_queue.put(Notification(message, time_ms, image))
         if not self.__notification_available_flag.is_set():
             self.__notification_available_flag.set()
 
@@ -115,26 +95,3 @@ class NotificationManager(QThread):
         total_w, total_h = self.__get_total_screen_size()
         available_w, available_h = self.__get_available_screen_size()
         return total_w - available_w, total_h - available_h
-
-    def __set_icon_pixmaps(self):
-        style = self.__app.style()
-
-        information_icon = style.standardIcon(QStyle.SP_MessageBoxInformation)
-        sizes = information_icon.availableSizes()
-        self.__INFORMATION_ICON_16x16 = information_icon.pixmap(sizes[0])
-        self.__INFORMATION_ICON_32x32 = information_icon.pixmap(sizes[1])
-
-        warning_icon = style.standardIcon(QStyle.SP_MessageBoxWarning)
-        sizes = warning_icon.availableSizes()
-        self.__WARNING_ICON_16x16 = warning_icon.pixmap(sizes[0])
-        self.__WARNING_ICON_32x32 = warning_icon.pixmap(sizes[1])
-
-        critical_icon = style.standardIcon(QStyle.SP_MessageBoxCritical)
-        sizes = critical_icon.availableSizes()
-        self.__CRITICAL_ICON_16x16 = critical_icon.pixmap(sizes[0])
-        self.__CRITICAL_ICON_32x32 = critical_icon.pixmap(sizes[1])
-
-        question_icon = style.standardIcon(QStyle.SP_MessageBoxQuestion)
-        sizes = question_icon.availableSizes()
-        self.__QUESTION_ICON_16x16 = question_icon.pixmap(sizes[0])
-        self.__QUESTION_ICON_32x32 = question_icon.pixmap(sizes[1])
