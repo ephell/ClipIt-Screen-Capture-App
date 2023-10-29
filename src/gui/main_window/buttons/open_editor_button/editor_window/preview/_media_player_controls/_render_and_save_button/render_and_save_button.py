@@ -1,4 +1,6 @@
-from PySide6.QtCore import Signal, Slot, QThread
+import threading
+
+from PySide6.QtCore import Signal, Slot, QObject
 from PySide6.QtWidgets import (
     QPushButton, QDialog, QFileDialog, QMessageBox
 )
@@ -86,7 +88,7 @@ class RenderAndSaveButton(QPushButton):
         self.cropping_progress_signal.connect(
             self.rendering_progress_dialog.cropping_progress_received  
         )
-        self.rendering_thread.finished.connect(
+        self.rendering_thread.finished_signal.connect(
             lambda: self.rendering_progress_dialog.rendering_finished(
                 output_file_path
             )
@@ -121,7 +123,9 @@ class _CannotOverwriteSourceFileMessageBox(QMessageBox):
         self.setIcon(QMessageBox.Critical)
 
 
-class _RenderingThread(QThread):
+class _RenderingThread(QObject, threading.Thread):
+
+    finished_signal = Signal()
 
     def __init__(
             self,
@@ -134,6 +138,7 @@ class _RenderingThread(QThread):
             logger
         ):
         super().__init__()
+        self.setDaemon(True)
         self.cut_begin = cut_begin
         self.cut_end = cut_end
         self.input_file_path = input_file_path
@@ -152,3 +157,4 @@ class _RenderingThread(QThread):
             self.crop_area,
             self.logger
         )
+        self.finished_signal.emit()
