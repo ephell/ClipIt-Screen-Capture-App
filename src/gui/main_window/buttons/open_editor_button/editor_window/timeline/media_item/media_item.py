@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtCore import Qt, Slot, QRectF
 from PySide6.QtGui import QBrush, QColor
 from PySide6.QtWidgets import QGraphicsRectItem
 
@@ -43,6 +43,10 @@ class MediaItem(QGraphicsRectItem):
         self.time_edits.right_handle_time_edit_time_changed_signal.connect(
             self.__on_right_handle_time_edit_time_changed_signal
         )
+
+    """Override"""
+    def boundingRect(self):
+        return QRectF(0, 0, self.rect().width(), self.rect().height())
 
     """Override"""
     def paint(self, painter, option, widget):
