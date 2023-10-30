@@ -1,6 +1,3 @@
-from logger import GlobalLogger
-log = GlobalLogger.LOGGER
-
 import multiprocessing as mp
 from time import perf_counter, sleep
 
@@ -72,12 +69,12 @@ class VideoRecorder(mp.Process):
             if isinstance(self.barrier, mp.synchronize.Barrier):
                 self.barrier.wait()
             else:
-                log.warning(
+                print(
                     f"Barrier not set in: {self.__class__.__name__}. " \
                     "Final file might be out of sync."
                 )
 
-            log.info("Started recording video ... ")
+            print("Started recording video ... ")
             # Letting the main thread know that recording has started.
             start_time = perf_counter()
             if self.recording_started is not None:
@@ -97,7 +94,7 @@ class VideoRecorder(mp.Process):
                     sleep(sleep_time)
 
             frame_writer.close()
-            log.info("Finished recording video!")
+            print("Finished recording video!")
 
         avg_fps = total_frames_captured / (perf_counter() - start_time)
 
@@ -111,7 +108,7 @@ class VideoRecorder(mp.Process):
 
     def __reencode_with_precise_fps(self, fps, total_frames_in_input_file):
         """Rewrites the video file with precise fps."""
-        log.info("Started reencoding video ... ")
+        print("Started reencoding video ... ")
         input_video_reader = imageio.get_reader(self.captured_filename)
         output_video_writer = imageio.get_writer(
             self.reencoded_filename,
@@ -128,4 +125,4 @@ class VideoRecorder(mp.Process):
                 self.reencoding_progress_queue.put(progress)
         input_video_reader.close()
         output_video_writer.close()
-        log.info("Finished reencoding video!")
+        print("Finished reencoding video!")

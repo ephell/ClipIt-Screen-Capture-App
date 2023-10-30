@@ -1,6 +1,3 @@
-from logger import GlobalLogger
-log = GlobalLogger.LOGGER
-
 from time import sleep
 import threading
 

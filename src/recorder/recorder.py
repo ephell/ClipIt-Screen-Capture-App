@@ -1,6 +1,3 @@
-from logger import GlobalLogger
-log = GlobalLogger.LOGGER
-
 import datetime
 import multiprocessing as mp
 import os
