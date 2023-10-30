@@ -5,7 +5,7 @@ import imageio
 import mss
 import numpy as np
 
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class VideoRecorder(mp.Process):

@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QPalette, QColor, QIcon
 from PySide6.QtCore import Qt
 
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class Application(QApplication):

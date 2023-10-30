@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
 from utilities.video import VideoUtils
 from ._progress_loggers import ProgressLoggers
 from ._rendering_progress_dialog.rendering_progress_dialog import RenderingProgressDialog
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class RenderAndSaveButton(QPushButton):

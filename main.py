@@ -1,7 +1,7 @@
 import sys
 
-from gui.application.application import Application
-from gui.main_window.main_window import MainWindow
+from src.gui.application.application import Application
+from src.gui.main_window.main_window import MainWindow
 
     
 if __name__ == "__main__":

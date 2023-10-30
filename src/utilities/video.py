@@ -3,7 +3,7 @@ from moviepy.editor import VideoFileClip
 from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
 import numpy as np
 
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class VideoUtils:

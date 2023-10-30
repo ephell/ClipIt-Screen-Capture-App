@@ -10,7 +10,7 @@ from utilities.video import VideoUtils
 from recorder.recorder_loopback import LoopbackRecorder
 from recorder.recorder_microphone import MicrophoneRecorder
 from recorder.recorder_video import VideoRecorder
-from settings.settings import Settings
+from src.settings.settings import Settings
 from utilities.audio import AudioUtils
 
 

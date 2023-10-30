@@ -11,7 +11,7 @@ import win32clipboard
 
 from gui.area_widgets.area_selector import AreaSelector
 from gui.notification_sender.notification_sender import NotificationSender
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class ScreenshotButton(QPushButton):

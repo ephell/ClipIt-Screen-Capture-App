@@ -1,7 +1,7 @@
 from PySide6.QtCore import Slot
 
 from ..line_edit_base import LineEditBase
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class ScreenshotLineEdit(LineEditBase):

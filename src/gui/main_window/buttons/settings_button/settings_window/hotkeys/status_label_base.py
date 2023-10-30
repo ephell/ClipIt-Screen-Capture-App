@@ -3,7 +3,7 @@ from abc import abstractmethod
 from PySide6.QtWidgets import QLabel
 from PySide6.QtGui import QColor
 
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class StatusLabelBase(QLabel):

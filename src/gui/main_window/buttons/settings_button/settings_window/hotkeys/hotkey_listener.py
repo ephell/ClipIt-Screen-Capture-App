@@ -1,7 +1,7 @@
 from pynput import keyboard
 from PySide6.QtCore import QObject, Signal
 
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class HotkeyListener(QObject):

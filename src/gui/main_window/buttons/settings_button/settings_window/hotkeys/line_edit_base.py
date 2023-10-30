@@ -4,7 +4,7 @@ from pynput import keyboard
 from PySide6.QtCore import Qt, QObject, Signal, Slot
 from PySide6.QtWidgets import QLineEdit
 
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class LineEditBase(QLineEdit):

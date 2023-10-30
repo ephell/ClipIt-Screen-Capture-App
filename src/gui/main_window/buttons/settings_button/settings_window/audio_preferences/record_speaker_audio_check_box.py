@@ -1,7 +1,7 @@
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QCheckBox
 
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class RecordSpeakerAudioCheckBox(QCheckBox):
