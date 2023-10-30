@@ -1,6 +1,3 @@
-from logger import GlobalLogger
-log = GlobalLogger.LOGGER
-
 import multiprocessing as mp
 import threading
 from time import perf_counter
@@ -61,12 +58,12 @@ class LoopbackRecorder(mp.Process):
                 if isinstance(self.barrier, mp.synchronize.Barrier):
                     self.barrier.wait()
                 else:
-                    log.warning(
+                    print(
                         f"Barrier not set in: {self.__class__.__name__}. " \
                         "Final file might be out of sync."
                     )
 
-                log.info("Started recording loopback audio ... ")
+                print("Started recording loopback audio ... ")
                 start_time = perf_counter()
                 while not self.stop_event.is_set():
                     data = stream.read(
@@ -75,7 +72,7 @@ class LoopbackRecorder(mp.Process):
                     )
                     output_file.writeframes(data)
 
-            log.debug(
+            print(
                 f"Stopped recording loopback audio at: {perf_counter()}, " \
                 f"Duration: {perf_counter() - start_time}"
             )
@@ -83,7 +80,7 @@ class LoopbackRecorder(mp.Process):
             output_file.close()
             # Letting the silence player thread know that it can stop.
             is_recording_finished.set()
-            log.info("Finished recording loopback audio!")
+            print("Finished recording loopback audio!")
 
 
 class _SilencePlayer(threading.Thread):
