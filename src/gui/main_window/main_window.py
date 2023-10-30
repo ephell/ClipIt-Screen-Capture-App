@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QMainWindow
 from .MainWindow_ui import Ui_MainWindow
 from .buttons.settings_button.settings_window.hotkeys.hotkey_listener import HotkeyListener
 from .system_tray.system_tray import SystemTray
-from gui.main_window.buttons.debug_button.debug_button import DebugButton
+from src.gui.main_window.buttons.debug_button.debug_button import DebugButton
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):

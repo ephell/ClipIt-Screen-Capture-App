@@ -9,8 +9,8 @@ from PySide6.QtWidgets import QPushButton
 from PySide6.QtGui import QImage
 import win32clipboard
 
-from gui.area_widgets.area_selector import AreaSelector
-from gui.notification_sender.notification_sender import NotificationSender
+from src.gui.area_widgets.area_selector import AreaSelector
+from src.gui.notification_sender.notification_sender import NotificationSender
 from src.settings.settings import Settings
 
 
