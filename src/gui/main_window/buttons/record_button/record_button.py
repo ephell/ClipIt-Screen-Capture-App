@@ -6,7 +6,6 @@ from PySide6.QtWidgets import QPushButton, QMessageBox, QMainWindow, QLabel
 import threading
 
 from .final_file_generation_dialog.final_file_generation_dialog import FinalFileGenerationDialog
-from gui.notification_sender.notification_sender import NotificationSender
 from settings.settings import Settings
 from recorder.recorder import Recorder
 from ._recording_area_selector import RecordingAreaSelector
@@ -29,7 +28,6 @@ class RecordButton(QPushButton):
         self.recording_area_selector.area_selection_finished_signal.connect(
             self.__on_area_selection_finished
         )
-        self.__notification_sender = NotificationSender()
 
     def is_recording_thread_alive(self):
         if self.recorder is not None:
@@ -49,7 +47,6 @@ class RecordButton(QPushButton):
                  
     def __start_recording(self):
         self.__get_capture_duration_label_widget().setText("Starting...")
-        self.__notification_sender.send("Starting recording process...", 2000)
         self.__set_stop_recording_icon()
         self.setEnabled(False)
         self.recorder_stop_event = threading.Event()
@@ -138,7 +135,6 @@ class RecordButton(QPushButton):
     @Slot()
     def __on_recording_started(self, start_time):
         self.recording_started_signal.emit()
-        self.__notification_sender.send("Recording started!", 2000)
         self.setEnabled(True)
         self.duration_label_updater = _CaptureDurationLabelUpdater(
             self.__get_capture_duration_label_widget(),
