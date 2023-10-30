@@ -7,7 +7,7 @@ import threading
 
 from .final_file_generation_dialog.final_file_generation_dialog import FinalFileGenerationDialog
 from src.settings.settings import Settings
-from recorder.recorder import Recorder
+from src.recorder.recorder import Recorder
 from ._recording_area_selector import RecordingAreaSelector
 
 
