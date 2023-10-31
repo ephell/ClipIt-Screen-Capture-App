@@ -5,8 +5,12 @@ __pycache__/
 /logs
 /.vscode
 /.idea
+/build
+/dist
+/output
 *.mp4
 *.mp3
+*.spec
 test.py
 testt.py
 testtt.py
