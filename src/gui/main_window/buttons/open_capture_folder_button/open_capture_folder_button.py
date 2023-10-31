@@ -3,7 +3,7 @@ import os
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QPushButton
 
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class OpenCaptureFolderButton(QPushButton):

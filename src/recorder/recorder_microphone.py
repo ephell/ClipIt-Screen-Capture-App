@@ -4,7 +4,7 @@ import wave
 
 import pyaudiowpatch as pyaudio
 
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class MicrophoneRecorder(mp.Process):

@@ -3,7 +3,7 @@ import threading
 from PySide6.QtCore import Slot, Signal
 from PySide6.QtWidgets import QPushButton, QMainWindow
 
-from gui.main_window.buttons.open_editor_button.editor_window.editor_window import EditorWindow
+from src.gui.main_window.buttons.open_editor_button.editor_window.editor_window import EditorWindow
 
 
 class DebugButton(QPushButton):

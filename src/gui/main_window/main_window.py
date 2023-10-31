@@ -7,17 +7,19 @@ from PySide6.QtWidgets import QMainWindow
 from .MainWindow_ui import Ui_MainWindow
 from .buttons.settings_button.settings_window.hotkeys.hotkey_listener import HotkeyListener
 from .system_tray.system_tray import SystemTray
-from gui.main_window.buttons.debug_button.debug_button import DebugButton
+from src.gui.main_window.buttons.debug_button.debug_button import DebugButton
+
+from src.utilities.py_installer import get_absolute_path
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
     ready_to_exit_signal = Signal()
-
+    
     def __init__(self, app):
         super().__init__()
         self.setupUi(self)
-        self.__set_stylesheet("src/gui/main_window/MainWindow.qss")
+        self.__set_stylesheet(get_absolute_path("src\\gui\\main_window\\MainWindow.qss"))
         self.app = app
         self.first_window_resize_event = True
         self.hotkey_listener = HotkeyListener()

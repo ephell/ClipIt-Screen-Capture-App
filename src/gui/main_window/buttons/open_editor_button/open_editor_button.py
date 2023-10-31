@@ -2,7 +2,7 @@ from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import QPushButton, QMainWindow, QMessageBox, QFileDialog
 
 from .editor_window.editor_window import EditorWindow
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class OpenEditorButton(QPushButton):

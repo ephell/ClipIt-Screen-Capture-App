@@ -6,12 +6,12 @@ import threading
 from proglog import ProgressBarLogger
 from PySide6.QtCore import Signal, QObject
 
-from utilities.video import VideoUtils
-from recorder.recorder_loopback import LoopbackRecorder
-from recorder.recorder_microphone import MicrophoneRecorder
-from recorder.recorder_video import VideoRecorder
-from settings.settings import Settings
-from utilities.audio import AudioUtils
+from src.recorder.recorder_loopback import LoopbackRecorder
+from src.recorder.recorder_microphone import MicrophoneRecorder
+from src.recorder.recorder_video import VideoRecorder
+from src.settings.settings import Settings
+from src.utilities.video import VideoUtils
+from src.utilities.audio import AudioUtils
 
 
 class Recorder(QObject, threading.Thread):

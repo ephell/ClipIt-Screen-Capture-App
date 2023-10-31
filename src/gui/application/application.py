@@ -5,12 +5,13 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QPalette, QColor, QIcon
 from PySide6.QtCore import Qt
 
-from settings.settings import Settings
+from src.settings.settings import Settings
+from src.utilities.py_installer import get_absolute_path
 
 
 class Application(QApplication):
 
-    __ICON_PATH = "src/gui/application/logo.svg"
+    __ICON_PATH = get_absolute_path("src\\gui\\application\\logo.svg")
     __STYLE = "Fusion"
     __CAPTURES_DIR_NAME = "captures"
 

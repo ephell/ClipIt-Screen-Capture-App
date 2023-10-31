@@ -2,8 +2,8 @@ import mss
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QMessageBox, QWidget
 
-from gui.area_widgets.area_selector import AreaSelector
-from gui.area_widgets.area_border_creator import AreaBorderCreator
+from src.gui.area_widgets.area_selector import AreaSelector
+from src.gui.area_widgets.area_border_creator import AreaBorderCreator
 
 
 class RecordingAreaSelector(QWidget):

@@ -1,7 +1,7 @@
 from PySide6.QtCore import Slot
 
 from ..status_label_base import StatusLabelBase
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class ScreenshotStatusLabel(StatusLabelBase):

@@ -1,7 +1,7 @@
 from PySide6.QtCore import Slot, Signal
 from PySide6.QtWidgets import QPushButton, QFileDialog, QMessageBox
 
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class UploadButton(QPushButton):

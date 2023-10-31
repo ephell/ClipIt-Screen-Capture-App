@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QWidget, QLabel
 from PySide6.QtGui import QPixmap
 
 from ._NotificationWidget_ui import Ui_NotificationWidget
-from settings.settings import Settings
+from src.settings.settings import Settings
 
 
 class Notification(QWidget, Ui_NotificationWidget):
