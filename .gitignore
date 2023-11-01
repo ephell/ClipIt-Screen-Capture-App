@@ -5,9 +5,11 @@ __pycache__/
 /logs
 /.vscode
 /.idea
-/build
 /dist
 /output
+/*build
+*.cmd
+*.exe
 *.mp4
 *.mp3
 *.spec
