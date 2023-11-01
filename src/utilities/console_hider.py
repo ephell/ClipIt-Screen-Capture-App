@@ -7,7 +7,20 @@ import win32con
 
 
 class ConsoleHider(threading.Thread):
+    """
+    Hides the console window of the application.
 
+    This is necessary to prevent the console window from being visible 
+    to the user when the compiled .exe file is executed. Of course, the 
+    .exe could be compiled with the --noconsole flag or similar to hide
+    the console window by default, but for unknown reasons this makes 
+    the app's recording processes fall out of sync even with synchronization 
+    mechanisms in place. This causes video and audio recorders produce 
+    files with different lengths, which ultimately results in the final 
+    video file being out of sync.
+
+    Tested compilers: PyInstaller, nuitka. Both exhibiting the same issue.
+    """
     def __init__(self):
         super().__init__()
         self.setDaemon(True)
