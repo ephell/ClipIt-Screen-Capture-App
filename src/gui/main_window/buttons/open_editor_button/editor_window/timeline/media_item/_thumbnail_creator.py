@@ -174,27 +174,28 @@ class ThumbnailCreator:
         Extracts the first frame from the video, scales it to the 
         height of the MediaItem and returns the scaled frame's dimensions.
         """
-        frame = VideoFileClip(self.media_item.media_player.file_path).get_frame(0)
-        frame_height, frame_width, _ = frame.shape
-        bytes_per_line = 3 * frame_width
-        q_image = QImage(
-            frame.data, 
-            frame_width, 
-            frame_height, 
-            bytes_per_line, 
-            QImage.Format_RGB888
-        )
-        q_pixmap = QPixmap.fromImage(q_image)
-        scaled_q_pixmap = q_pixmap.scaledToHeight(
-            self.media_item.boundingRect().height(),
-            mode=Qt.FastTransformation
-        )
-        # This condition triggers when 'media_item.boundingRect().height()' is 
-        # lower than the height of the video. When that happens only one
-        # frame is extracted and used as a thumbnail.
-        if frame_width < scaled_q_pixmap.width():
-            return frame_width, scaled_q_pixmap.height()
-        return scaled_q_pixmap.width(), scaled_q_pixmap.height()
+        with VideoFileClip(self.media_item.media_player.file_path) as video_clip:
+            frame = video_clip.get_frame(0)
+            frame_height, frame_width, _ = frame.shape
+            bytes_per_line = 3 * frame_width
+            q_image = QImage(
+                frame.data, 
+                frame_width, 
+                frame_height, 
+                bytes_per_line, 
+                QImage.Format_RGB888
+            )
+            q_pixmap = QPixmap.fromImage(q_image)
+            scaled_q_pixmap = q_pixmap.scaledToHeight(
+                self.media_item.boundingRect().height(),
+                mode=Qt.FastTransformation
+            )
+            # This condition triggers when 'media_item.boundingRect().height()' is 
+            # lower than the height of the video. When that happens only one
+            # frame is extracted and used as a thumbnail.
+            if frame_width < scaled_q_pixmap.width():
+                return frame_width, scaled_q_pixmap.height()
+            return scaled_q_pixmap.width(), scaled_q_pixmap.height()
 
     @Slot()
     def __on_resize_event_timer_expired(self):
@@ -261,12 +262,12 @@ class _QPixmapsExtractor(QObject, threading.Thread):
         return [i * interval for i in range(frame_amount)]
 
     def __extract_video_frames(self, video_file_path, extraction_timestamps):
-        video_clip = VideoFileClip(video_file_path)
-        frames = []
-        for timestamp in extraction_timestamps:
-            frame = video_clip.get_frame(timestamp / 1000.0)
-            frames.append(frame)
-        return frames
+        with VideoFileClip(video_file_path) as video_clip:        
+            frames = []
+            for timestamp in extraction_timestamps:
+                frame = video_clip.get_frame(timestamp / 1000.0)
+                frames.append(frame)
+            return frames
 
     def __convert_frames_to_q_pixmaps(self, video_frames: list[np.ndarray]):
         frame_height, frame_width, _ = video_frames[0].shape
