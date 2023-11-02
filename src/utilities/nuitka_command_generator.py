@@ -2,6 +2,7 @@ import os
 
 
 class NuitkaCommandGenerator:
+    """Utility class for generating a compilation command for Nuitka."""
 
     _MODE = "--standalone"
     _ENTRY_FILE_NAME = "main.py"
