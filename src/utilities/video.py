@@ -1,3 +1,5 @@
+import os
+
 import imageio
 from moviepy.editor import VideoFileClip
 from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
@@ -25,7 +27,9 @@ class VideoUtils:
             cut_end = cut_end if cut_end is not None else base_video_clip.duration
             final_video_clip = base_video_clip.subclip(cut_begin, cut_end)
 
+            # Crop if necessary
             cropped_video_clip = None
+            cut_video_clip = None
             cut_audio_clip = None
             if (
                 crop_area is not None
@@ -43,23 +47,37 @@ class VideoUtils:
                     logger=logger.cropping
                 )
                 cropped_video_clip = VideoFileClip(Settings.get_temp_file_paths().CROPPED_VIDEO_FILE)
-                cut_audio_clip = VideoFileClip(Settings.get_temp_file_paths().CUT_VIDEO_FILE).audio
+                cut_video_clip = VideoFileClip(Settings.get_temp_file_paths().CUT_VIDEO_FILE)
+                cut_audio_clip = cut_video_clip.audio
                 final_video_clip = cropped_video_clip.set_audio(cut_audio_clip)
 
+            # Change volume
             if volume is not None:
                 final_video_clip = final_video_clip.volumex(volume)
 
+            # Generate final file
             final_video_clip.write_videofile(
                 filename=output_file_path,
                 preset=preset,
                 logger=logger.final_file_rendering
             )
 
+            # Clean up clip's resources
             if cropped_video_clip is not None:
                 cropped_video_clip.close()
+            if cut_video_clip is not None:
+                cut_video_clip.close()
             if cut_audio_clip is not None:
                 cut_audio_clip.close()
             final_video_clip.close()
+
+            # Delete temp files
+            for attribute in dir(Settings.get_temp_file_paths()):
+                if not attribute.startswith('__'):
+                    path = getattr(Settings.get_temp_file_paths(), attribute)
+                    if not os.path.isdir(path):
+                        if os.path.exists(path):
+                            os.remove(path)
 
     @staticmethod
     def is_crop_area_full_frame(crop_area: tuple, frame: np.ndarray):
