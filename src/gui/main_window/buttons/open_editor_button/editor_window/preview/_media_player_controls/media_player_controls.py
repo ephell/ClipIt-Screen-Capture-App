@@ -2,7 +2,6 @@ from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QWidget
 
 from .MediaPlayerControls_ui import Ui_MediaPlayerControls
-from src.utilities.py_installer import get_absolute_path
 
 
 class MediaPlayerControls(Ui_MediaPlayerControls, QWidget):
@@ -10,9 +9,7 @@ class MediaPlayerControls(Ui_MediaPlayerControls, QWidget):
     def __init__(self, media_player, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        self.__set_stylesheet(
-            get_absolute_path("src\\gui\\main_window\\buttons\\open_editor_button\\editor_window\\preview\\_media_player_controls\\MediaPlayerControls.qss")
-        )
+        self.__set_stylesheet("src\\gui\\main_window\\buttons\\open_editor_button\\editor_window\\preview\\_media_player_controls\\MediaPlayerControls.qss")
         self.media_player = media_player
         self.render_and_save_button.set_media_player(self.media_player)
         self.crop_button.set_media_player(self.media_player)
