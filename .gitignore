@@ -8,12 +8,13 @@ __pycache__/
 /.idea
 /dist
 /output
-/*build
+/main.build
+/main.dist
 *.cmd
-*.exe
 *.mp4
 *.mp3
 *.spec
+main.exe
 test.py
 testt.py
 testtt.py
