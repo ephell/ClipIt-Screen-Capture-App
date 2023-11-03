@@ -13,6 +13,7 @@ class NuitkaCommandGenerator:
     """
     _MODE = "--standalone"
     _ENTRY_FILE_NAME = "main.py"
+    _EXE_NAME = "ClipIt"
     _APP_ICON_RELATIVE_PATH = "src\\gui\\application\\logo.ico" # Must be .ico file
     _DATA_FILES_RELATIVE_PATHS = [
         "src\\gui\\application\\logo.ico",
@@ -55,8 +56,17 @@ class NuitkaCommandGenerator:
     def _get_entry_file_name(self):
         return self._ENTRY_FILE_NAME
 
+    def _generate_exe_name_command(self):
+        return f"-o {self._EXE_NAME}"
+    
     def _generate_app_icon_command(self):
         return f"--windows-icon-from-ico='{self._get_absolute_path(self._APP_ICON_RELATIVE_PATH)}'"
+
+    def _generate_include_qt_plugins_command(self):
+        command = f"--include-qt-plugins="
+        for plugin in self._QT_PLUGINS:
+            command += f"{plugin},"
+        return command[:-1]
 
     def _generate_include_data_files_commands(self):
         commands = []
@@ -78,16 +88,11 @@ class NuitkaCommandGenerator:
             commands.append(f"--enable-plugin={plugin}")
         return commands
 
-    def _generate_include_qt_plugins_command(self):
-        command = f"--include-qt-plugins="
-        for plugin in self._QT_PLUGINS:
-            command += f"{plugin},"
-        return command[:-1]
-
     def _get_absolute_path(self, relative_path):
         return os.path.abspath(relative_path)
 
 
 if __name__ == "__main__":
     gen = NuitkaCommandGenerator()
-    print(gen.generate_final_command())
+    # print(gen.generate_final_command())
+    print(gen._generate_exe_name_command())
