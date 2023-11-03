@@ -18,7 +18,7 @@ class VideoRecorder(mp.Process):
             fps: int,
             barrier: mp.Barrier=None,
             stop_event: mp.Event=None,
-            reencoding_progress_queue: mp.Queue=None, # Mp.Manager().Queue() is faster
+            reencoding_progress_queue: mp.Queue=None,
             recording_started: mp.Value=None, # Float value set to -1.0
             file_generation_choice_event: mp.Event=None,
             file_generation_choice_value: mp.Value=None

@@ -120,6 +120,7 @@ class Recorder(QObject, threading.Thread):
         self.video_recorder_stop_event = mp.Event()
         self.video_recorder_file_generation_choice_event = mp.Event()
         self.video_recorder_file_generation_choice_value = mp.Value("b", True)
+        self.video_reencoding_progress_queue = mp.Queue()
         self.video_recorder = VideoRecorder(
             region=self.region,
             monitor=self.monitor,
@@ -127,7 +128,7 @@ class Recorder(QObject, threading.Thread):
             stop_event=self.video_recorder_stop_event,
             file_generation_choice_event=self.video_recorder_file_generation_choice_event,
             file_generation_choice_value=self.video_recorder_file_generation_choice_value,
-            reencoding_progress_queue=mp.Manager().Queue(),
+            reencoding_progress_queue=self.video_reencoding_progress_queue,
             recording_started=self.recording_started
         )
 
