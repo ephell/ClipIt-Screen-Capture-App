@@ -40,6 +40,7 @@ class NuitkaCommandGenerator:
         final_command = f"python -m nuitka "
         final_command += f"{self._get_mode()} "
         final_command += f"{self._get_entry_file_name()} "
+        final_command += f"{self._generate_exe_name_command()} "
         final_command += f"{self._generate_app_icon_command()} "
         final_command += f"{self._generate_include_qt_plugins_command()} "
         for command in self._generate_include_data_files_commands():
@@ -94,5 +95,4 @@ class NuitkaCommandGenerator:
 
 if __name__ == "__main__":
     gen = NuitkaCommandGenerator()
-    # print(gen.generate_final_command())
-    print(gen._generate_exe_name_command())
+    print(gen.generate_final_command())
