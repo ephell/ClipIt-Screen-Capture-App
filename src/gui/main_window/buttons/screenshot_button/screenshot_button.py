@@ -12,7 +12,6 @@ import win32clipboard
 from src.gui.area_widgets.area_selector import AreaSelector
 from src.gui.notification_sender.notification_sender import NotificationSender
 from src.settings.settings import Settings
-from src.utilities.py_installer import get_absolute_path
 
 
 class ScreenshotButton(QPushButton):
@@ -46,7 +45,7 @@ class ScreenshotButton(QPushButton):
                 'width': int(x1 - x0),
                 'height': int(y1 - y0)
             })
-        playsound(get_absolute_path("src\\gui\\main_window\\buttons\\screenshot_button\\camera-click.wav"))
+        playsound("src\\gui\\main_window\\buttons\\screenshot_button\\camera-click.wav")
         file_path = self.__generate_file_path()
         mss.tools.to_png(sc.rgb, sc.size, output=file_path)
         self.__send_to_clipboard(file_path)

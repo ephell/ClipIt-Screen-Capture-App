@@ -2,13 +2,11 @@ from PySide6.QtCore import Qt, QRectF
 from PySide6.QtGui import QPixmap, QBrush
 from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsItem
 
-from src.utilities.py_installer import get_absolute_path
-
 
 class LeftHandle(QGraphicsRectItem):
 
-    __THUMBNAIL_PATH = get_absolute_path("src\\gui\\main_window\\buttons\\open_editor_button\\editor_window\\timeline\\media_item\\media_item_handle.jpg")
-    __THUMBNAIL_IN_FOCUS_PATH = get_absolute_path("src\\gui\\main_window\\buttons\\open_editor_button\\editor_window\\timeline\\media_item\\media_item_handle_in_focus.jpg")
+    __THUMBNAIL_PATH = "src\\gui\\main_window\\buttons\\open_editor_button\\editor_window\\timeline\\media_item\\media_item_handle.jpg"
+    __THUMBNAIL_IN_FOCUS_PATH = "src\\gui\\main_window\\buttons\\open_editor_button\\editor_window\\timeline\\media_item\\media_item_handle_in_focus.jpg"
 
     def __init__(self, media_item):
         super().__init__()

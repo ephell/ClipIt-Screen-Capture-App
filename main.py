@@ -1,3 +1,9 @@
+import os
+# The following environment variable must be set before importing moviepy, 
+# otherwise moviepy won't be able to find ffmpeg when the app is compiled
+# and it will crash on startup.
+os.environ["IMAGEIO_FFMPEG_EXE"] = "src\\imageio_ffmpeg\\ffmpeg-win64-v4.2.2.exe"
+
 from multiprocessing import freeze_support
 import sys
 from time import sleep

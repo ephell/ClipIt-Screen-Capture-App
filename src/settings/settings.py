@@ -1,12 +1,10 @@
 from configparser import ConfigParser
 import os
 
-from src.utilities.py_installer import get_absolute_path
-
 
 class Settings:
 
-    SETTINGS_FILE = get_absolute_path("src\\settings\\settings.ini")
+    SETTINGS_FILE = "src\\settings\\settings.ini"
 
     @classmethod
     def get_capture_dir_path(cls):

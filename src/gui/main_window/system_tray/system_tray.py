@@ -2,14 +2,12 @@ from PySide6.QtCore import Slot, Signal, Qt
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QMessageBox
 
-from src.utilities.py_installer import get_absolute_path
-
 
 class SystemTray(QSystemTrayIcon):
 
     request_exit_signal = Signal()
 
-    __TRAY_ICON_PATH = get_absolute_path("src\\gui\\application\\logo.svg")
+    __TRAY_ICON_PATH = "src\\gui\\application\\logo.svg"
     # Action texts
     __ACTION_START_RECORDING_TEXT = "Start Recording"
     __ACTION_STOP_RECORDING_TEXT = "Stop Recording"
@@ -19,13 +17,13 @@ class SystemTray(QSystemTrayIcon):
     __ACTION_SETTINGS_TEXT = "Settings"
     __ACTION_EXIT_TEXT = "Exit"
     # Action icon paths
-    __ACTION_START_RECORDING_ICON_PATH = get_absolute_path("src\\gui\\main_window\\system_tray\\icons\\action_start_stop_recording\\1x\\baseline_videocam_white_24dp.png")
-    __ACTION_STOP_RECORDING_ICON_PATH = get_absolute_path("src\\gui\\main_window\\system_tray\\icons\\action_start_stop_recording\\1x\\baseline_videocam_off_white_24dp.png")
-    __ACTION_SCREENSHOT_ICON_PATH = get_absolute_path("src\\gui\\main_window\\system_tray\\icons\\action_screenshot\\1x\\baseline_camera_alt_white_24dp.png")
-    __ACTION_OPEN_EDITOR_ICON_PATH = get_absolute_path("src\\gui\\main_window\\system_tray\\icons\\action_open_editor\\1x\\baseline_movie_edit_white_24dp.png")
-    __ACTION_OPEN_CAPTURE_FOLDER_ICON_PATH = get_absolute_path("src\\gui\\main_window\\system_tray\\icons\\action_open_capture_folder\\1x\\baseline_folder_white_24dp.png")
-    __ACTION_SETTINGS_ICON_PATH = get_absolute_path("src\\gui\\main_window\\system_tray\\icons\\action_settings\\1x\\baseline_settings_white_24dp.png")
-    __ACTION_EXIT_ICON_PATH = get_absolute_path("src\\gui\\main_window\\system_tray\\icons\\action_exit\\1x\\baseline_close_white_24dp.png")
+    __ACTION_START_RECORDING_ICON_PATH = "src\\gui\\main_window\\system_tray\\icons\\action_start_stop_recording\\1x\\baseline_videocam_white_24dp.png"
+    __ACTION_STOP_RECORDING_ICON_PATH = "src\\gui\\main_window\\system_tray\\icons\\action_start_stop_recording\\1x\\baseline_videocam_off_white_24dp.png"
+    __ACTION_SCREENSHOT_ICON_PATH = "src\\gui\\main_window\\system_tray\\icons\\action_screenshot\\1x\\baseline_camera_alt_white_24dp.png"
+    __ACTION_OPEN_EDITOR_ICON_PATH = "src\\gui\\main_window\\system_tray\\icons\\action_open_editor\\1x\\baseline_movie_edit_white_24dp.png"
+    __ACTION_OPEN_CAPTURE_FOLDER_ICON_PATH = "src\\gui\\main_window\\system_tray\\icons\\action_open_capture_folder\\1x\\baseline_folder_white_24dp.png"
+    __ACTION_SETTINGS_ICON_PATH = "src\\gui\\main_window\\system_tray\\icons\\action_settings\\1x\\baseline_settings_white_24dp.png"
+    __ACTION_EXIT_ICON_PATH = "src\\gui\\main_window\\system_tray\\icons\\action_exit\\1x\\baseline_close_white_24dp.png"
 
     def __init__(self, main_window):
         super().__init__(main_window)
