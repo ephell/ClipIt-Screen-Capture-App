@@ -1,3 +1,4 @@
+import os
 from time import perf_counter
 
 from PySide6.QtCore import Slot, Signal, QThread, Qt
@@ -173,6 +174,8 @@ class RecordButton(QPushButton):
         user_choice = message_box.exec()
         if user_choice == QMessageBox.Yes:
             self.open_editor_after_file_generation_finished_signal.emit(file_path)
+        elif user_choice == QMessageBox.No:
+            os.startfile(Settings.get_capture_dir_path())
 
 
 class _FileGenerationChoiceMessageBox(QMessageBox):
