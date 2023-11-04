@@ -74,21 +74,16 @@ class RecordingAreaSelector(QWidget):
         """
         with mss.mss() as sct:
             monitors = sct.monitors
-            monitor_index_1 = None
-            monitor_index_2 = None
             for i in range(1, len(monitors)):
                 m = monitors[i]
-                if (m["left"] <= x0 < m["left"] + m["width"] 
-                    and m["top"] <= y0 < m["top"] + m["height"]):
-                    monitor_index_1 = i
-                if (m["left"] <= x1 < m["left"] + m["width"] 
-                    and m["top"] <= y1 < m["top"] + m["height"]):
-                    monitor_index_2 = i
-
-            if monitor_index_1 == monitor_index_2:
-                return True
-            else:
-                return False
+                if (
+                    m["left"] <= x0 <= m["left"] + m["width"] 
+                    and m["top"] <= y0 <= m["top"] + m["height"]
+                    and m["left"] <= x1 <= m["left"] + m["width"]
+                    and m["top"] <= y1 <= m["top"] + m["height"]
+                ):
+                    return True
+            return False
 
     def __get_monitor_by_point(self, x, y):
         """Get the index of the monitor that contains the point (x, y)."""

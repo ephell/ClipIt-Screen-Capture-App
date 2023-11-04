@@ -39,12 +39,18 @@ class AreaSelector(QWidget):
         if event.button() == Qt.LeftButton and self.dragging:
             self.dragging = False
             self.end_pos = event.position()
-            self.get_area_coords_callback(
-                min(self.start_pos.x(), self.end_pos.x()),
-                min(self.start_pos.y(), self.end_pos.y()),
-                max(self.start_pos.x(), self.end_pos.x()),
-                max(self.start_pos.y(), self.end_pos.y())
-            )
+
+            top_x = min(self.start_pos.x(), self.end_pos.x())
+            top_y = min(self.start_pos.y(), self.end_pos.y())
+            bottom_x = max(self.start_pos.x(), self.end_pos.x())
+            bottom_y = max(self.start_pos.y(), self.end_pos.y())
+
+            # Get whole area of the monitor if 1 click was made without dragging
+            if bottom_x - top_x < 1 or bottom_y - top_y < 1:
+                monitor_index = self.__get_monitor_by_point(top_x, top_y)
+                top_x, top_y, bottom_x, bottom_y = self.__get_monitor_coords_by_index(monitor_index)
+
+            self.get_area_coords_callback(top_x, top_y, bottom_x, bottom_y)
 
     """Override"""
     def mouseMoveEvent(self, event):
@@ -108,10 +114,28 @@ class AreaSelector(QWidget):
     def __get_rectangle(self):
         x1, y1 = self.start_pos.x(), self.start_pos.y()
         x2, y2 = self.end_pos.x(), self.end_pos.y()
-
         x = min(x1, x2)
         y = min(y1, y2)
         w = abs(x1 - x2)
         h = abs(y1 - y2)
-
         return x, y, w, h
+
+    def __get_monitor_by_point(self, x, y):
+        """Get the index of the monitor that contains the point (x, y)."""
+        with mss.mss() as sct:
+            monitors = sct.monitors
+            for i in range(1, len(monitors)):
+                m = monitors[i]
+                if (m["left"] <= x < m["left"] + m["width"] 
+                    and m["top"] <= y < m["top"] + m["height"]):
+                    return i
+            return None
+
+    def __get_monitor_coords_by_index(self, monitor_index):
+        with mss.mss() as sct:
+            monitor = sct.monitors[monitor_index]
+            top_left_x = monitor["left"]
+            top_left_y = monitor["top"]
+            bottom_right_x = monitor["left"] + monitor["width"]
+            bottom_right_y = monitor["top"] + monitor["height"]
+            return (top_left_x, top_left_y, bottom_right_x, bottom_right_y)
