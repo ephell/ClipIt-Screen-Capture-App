@@ -1,13 +1,12 @@
 [tool.poetry]
 name = "clipit"
 version = "1.0.0"
-description = "Easy to use screen capture, video recording and editing app for Windows."
+description = "Screen capture application for Windows designed to simplify the process of recording short videos."
 authors = ["ephell"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/ephell/ClipIt"
 repository = "https://github.com/ephell/ClipIt"
-keywords = ["clipit", "clip", "it", "screen", "capture", "video", "recording", "editing", "app", "windows"]
 packages = [{include = "src"}]
 include = ["README.md", "LICENSE"]
 
