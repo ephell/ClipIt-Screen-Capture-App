@@ -83,6 +83,7 @@ class VideoRecorder(mp.Process):
             total_frames_captured = 0
             frames_captured_current_second = 0
             frames_captured_each_second = []
+            start_time_for_debug = perf_counter()
             start_time = perf_counter()
             while not self.stop_event.is_set():
                 frame_start_time = perf_counter()
@@ -103,6 +104,7 @@ class VideoRecorder(mp.Process):
                     frames_captured_current_second = 0
                     start_time = current_time
 
+            print(f"Duration: {perf_counter() - start_time_for_debug} seconds")
             frame_writer.close()
             print("Finished recording video!")
 
@@ -111,6 +113,8 @@ class VideoRecorder(mp.Process):
             # captured in the remainder time (0.5s) are also appended.
             if sum(frames_captured_each_second) != total_frames_captured:
                 frames_captured_each_second.append(frames_captured_current_second)
+
+        print(frames_captured_each_second)
 
         return frames_captured_each_second
 
@@ -131,13 +135,42 @@ class VideoRecorder(mp.Process):
             quality=self.quality,
             macro_block_size=self.macro_block_size
         )
+
         frames_written = 0
-        for frame in input_video_reader:
-            output_video_writer.append_data(frame)
-            frames_written += 1
+        for i, frame_count in enumerate(frames_captured_each_second):
+            frames = self.__extract_frames(frame_count, input_video_reader)
+            if i != len(frames_captured_each_second) - 1:
+                extended_pack = self.__generate_extended_frame_pack(frames, self.fps)
+                for _, frame_data in extended_pack.items():
+                    output_video_writer.append_data(frame_data)
+                    frames_written += 1
+            else:
+                for _, frame_data in frames.items():
+                    output_video_writer.append_data(frame_data)
+                    frames_written += 1
+
             if self.reencoding_progress_queue is not None:
                 progress = (frames_written / total_frames_in_input_file) * 100
                 self.reencoding_progress_queue.put(progress)
+
+
         input_video_reader.close()
         output_video_writer.close()
         print("Finished reencoding video!")
+
+    def __extract_frames(self, frame_amount, input_video_reader):
+        frames = {}
+        for frame_index in range(frame_amount):
+            frame_data = input_video_reader.get_next_data()
+            if frame_data is None:
+                break
+            frames.update({frame_index: frame_data})
+        return frames
+    
+    def __generate_extended_frame_pack(self, frames: dict[int, np.ndarray], extend_to_fps):
+        extended_pack = {}
+        frames_per_source_frame = extend_to_fps / len(frames)
+        for i in range(extend_to_fps):
+            src_frame = int(i / frames_per_source_frame)
+            extended_pack[i] = frames[src_frame]
+        return extended_pack
