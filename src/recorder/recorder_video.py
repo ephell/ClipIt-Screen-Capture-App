@@ -46,7 +46,7 @@ class VideoRecorder(mp.Process):
             self.file_generation_choice_value is None
             or self.file_generation_choice_value.value == True
         ):
-            self.__reencode_with_precise_fps(frames_captured_each_second)
+            self.__reencode_video(frames_captured_each_second)
 
     def __capture_and_save_video(self):
         with mss.mss() as sct:
@@ -110,13 +110,7 @@ class VideoRecorder(mp.Process):
 
         return frames_captured_each_second
 
-    def __remove_alpha_channel(self, frame: np.ndarray):
-        return frame[:, :, :3]
-
-    def __flip_from_BGRA_to_RGB(self, frame: np.ndarray):
-        return np.flip(frame[:, :, :3], 2)
-
-    def __reencode_with_precise_fps(self, frames_captured_each_second):
+    def __reencode_video(self, frames_captured_each_second):
         """Rewrites the video file with precise fps."""
         print("Started reencoding video ... ")
         total_frames_in_input_file = sum(frames_captured_each_second)
@@ -131,13 +125,12 @@ class VideoRecorder(mp.Process):
         frames_written = 0
         for _, frame_count in enumerate(frames_captured_each_second):
             frames = self.__extract_frames(frame_count, input_video_reader)
-            extended_pack = self.__generate_extended_frame_pack(frames, self.fps)
-            for _, frame_data in extended_pack.items():
+            extended_frame_batch = self.__extend_frame_batch(frames, self.fps)
+            for _, frame_data in extended_frame_batch.items():
                 frame_data = self.__remove_alpha_channel(frame_data)
                 frame_data = self.__flip_from_BGRA_to_RGB(frame_data)
                 output_video_writer.append_data(frame_data)
                 frames_written += 1
-
                 if self.reencoding_progress_queue is not None:
                     progress = (frames_written / total_frames_in_input_file) * 100
                     self.reencoding_progress_queue.put(progress)
@@ -155,10 +148,22 @@ class VideoRecorder(mp.Process):
             frames.update({frame_index: frame_data})
         return frames
     
-    def __generate_extended_frame_pack(self, frames: dict[int, np.ndarray], extend_to_fps):
-        extended_pack = {}
+    def __extend_frame_batch(self, frames: dict[int, np.ndarray], extend_to_fps):
+        """
+        Extend a dictionary of frames to match the specified fps.
+        
+        It fills the gaps between the frames by duplicating where
+        needed to match the FPS video was supposed to be recorded at.
+        """
+        extended_batch = {}
         frames_per_source_frame = extend_to_fps / len(frames)
         for i in range(extend_to_fps):
             src_frame = int(i / frames_per_source_frame)
-            extended_pack[i] = frames[src_frame]
-        return extended_pack
+            extended_batch[i] = frames[src_frame]
+        return extended_batch
+
+    def __remove_alpha_channel(self, frame: np.ndarray):
+        return frame[:, :, :3]
+
+    def __flip_from_BGRA_to_RGB(self, frame: np.ndarray):
+        return np.flip(frame[:, :, :3], 2)
