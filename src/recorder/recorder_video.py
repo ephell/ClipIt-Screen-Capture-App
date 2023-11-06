@@ -82,7 +82,6 @@ class VideoRecorder(mp.Process):
 
             frames_captured_current_second = 0
             frames_captured_each_second = []
-            start_time_for_debug = perf_counter()
             start_time = perf_counter()
             while not self.stop_event.is_set():
                 frame_start_time = perf_counter()
@@ -100,8 +99,6 @@ class VideoRecorder(mp.Process):
                     frames_captured_current_second = 0
                     start_time = current_time
 
-            print(frames_captured_each_second)
-            print(f"Duration: {perf_counter() - start_time_for_debug} seconds")
             frame_writer.close()
             print("Finished recording video!")
 
