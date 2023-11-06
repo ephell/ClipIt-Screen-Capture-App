@@ -88,8 +88,6 @@ class VideoRecorder(mp.Process):
             while not self.stop_event.is_set():
                 frame_start_time = perf_counter()
                 frame = np.array(sct.grab(monitor))
-                frame = self.__remove_alpha_channel(frame)
-                frame = self.__flip_from_BGRA_to_RGB(frame)
                 total_frames_captured += 1
                 frames_captured_current_second += 1
                 frame_writer.append_data(frame)
@@ -107,12 +105,6 @@ class VideoRecorder(mp.Process):
             print(f"Duration: {perf_counter() - start_time_for_debug} seconds")
             frame_writer.close()
             print("Finished recording video!")
-
-            # In most cases the recording stops at a fractional time value
-            # (e.g. 1.5seconds), so we need to make sure that the frames
-            # captured in the remainder time (0.5s) are also appended.
-            if sum(frames_captured_each_second) != total_frames_captured:
-                frames_captured_each_second.append(frames_captured_current_second)
 
         print(frames_captured_each_second)
 
@@ -137,22 +129,18 @@ class VideoRecorder(mp.Process):
         )
 
         frames_written = 0
-        for i, frame_count in enumerate(frames_captured_each_second):
+        for _, frame_count in enumerate(frames_captured_each_second):
             frames = self.__extract_frames(frame_count, input_video_reader)
-            if i != len(frames_captured_each_second) - 1:
-                extended_pack = self.__generate_extended_frame_pack(frames, self.fps)
-                for _, frame_data in extended_pack.items():
-                    output_video_writer.append_data(frame_data)
-                    frames_written += 1
-            else:
-                for _, frame_data in frames.items():
-                    output_video_writer.append_data(frame_data)
-                    frames_written += 1
+            extended_pack = self.__generate_extended_frame_pack(frames, self.fps)
+            for _, frame_data in extended_pack.items():
+                frame_data = self.__remove_alpha_channel(frame_data)
+                frame_data = self.__flip_from_BGRA_to_RGB(frame_data)
+                output_video_writer.append_data(frame_data)
+                frames_written += 1
 
-            if self.reencoding_progress_queue is not None:
-                progress = (frames_written / total_frames_in_input_file) * 100
-                self.reencoding_progress_queue.put(progress)
-
+                if self.reencoding_progress_queue is not None:
+                    progress = (frames_written / total_frames_in_input_file) * 100
+                    self.reencoding_progress_queue.put(progress)
 
         input_video_reader.close()
         output_video_writer.close()
