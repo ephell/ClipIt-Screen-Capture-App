@@ -80,7 +80,6 @@ class VideoRecorder(mp.Process):
             if self.recording_started is not None:
                 self.recording_started.value = start_time
 
-            total_frames_captured = 0
             frames_captured_current_second = 0
             frames_captured_each_second = []
             start_time_for_debug = perf_counter()
@@ -88,9 +87,8 @@ class VideoRecorder(mp.Process):
             while not self.stop_event.is_set():
                 frame_start_time = perf_counter()
                 frame = np.array(sct.grab(monitor))
-                total_frames_captured += 1
-                frames_captured_current_second += 1
                 frame_writer.append_data(frame)
+                frames_captured_current_second += 1
                 frame_capture_time = perf_counter() - frame_start_time
                 sleep_time = (1.0 / self.fps) - frame_capture_time
                 if sleep_time > 0:
@@ -102,11 +100,10 @@ class VideoRecorder(mp.Process):
                     frames_captured_current_second = 0
                     start_time = current_time
 
+            print(frames_captured_each_second)
             print(f"Duration: {perf_counter() - start_time_for_debug} seconds")
             frame_writer.close()
             print("Finished recording video!")
-
-        print(frames_captured_each_second)
 
         return frames_captured_each_second
 
