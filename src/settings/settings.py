@@ -21,20 +21,6 @@ class Settings:
         return _TempFilePaths
     
     @classmethod
-    def get_audio_preferences(cls):
-        parser = ConfigParser()
-        parser.read(cls.SETTINGS_FILE)
-        return parser["AUDIO_PREFERENCES"]
-    
-    @classmethod
-    def set_audio_preference(cls, preference_name, preference_value):
-        parser = ConfigParser()
-        parser.read(cls.SETTINGS_FILE)
-        parser["AUDIO_PREFERENCES"][preference_name] = preference_value
-        with open(cls.SETTINGS_FILE, "w") as configfile:
-            parser.write(configfile)
-
-    @classmethod
     def get_hotkeys(cls):
         parser = ConfigParser()
         parser.read(cls.SETTINGS_FILE)
@@ -65,6 +51,4 @@ class _TempFilePaths:
     CUT_VIDEO_FILE = os.path.join(DIR_PATH, "cut_video.mp4")
     CROPPED_VIDEO_FILE = os.path.join(DIR_PATH, "cropped_video.mp4")
     LOOPBACK_AUDIO_FILE = os.path.join(DIR_PATH, "loopback_audio.wav")
-    MICROPHONE_AUDIO_FILE = os.path.join(DIR_PATH, "microphone_audio.wav")
-    MERGED_AUDIO_FILE = os.path.join(DIR_PATH, "merged_audio.wav")
     FINAL_FILE = os.path.join(DIR_PATH, "final_file.mp4")

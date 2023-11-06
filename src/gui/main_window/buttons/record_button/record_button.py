@@ -54,8 +54,7 @@ class RecordButton(QPushButton):
         self.file_generation_choice_event = threading.Event()
         self.recorder = Recorder(
             record_video=True,
-            record_loopback=Settings.get_audio_preferences().getboolean("RECORD_LOOPBACK"),
-            record_microphone=Settings.get_audio_preferences().getboolean("RECORD_MICROPHONE"),
+            record_loopback=True,
             stop_event=self.recorder_stop_event,
             file_generation_choice_event=self.file_generation_choice_event,
             region=[*self.recording_area_selector.get_area_coords()],

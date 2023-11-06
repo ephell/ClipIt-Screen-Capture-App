@@ -18,8 +18,6 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QGroupBox, QHBoxLayout, QLabel,
     QSizePolicy, QVBoxLayout, QWidget)
 
-from .audio_preferences.record_microphone_audio_check_box import RecordMicrophoneAudioCheckBox
-from .audio_preferences.record_speaker_audio_check_box import RecordSpeakerAudioCheckBox
 from .captures_directory.browse_button import BrowseButton
 from .captures_directory.line_edit import CapturesDirectoryLineEdit
 from .hotkeys.screenshot.line_edit import ScreenshotLineEdit
@@ -31,9 +29,9 @@ class Ui_SettingsWindow(object):
     def setupUi(self, SettingsWindow):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
-        SettingsWindow.resize(443, 270)
-        SettingsWindow.setMinimumSize(QSize(443, 270))
-        SettingsWindow.setMaximumSize(QSize(443, 270))
+        SettingsWindow.resize(443, 184)
+        SettingsWindow.setMinimumSize(QSize(443, 184))
+        SettingsWindow.setMaximumSize(QSize(443, 184))
         self.verticalLayout = QVBoxLayout(SettingsWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.captures_dir_group_box = QGroupBox(SettingsWindow)
@@ -54,24 +52,6 @@ class Ui_SettingsWindow(object):
 
 
         self.verticalLayout.addWidget(self.captures_dir_group_box)
-
-        self.audio_preferences_group_box = QGroupBox(SettingsWindow)
-        self.audio_preferences_group_box.setObjectName(u"audio_preferences_group_box")
-        self.horizontalLayout_2 = QHBoxLayout(self.audio_preferences_group_box)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.record_speaker_audio_check_box = RecordSpeakerAudioCheckBox(self.audio_preferences_group_box)
-        self.record_speaker_audio_check_box.setObjectName(u"record_speaker_audio_check_box")
-        self.record_speaker_audio_check_box.setEnabled(True)
-
-        self.horizontalLayout_2.addWidget(self.record_speaker_audio_check_box)
-
-        self.record_microphone_audio_checkbox = RecordMicrophoneAudioCheckBox(self.audio_preferences_group_box)
-        self.record_microphone_audio_checkbox.setObjectName(u"record_microphone_audio_checkbox")
-
-        self.horizontalLayout_2.addWidget(self.record_microphone_audio_checkbox)
-
-
-        self.verticalLayout.addWidget(self.audio_preferences_group_box)
 
         self.hotkeys_group_box = QGroupBox(SettingsWindow)
         self.hotkeys_group_box.setObjectName(u"hotkeys_group_box")
@@ -169,9 +149,6 @@ class Ui_SettingsWindow(object):
         SettingsWindow.setWindowTitle(QCoreApplication.translate("SettingsWindow", u"SettingsWindow", None))
         self.captures_dir_group_box.setTitle(QCoreApplication.translate("SettingsWindow", u"Captures Directory", None))
         self.browse_button.setText(QCoreApplication.translate("SettingsWindow", u"Browse", None))
-        self.audio_preferences_group_box.setTitle(QCoreApplication.translate("SettingsWindow", u"Audio Preferences", None))
-        self.record_speaker_audio_check_box.setText(QCoreApplication.translate("SettingsWindow", u"Record Speaker Audio", None))
-        self.record_microphone_audio_checkbox.setText(QCoreApplication.translate("SettingsWindow", u"Record Microphone Audio", None))
         self.hotkeys_group_box.setTitle(QCoreApplication.translate("SettingsWindow", u"Hotkeys", None))
         self.screenshot_label.setText(QCoreApplication.translate("SettingsWindow", u"Screenshot", None))
         self.start_stop_recording_label.setText(QCoreApplication.translate("SettingsWindow", u"Start/Stop Recording", None))

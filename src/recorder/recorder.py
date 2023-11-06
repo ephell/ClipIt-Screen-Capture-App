@@ -7,7 +7,6 @@ from proglog import ProgressBarLogger
 from PySide6.QtCore import Signal, QObject
 
 from src.recorder.recorder_loopback import LoopbackRecorder
-from src.recorder.recorder_microphone import MicrophoneRecorder
 from src.recorder.recorder_video import VideoRecorder
 from src.settings.settings import Settings
 from src.utilities.video import VideoUtils
@@ -26,7 +25,6 @@ class Recorder(QObject, threading.Thread):
     # Final file generation progress signals.
     video_reencoding_progress_signal = Signal(int)
     video_and_audio_merging_progress_signal = Signal(int)
-    audio_merging_progress_signal = Signal(int)
     # Emits the path to the final video file.
     file_generation_finished_signal = Signal(str)
 
@@ -34,7 +32,6 @@ class Recorder(QObject, threading.Thread):
             self,
             record_video: bool,
             record_loopback: bool,
-            record_microphone: bool,
             region: list[int, int, int, int],
             monitor: int,
             fps: int,
@@ -45,7 +42,6 @@ class Recorder(QObject, threading.Thread):
         self.setName("Recorder")
         self.record_video = record_video
         self.record_loopback = record_loopback
-        self.record_microphone = record_microphone
         self.region = region
         self.monitor = monitor
         self.fps = fps
@@ -55,19 +51,15 @@ class Recorder(QObject, threading.Thread):
         self.recording_started = mp.Value("d", -1.0)
         self.video_recorder = None
         self.loopback_recorder = None
-        self.microphone_recorder = None
         self.video_recorder_stop_event = None
         self.video_recorder_file_generation_choice_event = None
         self.video_recorder_file_generation_choice_value = None
         self.loopback_recorder_stop_event = None
-        self.microphone_recorder_stop_event = None
     
         if self.record_video:
             self.__initialize_video_recorder()
         if self.record_loopback:
             self.__initialize_loopback_recorder()
-        if self.record_microphone:
-            self.__initialize_microphone_recorder()
 
         # Make sure all recorders start at the same time.
         barrier = mp.Barrier(len(self.__get_recorders()))
@@ -144,23 +136,10 @@ class Recorder(QObject, threading.Thread):
         else:
             self.record_loopback = False
 
-    def __initialize_microphone_recorder(self):
-        microphone = AudioUtils.get_default_microphone()
-        if microphone is not None:
-            self.record_microphone = True
-            self.microphone_recorder_stop_event = mp.Event()
-            self.microphone_recorder = MicrophoneRecorder(
-                microphone=microphone,
-                stop_event=self.microphone_recorder_stop_event
-            )
-        else:
-            self.record_microphone = False
-
     def __get_recorders(self):
         recorders = [
             self.video_recorder, 
-            self.loopback_recorder, 
-            self.microphone_recorder
+            self.loopback_recorder
         ]
         return [recorder for recorder in recorders if recorder is not None]
 
@@ -175,50 +154,15 @@ class Recorder(QObject, threading.Thread):
 
     def __generate_final_video(self):
         """Generates the final file from recorded temporary files."""
-        # Create loggers
-        video_and_audio_merging_logger = _MergingProgressLogger(
-            progress_signal=self.video_and_audio_merging_progress_signal
-        )
-        if len(self.__get_recorders()) == 3:
-            audio_merging_logger = _MergingProgressLogger(
-                progress_signal=self.audio_merging_progress_signal
-            )
-
-        # Merge video/audio as needed
+        # Merge video with audio into a final file.
+        logger = _MergingProgressLogger(self.video_and_audio_merging_progress_signal)
         temp_file_paths = Settings.get_temp_file_paths()
-        if self.record_loopback and self.record_microphone:
-            VideoUtils.merge_audio(
-                first_clip_path=temp_file_paths.LOOPBACK_AUDIO_FILE, 
-                second_clip_path=temp_file_paths.MICROPHONE_AUDIO_FILE,
-                output_path=temp_file_paths.MERGED_AUDIO_FILE,
-                logger=audio_merging_logger
-            )
-            VideoUtils.merge_video_with_audio(
-                video_path=temp_file_paths.REENCODED_VIDEO_FILE,
-                audio_path=temp_file_paths.MERGED_AUDIO_FILE,
-                output_path=temp_file_paths.FINAL_FILE,
-                logger=video_and_audio_merging_logger
-            )
-        elif self.record_loopback and not self.record_microphone:
-            VideoUtils.merge_video_with_audio(
-                video_path=temp_file_paths.REENCODED_VIDEO_FILE,
-                audio_path=temp_file_paths.LOOPBACK_AUDIO_FILE,
-                output_path=temp_file_paths.FINAL_FILE,
-                logger=video_and_audio_merging_logger
-            )
-        elif self.record_microphone and not self.record_loopback:
-            VideoUtils.merge_video_with_audio(
-                video_path=temp_file_paths.REENCODED_VIDEO_FILE,
-                audio_path=temp_file_paths.MICROPHONE_AUDIO_FILE,
-                output_path=temp_file_paths.FINAL_FILE,
-                logger=video_and_audio_merging_logger
-            )
-        else:
-            os.replace(
-                src=temp_file_paths.REENCODED_VIDEO_FILE,
-                dst=temp_file_paths.FINAL_FILE
-            )
-
+        VideoUtils.merge_video_with_audio(
+            video_path=temp_file_paths.REENCODED_VIDEO_FILE,
+            audio_path=temp_file_paths.LOOPBACK_AUDIO_FILE,
+            output_path=temp_file_paths.FINAL_FILE,
+            logger=logger
+        )
         # Rename the final file and move it to output folder.
         now = datetime.datetime.now()
         timestamp = now.strftime("%Y-%m-%d [] %H-%M-%S")
@@ -228,11 +172,9 @@ class Recorder(QObject, threading.Thread):
             src=old_file_path,
             dst=new_file_path
         )
-
         # Replace backslashes with forward slashes so that there are no
         # errors when opening the file in the editor after generating it.
         new_file_path = new_file_path.replace('\\', '/')
-
         return new_file_path
 
     def __clean_up_temp_directory(self):
