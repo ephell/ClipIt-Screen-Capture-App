@@ -144,26 +144,3 @@ class VideoUtils:
             preset="ultrafast", 
             logger=logger
         )
-
-    @staticmethod
-    def merge_audio(
-        first_clip_path, 
-        second_clip_path,
-        output_path,
-        logger=None
-    ):
-        clip1 = AudioFileClip(first_clip_path)
-        clip2 = AudioFileClip(second_clip_path)
-
-        clip1_duration = int(clip1.duration)
-        clip2_duration = int(clip2.duration)
-        duration = min(clip1_duration, clip2_duration)
-        clip1 = clip1.subclip(0, duration)
-        clip2 = clip2.subclip(0, duration)
-
-        merged_audio = CompositeAudioClip([clip1, clip2])
-        merged_audio.write_audiofile(
-            filename=output_path,
-            fps=44100,
-            logger=logger
-        )

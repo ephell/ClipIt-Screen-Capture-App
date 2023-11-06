@@ -51,5 +51,4 @@ class _TempFilePaths:
     CUT_VIDEO_FILE = os.path.join(DIR_PATH, "cut_video.mp4")
     CROPPED_VIDEO_FILE = os.path.join(DIR_PATH, "cropped_video.mp4")
     LOOPBACK_AUDIO_FILE = os.path.join(DIR_PATH, "loopback_audio.wav")
-    MERGED_AUDIO_FILE = os.path.join(DIR_PATH, "merged_audio.wav")
     FINAL_FILE = os.path.join(DIR_PATH, "final_file.mp4")

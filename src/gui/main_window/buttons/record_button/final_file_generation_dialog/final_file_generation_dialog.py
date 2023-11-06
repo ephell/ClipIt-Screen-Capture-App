@@ -19,7 +19,6 @@ class FinalFileGenerationDialog(QDialog, Ui_FinalFileGenerationDialog):
         self.total_steps = total_steps
         self.current_step = 0
         self.is_first_video_reencoding_signal = True
-        self.is_first_audio_merging_signal = True
         self.is_first_video_and_audio_merging_signal = True
         self.is_file_generation_complete = False
         self.__connect_signals_and_slots()
