@@ -154,7 +154,7 @@ class Recorder(QObject, threading.Thread):
 
     def __generate_final_video(self):
         """Generates the final file from recorded temporary files."""
-        # Merge video with audio into a final file
+        # Merge video with audio into a final file.
         logger = _MergingProgressLogger(self.video_and_audio_merging_progress_signal)
         temp_file_paths = Settings.get_temp_file_paths()
         VideoUtils.merge_video_with_audio(
@@ -163,11 +163,6 @@ class Recorder(QObject, threading.Thread):
             output_path=temp_file_paths.FINAL_FILE,
             logger=logger
         )
-        os.replace(
-            src=temp_file_paths.REENCODED_VIDEO_FILE,
-            dst=temp_file_paths.FINAL_FILE
-        )
-
         # Rename the final file and move it to output folder.
         now = datetime.datetime.now()
         timestamp = now.strftime("%Y-%m-%d [] %H-%M-%S")
@@ -177,11 +172,9 @@ class Recorder(QObject, threading.Thread):
             src=old_file_path,
             dst=new_file_path
         )
-
         # Replace backslashes with forward slashes so that there are no
         # errors when opening the file in the editor after generating it.
         new_file_path = new_file_path.replace('\\', '/')
-
         return new_file_path
 
     def __clean_up_temp_directory(self):
