@@ -16,17 +16,6 @@ class AudioUtils:
         return None
 
     @classmethod
-    def get_default_microphone(cls):
-        if cls.is_WASAPI_available():
-            with pyaudio.PyAudio() as p:
-                w = cls.get_WASAPI_info()
-                try:
-                    return p.get_device_info_by_index(w["defaultInputDevice"])
-                except OSError:
-                    return None
-        return None
-
-    @classmethod
     def get_default_loopback_device(cls):
         default_speakers = AudioUtils.get_default_speakers()
         if default_speakers is not None:
