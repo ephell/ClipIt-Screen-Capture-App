@@ -28,9 +28,6 @@ class FinalFileGenerationDialog(QDialog, Ui_FinalFileGenerationDialog):
         self.recorder.video_reencoding_progress_signal.connect(
             self.__on_video_reencoding_progress_signal_received
         )
-        self.recorder.audio_merging_progress_signal.connect(
-            self.__on_audio_merging_progress_signal_received
-        )
         self.recorder.video_and_audio_merging_progress_signal.connect(
             self.__on_video_and_audio_merging_progress_signal_received
         )
@@ -54,17 +51,6 @@ class FinalFileGenerationDialog(QDialog, Ui_FinalFileGenerationDialog):
             self.status_message_label.setText(
                 f"({self.current_step}/{self.total_steps}) "
                 "Encoding video frames ..."
-            )
-
-    @Slot()
-    def __on_audio_merging_progress_signal_received(self, value):
-        self.progress_bar.setValue(value)
-        if self.is_first_audio_merging_signal:
-            self.is_first_audio_merging_signal = False
-            self.current_step += 1
-            self.status_message_label.setText(
-                f"({self.current_step}/{self.total_steps}) "
-                "Merging speaker and microphone audio ..."
             )
 
     @Slot()

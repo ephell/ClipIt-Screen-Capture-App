@@ -25,7 +25,6 @@ class Recorder(QObject, threading.Thread):
     # Final file generation progress signals.
     video_reencoding_progress_signal = Signal(int)
     video_and_audio_merging_progress_signal = Signal(int)
-    audio_merging_progress_signal = Signal(int)
     # Emits the path to the final video file.
     file_generation_finished_signal = Signal(str)
 
