@@ -130,10 +130,18 @@ class VideoUtils:
     ):
         video_clip = VideoFileClip(video_path)
         audio_clip = AudioFileClip(audio_path)
-        final_clip = video_clip.set_audio(audio_clip)
+
+        # Make sure the video and audio are the same length
+        video_duration = int(video_clip.duration)
+        audio_duration = int(audio_clip.duration)
+        duration = min(video_duration, audio_duration)
+        trimmed_video = video_clip.subclip(0, duration)
+        trimmed_audio = audio_clip.subclip(0, duration)
+
+        final_clip = trimmed_video.set_audio(trimmed_audio)
         final_clip.write_videofile(
-            filename=output_path,
-            preset="ultrafast",
+            output_path, 
+            preset="ultrafast", 
             logger=logger
         )
 
@@ -146,6 +154,13 @@ class VideoUtils:
     ):
         clip1 = AudioFileClip(first_clip_path)
         clip2 = AudioFileClip(second_clip_path)
+
+        clip1_duration = int(clip1.duration)
+        clip2_duration = int(clip2.duration)
+        duration = min(clip1_duration, clip2_duration)
+        clip1 = clip1.subclip(0, duration)
+        clip2 = clip2.subclip(0, duration)
+
         merged_audio = CompositeAudioClip([clip1, clip2])
         merged_audio.write_audiofile(
             filename=output_path,
