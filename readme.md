@@ -8,7 +8,7 @@ ClipIt is a user-friendly application designed to simplify the process of record
 ## Features
 - Easy to use GUI.
 - Record or screenshot a custom area of the screen.
-- Record speaker and/or microphone audio along with the video.
+- Record speaker audio along with the video.
 - Edit video length, resolution and volume using the built-in editor.
 - Configure custom hotkeys for quick recording or screenshot.
 - Access the application via the system tray.
