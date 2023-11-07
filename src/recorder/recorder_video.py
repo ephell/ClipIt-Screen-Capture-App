@@ -86,14 +86,9 @@ class VideoRecorder(mp.Process):
             fps_counts = []
             start_time = perf_counter()
             while not self.stop_event.is_set():
-                frame_start_time = perf_counter()
                 frame = np.array(sct.grab(monitor))
                 frame_writer.append_data(frame)
                 frames_captured_current_second += 1
-                frame_capture_time = perf_counter() - frame_start_time
-                sleep_time = (1.0 / self.fps) - frame_capture_time
-                if sleep_time > 0:
-                    sleep(sleep_time)
 
                 current_time = perf_counter()
                 if current_time - start_time >= 1.0:
@@ -114,6 +109,10 @@ class VideoRecorder(mp.Process):
         """Rewrites the video file with precise fps."""
         print("Started reencoding video ... ")
         total_frames_in_input_file = sum(fps_counts)
+        average_fps = int(sum(fps_counts) / len(fps_counts))
+        if self.fps > average_fps:
+            self.fps = average_fps
+
         input_video_reader = imageio.get_reader(self.captured_filename)
         output_video_writer = imageio.get_writer(
             self.reencoded_filename,
@@ -153,7 +152,9 @@ class VideoRecorder(mp.Process):
         Extend a dictionary of frames to match the specified fps.
         
         It fills the gaps between the frames by duplicating where
-        needed to match the FPS video was supposed to be recorded at.
+        needed. In the case where `extend_to_fps` is smaller than
+        the amount of frames, some middle frames will be skipped in
+        the resulting dictionary.
         """
         extended_batch = {}
         frames_per_source_frame = extend_to_fps / len(frames)
