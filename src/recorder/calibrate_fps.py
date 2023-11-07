@@ -14,27 +14,39 @@ class SampleGetter(QObject, threading.Thread):
         super().__init__()
         self.fps = 30
         self.monitor = 1
+        self.sample_data = {}
+        self.sample_sleep_time = 5
     
     def run(self):
-        self.full_screen_recorder_stop_event = threading.Event()
-        self.frames_captured_each_second_queue = queue.Queue()
-        self.full_screen_recorder = Recorder(
+        self.__get_sample(self.__get_max_monitor_area())
+        print(f"Max area done, sample data: {self.sample_data}")
+        self.__get_sample(self.__get_max_area_half_height())
+        print(f"Half height done, sample data: {self.sample_data}")
+        self.__get_sample(self.__get_max_area_half_width())
+        print(f"Half width done, sample data: {self.sample_data}")
+        self.__get_sample(self.__get_max_area_quarter())
+        print(f"Quarter done, sample data: {self.sample_data}")
+
+    def __get_sample(self, area):
+        stop_event = threading.Event()
+        fps_counts_queue = queue.Queue()
+        recorder = Recorder(
             record_video=True,
             record_loopback=True,
-            region=self.__get_max_monitor_area(),
+            region=area,
             monitor=self.monitor,
             fps=self.fps,
-            stop_event=self.full_screen_recorder_stop_event,
+            stop_event=stop_event,
             generate_final_file=False,
-            frames_captured_each_second_queue=self.frames_captured_each_second_queue
+            frames_captured_each_second_queue=fps_counts_queue
         )
-        self.full_screen_recorder.start()
-        sleep(5)
-        self.full_screen_recorder_stop_event.set()
-        print(f"Frame info: {self.frames_captured_each_second_queue.get()}")
-        self.full_screen_recorder.join()
-        print("Sample getter stopped")
-
+        recorder.start()
+        sleep(self.sample_sleep_time)
+        stop_event.set()
+        frame_counts = fps_counts_queue.get()
+        recorder.join()
+        self.sample_data.update({area: frame_counts})
+        
     def __get_max_monitor_area(self):
         mon = mss.mss().monitors[1]
         return (mon["left"], mon["top"], mon["width"], mon["height"])
@@ -50,4 +62,3 @@ class SampleGetter(QObject, threading.Thread):
     def __get_max_area_quarter(self):
         mon = mss.mss().monitors[1]
         return (mon["left"], mon["top"], mon["width"] // 2, mon["height"] // 2)
-
