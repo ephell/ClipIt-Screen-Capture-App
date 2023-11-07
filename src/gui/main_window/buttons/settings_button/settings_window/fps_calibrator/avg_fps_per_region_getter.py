@@ -15,14 +15,14 @@ class AvgFPSPerAreaGetter(QObject, threading.Thread):
         super().__init__()
         self.fps = 30
         self.monitor = 1
-        self.avg_fps_per_area = {}
+        self.avg_fps_per_region = {}
         self.sample_sleep_time = 5
     
     def run(self):
         self.__get_avg_area_fps(self.__get_max_area())
         self.__get_avg_area_fps(self.__get_max_area_half())
         self.__get_avg_area_fps(self.__get_max_area_quarter())
-        Settings.set_video_recorder_setting("avg_fps_per_area", f"{self.avg_fps_per_area}")
+        Settings.set_video_recorder_setting("avg_fps_per_region", f"{self.avg_fps_per_region}")
 
     def __get_avg_area_fps(self, area):
         stop_event = threading.Event()
@@ -40,7 +40,7 @@ class AvgFPSPerAreaGetter(QObject, threading.Thread):
         recorder.start()
         sleep(self.sample_sleep_time)
         stop_event.set()
-        self.avg_fps_per_area.update({area: self.__calculate_avg(fps_counts_queue.get())})
+        self.avg_fps_per_region.update({area: self.__calculate_avg(fps_counts_queue.get())})
         recorder.join()
         
     def __get_max_area(self):
