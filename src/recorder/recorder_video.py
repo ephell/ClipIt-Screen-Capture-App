@@ -21,7 +21,8 @@ class VideoRecorder(mp.Process):
             reencoding_progress_queue: mp.Queue=None,
             recording_started: mp.Value=None, # Float value set to -1.0
             file_generation_choice_event: mp.Event=None,
-            file_generation_choice_value: mp.Value=None
+            file_generation_choice_value: mp.Value=None,
+            frames_captured_each_second_queue: mp.Queue=None # Used for calibration
         ):
         super().__init__()
         self.region = region
@@ -33,6 +34,7 @@ class VideoRecorder(mp.Process):
         self.recording_started = recording_started
         self.file_generation_choice_event = file_generation_choice_event
         self.file_generation_choice_value = file_generation_choice_value
+        self.frames_captured_each_second_queue = frames_captured_each_second_queue
         self.captured_filename = Settings.get_temp_file_paths().CAPTURED_VIDEO_FILE
         self.reencoded_filename = Settings.get_temp_file_paths().REENCODED_VIDEO_FILE
         self.macro_block_size = 2
@@ -40,13 +42,14 @@ class VideoRecorder(mp.Process):
 
     def run(self):
         frames_captured_each_second = self.__capture_and_save_video()
-        if self.file_generation_choice_event is not None:
-            self.file_generation_choice_event.wait()
-        if (
-            self.file_generation_choice_value is None
-            or self.file_generation_choice_value.value == True
-        ):
-            self.__reencode_video(frames_captured_each_second)
+        if self.frames_captured_each_second_queue is None:
+            if self.file_generation_choice_event is not None:
+                self.file_generation_choice_event.wait()
+            if (
+                self.file_generation_choice_value is None
+                or self.file_generation_choice_value.value == True
+            ):
+                self.__reencode_video(frames_captured_each_second)
 
     def __capture_and_save_video(self):
         with mss.mss() as sct:
@@ -102,6 +105,10 @@ class VideoRecorder(mp.Process):
             frame_writer.close()
             print("Finished recording video!")
 
+        if self.frames_captured_each_second_queue is not None:
+            self.frames_captured_each_second_queue.put(frames_captured_each_second)
+
+        print(frames_captured_each_second)
         return frames_captured_each_second
 
     def __reencode_video(self, frames_captured_each_second):
