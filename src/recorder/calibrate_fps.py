@@ -14,20 +14,16 @@ class SampleGetter(QObject, threading.Thread):
         super().__init__()
         self.fps = 30
         self.monitor = 1
-        self.sample_data = {}
-        self.sample_sleep_time = 5
+        self.avg_fps_per_area = {}
+        self.sample_sleep_time = 10
     
     def run(self):
-        self.__get_sample(self.__get_max_monitor_area())
-        print(f"Max area done, sample data: {self.sample_data}")
-        self.__get_sample(self.__get_max_area_half_height())
-        print(f"Half height done, sample data: {self.sample_data}")
-        self.__get_sample(self.__get_max_area_half_width())
-        print(f"Half width done, sample data: {self.sample_data}")
-        self.__get_sample(self.__get_max_area_quarter())
-        print(f"Quarter done, sample data: {self.sample_data}")
+        self.__get_avg_area_fps(self.__get_max_area())
+        self.__get_avg_area_fps(self.__get_max_area_half_height())
+        self.__get_avg_area_fps(self.__get_max_area_half_width())
+        self.__get_avg_area_fps(self.__get_max_area_quarter())
 
-    def __get_sample(self, area):
+    def __get_avg_area_fps(self, area):
         stop_event = threading.Event()
         fps_counts_queue = queue.Queue()
         recorder = Recorder(
@@ -43,11 +39,10 @@ class SampleGetter(QObject, threading.Thread):
         recorder.start()
         sleep(self.sample_sleep_time)
         stop_event.set()
-        frame_counts = fps_counts_queue.get()
+        self.avg_fps_per_area.update({area: self.__calculate_avg(fps_counts_queue.get())})
         recorder.join()
-        self.sample_data.update({area: frame_counts})
         
-    def __get_max_monitor_area(self):
+    def __get_max_area(self):
         mon = mss.mss().monitors[1]
         return (mon["left"], mon["top"], mon["width"], mon["height"])
     
@@ -62,3 +57,6 @@ class SampleGetter(QObject, threading.Thread):
     def __get_max_area_quarter(self):
         mon = mss.mss().monitors[1]
         return (mon["left"], mon["top"], mon["width"] // 2, mon["height"] // 2)
+
+    def __calculate_avg(self, frame_counts):
+        return int(sum(frame_counts) / len(frame_counts))
