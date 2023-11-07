@@ -39,7 +39,7 @@ class Recorder(QObject, threading.Thread):
             stop_event: threading.Event,
             file_generation_choice_event: threading.Event=None,
             generate_final_file=True,
-            frames_captured_each_second_queue: queue.Queue()=None
+            video_fps_counts_queue: queue.Queue()=None
         ):
         super().__init__()
         self.setName("Recorder")
@@ -53,13 +53,13 @@ class Recorder(QObject, threading.Thread):
         self.generate_final_file = generate_final_file
         self.recording_started = mp.Value("d", -1.0)
         self.video_recorder = None
-        self.loopback_recorder = None
         self.video_recorder_stop_event = None
         self.video_recorder_file_generation_choice_event = None
         self.video_recorder_file_generation_choice_value = None
-        self.video_frames_capture_each_second_queue = None
+        self.video_recorder_fps_counts_queue = None
+        self.video_fps_counts_queue = video_fps_counts_queue
+        self.loopback_recorder = None
         self.loopback_recorder_stop_event = None
-        self.frames_captured_each_second_queue = frames_captured_each_second_queue
     
         if self.record_video:
             self.__initialize_video_recorder()
@@ -111,13 +111,11 @@ class Recorder(QObject, threading.Thread):
         for recorder in self.__get_recorders():
             recorder.join()
 
-        # For fps calibration if needed
-        if self.video_frames_capture_each_second_queue is not None:
-            frms = self.video_frames_capture_each_second_queue.get()
-            print("azaz", frms)
-            print(frms)
-            if self.frames_captured_each_second_queue is not None:
-                self.frames_captured_each_second_queue.put(frms)
+        if self.video_recorder_fps_counts_queue is not None:
+            if self.video_fps_counts_queue is not None:
+                self.video_fps_counts_queue.put(
+                    self.video_recorder_fps_counts_queue.get()
+                )
 
         # self.__clean_up_temp_directory()
 
@@ -126,7 +124,7 @@ class Recorder(QObject, threading.Thread):
         self.video_recorder_file_generation_choice_event = mp.Event()
         self.video_recorder_file_generation_choice_value = mp.Value("b", True)
         self.video_reencoding_progress_queue = mp.Queue()
-        self.video_frames_capture_each_second_queue = mp.Queue()
+        self.video_recorder_fps_counts_queue = mp.Queue()
         self.video_recorder = VideoRecorder(
             region=self.region,
             monitor=self.monitor,
@@ -136,7 +134,7 @@ class Recorder(QObject, threading.Thread):
             file_generation_choice_value=self.video_recorder_file_generation_choice_value,
             reencoding_progress_queue=self.video_reencoding_progress_queue,
             recording_started=self.recording_started,
-            frames_captured_each_second_queue=self.video_frames_capture_each_second_queue
+            fps_counts_queue=self.video_recorder_fps_counts_queue
         )
 
     def __initialize_loopback_recorder(self):
