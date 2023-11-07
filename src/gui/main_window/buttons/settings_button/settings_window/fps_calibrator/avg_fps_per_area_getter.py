@@ -20,8 +20,7 @@ class AvgFPSPerAreaGetter(QObject, threading.Thread):
     
     def run(self):
         self.__get_avg_area_fps(self.__get_max_area())
-        self.__get_avg_area_fps(self.__get_max_area_half_height())
-        self.__get_avg_area_fps(self.__get_max_area_half_width())
+        self.__get_avg_area_fps(self.__get_max_area_half())
         self.__get_avg_area_fps(self.__get_max_area_quarter())
         Settings.set_video_recorder_setting("avg_fps_per_area", f"{self.avg_fps_per_area}")
 
@@ -48,11 +47,7 @@ class AvgFPSPerAreaGetter(QObject, threading.Thread):
         mon = mss.mss().monitors[1]
         return (mon["left"], mon["top"], mon["width"], mon["height"])
     
-    def __get_max_area_half_height(self):
-        mon = mss.mss().monitors[1]
-        return (mon["left"], mon["top"], mon["width"], mon["height"] // 2)
-    
-    def __get_max_area_half_width(self):
+    def __get_max_area_half(self):
         mon = mss.mss().monitors[1]
         return (mon["left"], mon["top"], mon["width"] // 2, mon["height"])
     
