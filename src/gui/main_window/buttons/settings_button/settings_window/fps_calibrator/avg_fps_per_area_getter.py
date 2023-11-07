@@ -1,14 +1,14 @@
 import mss
+import queue
 import threading
 from time import sleep
-import queue
 
 from PySide6.QtCore import QObject
 
 from src.recorder.recorder import Recorder
 
 
-class SampleGetter(QObject, threading.Thread):
+class AvgFPSPerAreaGetter(QObject, threading.Thread):
 
     def __init__(self):
         super().__init__()
