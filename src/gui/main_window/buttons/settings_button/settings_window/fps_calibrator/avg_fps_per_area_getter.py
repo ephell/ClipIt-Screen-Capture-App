@@ -6,6 +6,7 @@ from time import sleep
 from PySide6.QtCore import QObject
 
 from src.recorder.recorder import Recorder
+from src.settings.settings import Settings
 
 
 class AvgFPSPerAreaGetter(QObject, threading.Thread):
@@ -15,13 +16,14 @@ class AvgFPSPerAreaGetter(QObject, threading.Thread):
         self.fps = 30
         self.monitor = 1
         self.avg_fps_per_area = {}
-        self.sample_sleep_time = 10
+        self.sample_sleep_time = 5
     
     def run(self):
         self.__get_avg_area_fps(self.__get_max_area())
         self.__get_avg_area_fps(self.__get_max_area_half_height())
         self.__get_avg_area_fps(self.__get_max_area_half_width())
         self.__get_avg_area_fps(self.__get_max_area_quarter())
+        Settings.set_video_recorder_setting("avg_fps_per_area", f"{self.avg_fps_per_area}")
 
     def __get_avg_area_fps(self, area):
         stop_event = threading.Event()
@@ -34,7 +36,7 @@ class AvgFPSPerAreaGetter(QObject, threading.Thread):
             fps=self.fps,
             stop_event=stop_event,
             generate_final_file=False,
-            frames_captured_each_second_queue=fps_counts_queue
+            video_fps_counts_queue=fps_counts_queue
         )
         recorder.start()
         sleep(self.sample_sleep_time)
