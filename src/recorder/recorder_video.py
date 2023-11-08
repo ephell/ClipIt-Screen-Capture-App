@@ -37,6 +37,7 @@ class VideoRecorder(mp.Process):
         self.reencoded_filename = Settings.get_temp_file_paths().REENCODED_VIDEO_FILE
         self.macro_block_size = 2
         self.quality = 5 # 10 is max (pretty large file size)
+        self.__frame_writer_fps = 30 # Value doesn't matter since the video is going to be reencoded anyway
 
     def run(self):
         fps_counts = self.__capture_and_save_video()
@@ -60,7 +61,7 @@ class VideoRecorder(mp.Process):
 
             frame_writer = imageio.get_writer(
                 self.captured_filename,
-                fps=self.fps,
+                fps=self.__frame_writer_fps,
                 quality=self.quality,
                 macro_block_size=self.macro_block_size
             )
@@ -103,8 +104,7 @@ class VideoRecorder(mp.Process):
         print("Started reencoding video ... ")
         total_frames_in_input_file = sum(fps_counts)
         average_fps = int(sum(fps_counts) / len(fps_counts))
-        if self.fps > average_fps:
-            self.fps = average_fps
+        self.fps = average_fps
 
         input_video_reader = imageio.get_reader(self.captured_filename)
         output_video_writer = imageio.get_writer(
