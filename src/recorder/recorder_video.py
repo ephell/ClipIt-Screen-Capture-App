@@ -102,9 +102,7 @@ class VideoRecorder(mp.Process):
     def __reencode_video(self, fps_counts):
         """Rewrites the video file with precise fps."""
         print("Started reencoding video ... ")
-        total_frames_in_input_file = sum(fps_counts)
-        average_fps = int(sum(fps_counts) / len(fps_counts))
-        self.fps = average_fps
+        self.fps = int(sum(fps_counts) / len(fps_counts)) # Average fps
 
         input_video_reader = imageio.get_reader(self.captured_filename)
         output_video_writer = imageio.get_writer(
@@ -114,7 +112,8 @@ class VideoRecorder(mp.Process):
             macro_block_size=self.macro_block_size
         )
 
-        frames_written = 0
+        frame_batches_written = 0
+        frame_batches_total = len(fps_counts)
         for _, frame_count in enumerate(fps_counts):
             frames = self.__extract_frames(frame_count, input_video_reader)
             extended_frame_batch = self.__extend_frame_batch(frames, self.fps)
@@ -122,10 +121,11 @@ class VideoRecorder(mp.Process):
                 frame_data = self.__remove_alpha_channel(frame_data)
                 frame_data = self.__flip_from_BGRA_to_RGB(frame_data)
                 output_video_writer.append_data(frame_data)
-                frames_written += 1
-                if self.reencoding_progress_queue is not None:
-                    progress = (frames_written / total_frames_in_input_file) * 100
-                    self.reencoding_progress_queue.put(progress)
+
+            frame_batches_written += 1
+            if self.reencoding_progress_queue is not None:
+                progress = (frame_batches_written / frame_batches_total) * 100
+                self.reencoding_progress_queue.put(progress)
 
         input_video_reader.close()
         output_video_writer.close()
