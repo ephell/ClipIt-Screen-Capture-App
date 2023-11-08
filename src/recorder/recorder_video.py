@@ -22,7 +22,6 @@ class VideoRecorder(mp.Process):
             recording_started: mp.Value=None, # Float value set to -1.0
             file_generation_choice_event: mp.Event=None,
             file_generation_choice_value: mp.Value=None,
-            fps_counts_queue: mp.Queue=None # Used in AvgFPSPerAreaGetter() object
         ):
         super().__init__()
         self.region = region
@@ -34,7 +33,6 @@ class VideoRecorder(mp.Process):
         self.recording_started = recording_started
         self.file_generation_choice_event = file_generation_choice_event
         self.file_generation_choice_value = file_generation_choice_value
-        self.fps_counts_queue = fps_counts_queue
         self.captured_filename = Settings.get_temp_file_paths().CAPTURED_VIDEO_FILE
         self.reencoded_filename = Settings.get_temp_file_paths().REENCODED_VIDEO_FILE
         self.macro_block_size = 2
@@ -82,27 +80,22 @@ class VideoRecorder(mp.Process):
             if self.recording_started is not None:
                 self.recording_started.value = start_time
 
-            frames_captured_current_second = 0
+            fps = 0
             fps_counts = []
             start_time = perf_counter()
             while not self.stop_event.is_set():
                 frame = np.array(sct.grab(monitor))
                 frame_writer.append_data(frame)
-                frames_captured_current_second += 1
-
+                fps += 1
                 current_time = perf_counter()
                 if current_time - start_time >= 1.0:
-                    fps_counts.append(frames_captured_current_second)
-                    frames_captured_current_second = 0
+                    fps_counts.append(fps)
+                    fps = 0
                     start_time = current_time
 
             frame_writer.close()
             print("Finished recording video!")
 
-        if self.fps_counts_queue is not None:
-            self.fps_counts_queue.put(fps_counts)
-
-        print(fps_counts)
         return fps_counts
 
     def __reencode_video(self, fps_counts):

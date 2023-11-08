@@ -25,20 +25,6 @@ class Settings:
         parser = ConfigParser()
         parser.read(cls.SETTINGS_FILE)
         return parser["HOTKEYS"]
-    
-    @classmethod
-    def get_video_recorder_settings(cls):
-        parser = ConfigParser()
-        parser.read(cls.SETTINGS_FILE)
-        return parser["VIDEO_RECORDER"]
-    
-    @classmethod
-    def set_video_recorder_setting(cls, setting_name, setting_value):
-        parser = ConfigParser()
-        parser.read(cls.SETTINGS_FILE)
-        parser["VIDEO_RECORDER"][setting_name] = setting_value
-        with open(cls.SETTINGS_FILE, "w") as configfile:
-            parser.write(configfile)
 
     @classmethod
     def set_hotkey(cls, hotkey_name, hotkey_value):

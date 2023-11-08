@@ -39,7 +39,6 @@ class Recorder(QObject, threading.Thread):
             stop_event: threading.Event,
             file_generation_choice_event: threading.Event=None,
             generate_final_file=True,
-            video_fps_counts_queue: queue.Queue()=None
         ):
         super().__init__()
         self.setName("Recorder")
@@ -56,8 +55,6 @@ class Recorder(QObject, threading.Thread):
         self.video_recorder_stop_event = None
         self.video_recorder_file_generation_choice_event = None
         self.video_recorder_file_generation_choice_value = None
-        self.video_recorder_fps_counts_queue = None
-        self.video_fps_counts_queue = video_fps_counts_queue
         self.loopback_recorder = None
         self.loopback_recorder_stop_event = None
     
@@ -111,12 +108,6 @@ class Recorder(QObject, threading.Thread):
         for recorder in self.__get_recorders():
             recorder.join()
 
-        if self.video_recorder_fps_counts_queue is not None:
-            if self.video_fps_counts_queue is not None:
-                self.video_fps_counts_queue.put(
-                    self.video_recorder_fps_counts_queue.get()
-                )
-
         # self.__clean_up_temp_directory()
 
     def __initialize_video_recorder(self):
@@ -124,7 +115,6 @@ class Recorder(QObject, threading.Thread):
         self.video_recorder_file_generation_choice_event = mp.Event()
         self.video_recorder_file_generation_choice_value = mp.Value("b", True)
         self.video_reencoding_progress_queue = mp.Queue()
-        self.video_recorder_fps_counts_queue = mp.Queue()
         self.video_recorder = VideoRecorder(
             region=self.region,
             monitor=self.monitor,
@@ -134,7 +124,6 @@ class Recorder(QObject, threading.Thread):
             file_generation_choice_value=self.video_recorder_file_generation_choice_value,
             reencoding_progress_queue=self.video_reencoding_progress_queue,
             recording_started=self.recording_started,
-            fps_counts_queue=self.video_recorder_fps_counts_queue
         )
 
     def __initialize_loopback_recorder(self):
