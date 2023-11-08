@@ -1,5 +1,5 @@
 import multiprocessing as mp
-from time import perf_counter, sleep
+from time import perf_counter
 
 import imageio
 import mss
@@ -37,16 +37,16 @@ class VideoRecorder(mp.Process):
         self.quality = 5 # 10 is max (pretty large file size)
 
     def run(self):
-        fps_counts = self.__capture_and_save_video()
+        fps_counts = self.__capture_and_save_frames()
         if self.file_generation_choice_event is not None:
             self.file_generation_choice_event.wait()
         if (
             self.file_generation_choice_value is None
             or self.file_generation_choice_value.value == True
         ):
-            self.__reencode_video(fps_counts)
+            self.__reencode_captured_frames(fps_counts)
 
-    def __capture_and_save_video(self):
+    def __capture_and_save_frames(self):
         with mss.mss() as sct:
             monitor = {
                 "left": int(self.region[0]),
@@ -96,8 +96,7 @@ class VideoRecorder(mp.Process):
 
         return fps_counts
 
-    def __reencode_video(self, fps_counts):
-        """Rewrites the video file with precise fps."""
+    def __reencode_captured_frames(self, fps_counts):
         print("Started reencoding video ... ")
         avg_fps = int(sum(fps_counts) / len(fps_counts))
 
