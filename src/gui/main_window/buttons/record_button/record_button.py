@@ -58,8 +58,7 @@ class RecordButton(QPushButton):
             stop_event=self.recorder_stop_event,
             file_generation_choice_event=self.file_generation_choice_event,
             region=[*self.recording_area_selector.get_area_coords()],
-            monitor=self.recording_area_selector.get_monitor(),
-            fps=30
+            monitor=self.recording_area_selector.get_monitor()
         )
         self.recorder.recording_started_signal.connect(
             self.__on_recording_started

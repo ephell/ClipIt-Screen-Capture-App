@@ -35,7 +35,6 @@ class Recorder(QObject, threading.Thread):
             record_loopback: bool,
             region: list[int, int, int, int],
             monitor: int,
-            fps: int,
             stop_event: threading.Event,
             file_generation_choice_event: threading.Event=None,
             generate_final_file=True,
@@ -46,7 +45,6 @@ class Recorder(QObject, threading.Thread):
         self.record_loopback = record_loopback
         self.region = region
         self.monitor = monitor
-        self.fps = fps
         self.stop_event = stop_event
         self.file_generation_choice_event = file_generation_choice_event
         self.generate_final_file = generate_final_file
@@ -118,7 +116,6 @@ class Recorder(QObject, threading.Thread):
         self.video_recorder = VideoRecorder(
             region=self.region,
             monitor=self.monitor,
-            fps=self.fps,
             stop_event=self.video_recorder_stop_event,
             file_generation_choice_event=self.video_recorder_file_generation_choice_event,
             file_generation_choice_value=self.video_recorder_file_generation_choice_value,
