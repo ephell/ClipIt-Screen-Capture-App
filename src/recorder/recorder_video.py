@@ -1,5 +1,5 @@
 import multiprocessing as mp
-from time import perf_counter
+from time import perf_counter, sleep
 
 import imageio
 import mss
@@ -35,6 +35,7 @@ class VideoRecorder(mp.Process):
         self.reencoded_filename = Settings.get_temp_file_paths().REENCODED_VIDEO_FILE
         self.macro_block_size = 2
         self.quality = 5 # 10 is max (pretty large file size)
+        self.__fps_limit = 30
 
     def run(self):
         fps_counts = self.__capture_and_save_frames()
@@ -58,7 +59,7 @@ class VideoRecorder(mp.Process):
 
             frame_writer = imageio.get_writer(
                 self.captured_filename,
-                fps=30, # Value doesn't matter since the correct fps is set during reencoding
+                fps=self.__fps_limit,
                 quality=self.quality,
                 macro_block_size=self.macro_block_size
             )
@@ -82,6 +83,7 @@ class VideoRecorder(mp.Process):
             fps_counts = []
             start_time = perf_counter()
             while not self.stop_event.is_set():
+                frame_start_time = perf_counter()
                 frame = np.array(sct.grab(monitor))
                 frame_writer.append_data(frame)
                 fps += 1
@@ -91,6 +93,12 @@ class VideoRecorder(mp.Process):
                     fps = 0
                     start_time = current_time
 
+                # Limiting the fps
+                frame_capture_time = perf_counter() - frame_start_time
+                sleep_time = (1.0 / self.__fps_limit) - frame_capture_time
+                if sleep_time > 0:
+                    sleep(sleep_time)
+
             frame_writer.close()
             print("Finished recording video!")
 
@@ -98,12 +106,10 @@ class VideoRecorder(mp.Process):
 
     def __reencode_captured_frames(self, fps_counts):
         print("Started reencoding video ... ")
-        avg_fps = int(sum(fps_counts) / len(fps_counts))
-
         input_video_reader = imageio.get_reader(self.captured_filename)
         output_video_writer = imageio.get_writer(
             self.reencoded_filename,
-            fps=avg_fps,
+            fps=self.__fps_limit,
             quality=self.quality,
             macro_block_size=self.macro_block_size
         )
@@ -112,7 +118,7 @@ class VideoRecorder(mp.Process):
         frame_batches_total = len(fps_counts)
         for _, frame_count in enumerate(fps_counts):
             frames = self.__extract_frames(frame_count, input_video_reader)
-            extended_frame_batch = self.__extend_frame_batch(frames, avg_fps)
+            extended_frame_batch = self.__extend_frame_batch(frames, self.__fps_limit)
             for _, frame_data in extended_frame_batch.items():
                 frame_data = self.__remove_alpha_channel(frame_data)
                 frame_data = self.__flip_from_BGRA_to_RGB(frame_data)
