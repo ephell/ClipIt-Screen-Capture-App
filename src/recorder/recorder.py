@@ -2,6 +2,7 @@ import datetime
 import multiprocessing as mp
 import os
 import threading
+import queue
 
 from proglog import ProgressBarLogger
 from PySide6.QtCore import Signal, QObject
@@ -34,9 +35,9 @@ class Recorder(QObject, threading.Thread):
             record_loopback: bool,
             region: list[int, int, int, int],
             monitor: int,
-            fps: int,
             stop_event: threading.Event,
-            file_generation_choice_event: threading.Event=None
+            file_generation_choice_event: threading.Event=None,
+            generate_final_file=True,
         ):
         super().__init__()
         self.setName("Recorder")
@@ -44,16 +45,15 @@ class Recorder(QObject, threading.Thread):
         self.record_loopback = record_loopback
         self.region = region
         self.monitor = monitor
-        self.fps = fps
         self.stop_event = stop_event
         self.file_generation_choice_event = file_generation_choice_event
-        self.generate_final_file = True
+        self.generate_final_file = generate_final_file
         self.recording_started = mp.Value("d", -1.0)
         self.video_recorder = None
-        self.loopback_recorder = None
         self.video_recorder_stop_event = None
         self.video_recorder_file_generation_choice_event = None
         self.video_recorder_file_generation_choice_value = None
+        self.loopback_recorder = None
         self.loopback_recorder_stop_event = None
     
         if self.record_video:
@@ -106,7 +106,7 @@ class Recorder(QObject, threading.Thread):
         for recorder in self.__get_recorders():
             recorder.join()
 
-        self.__clean_up_temp_directory()
+        # self.__clean_up_temp_directory()
 
     def __initialize_video_recorder(self):
         self.video_recorder_stop_event = mp.Event()
@@ -116,12 +116,11 @@ class Recorder(QObject, threading.Thread):
         self.video_recorder = VideoRecorder(
             region=self.region,
             monitor=self.monitor,
-            fps=self.fps,
             stop_event=self.video_recorder_stop_event,
             file_generation_choice_event=self.video_recorder_file_generation_choice_event,
             file_generation_choice_value=self.video_recorder_file_generation_choice_value,
             reencoding_progress_queue=self.video_reencoding_progress_queue,
-            recording_started=self.recording_started
+            recording_started=self.recording_started,
         )
 
     def __initialize_loopback_recorder(self):

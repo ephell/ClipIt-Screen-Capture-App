@@ -27,7 +27,7 @@ class LoopbackRecorder(mp.Process):
 
     def run(self):
         is_silence_playing = mp.Event()
-        is_recording_finished = threading.Event()
+        is_recording_finished = mp.Event()
         silence_player = _SilencePlayer(
             is_silence_playing=is_silence_playing, 
             is_recording_finished=is_recording_finished
@@ -36,6 +36,7 @@ class LoopbackRecorder(mp.Process):
         is_silence_playing.wait()
         self.__record_loopback(is_recording_finished)
         silence_player.join()
+        print("Finished recording loopback audio!")
         
     def __record_loopback(self, is_recording_finished):
         with pyaudio.PyAudio() as p:
@@ -83,7 +84,7 @@ class LoopbackRecorder(mp.Process):
             print("Finished recording loopback audio!")
 
 
-class _SilencePlayer(threading.Thread):
+class _SilencePlayer(mp.Process):
     """
     Plays silence in the background. 
     
@@ -99,7 +100,6 @@ class _SilencePlayer(threading.Thread):
 
     def __init__(self, is_silence_playing, is_recording_finished):
         super().__init__()
-        self.daemon = True
         self.is_silence_playing = is_silence_playing
         self.is_recording_finished = is_recording_finished
         self.sample_rate = 44100

@@ -25,7 +25,7 @@ class Settings:
         parser = ConfigParser()
         parser.read(cls.SETTINGS_FILE)
         return parser["HOTKEYS"]
-    
+
     @classmethod
     def set_hotkey(cls, hotkey_name, hotkey_value):
         parser = ConfigParser()
