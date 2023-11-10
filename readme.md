@@ -3,7 +3,7 @@
 </p>
 
 # 🎥 ClipIt - Screen Capture App
-ClipIt is a user-friendly application designed to simplify the process of recording short videos. You can effortlessly start recording a custom area of your screen and ClipIt will generate a video file as soon as you stop. At that point the file is ready to be shared. If you're not satisfied with the result you also have the option to trim the length, crop the resolution, or adjust the volume of the video using the built-in editor.
+ClipIt is a user-friendly application aimed at simplifying the creation of short video clips. It initiates recording when an area is selected and automatically generates an .mp4 file upon completion. Additionally, the built-in editor allows for trimming the video's length, cropping its resolution, and adjusting the volume.
 
 ## Features
 - Easy to use GUI.
