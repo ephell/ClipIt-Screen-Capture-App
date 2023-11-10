@@ -14,7 +14,7 @@ ClipIt is a user-friendly application aimed at simplifying the creation of short
 - Access the application via the system tray.
 
 <p align="center">
-  <img src="https://i.imgur.com/05mJa53.jpg" alt="GUI-Interfaces">
+  <img src="https://i.imgur.com/TYtNIB4.jpg" alt="GUI-Interfaces">
 </p>
 
 ## Video Recording Demo
