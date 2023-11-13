@@ -110,7 +110,6 @@ class VideoRecorder(mp.Process):
 
     def __reencode_captured_frames(self, fps_counts):
         print("Started reencoding video ... ")
-        print(f"FPS counts: {fps_counts}")
         input_video_reader = imageio.get_reader(self.captured_filename)
         output_video_writer = imageio.get_writer(
             self.reencoded_filename,
