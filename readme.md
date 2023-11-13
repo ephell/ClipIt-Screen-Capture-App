@@ -24,10 +24,10 @@ ClipIt is a user-friendly application aimed at simplifying the creation of short
 
 ## Additional Information
 - One minute of recording at 1080p resolution generates a file between 15-30 MB in size.
-- All recordings are limited to 30 FPS.
-- Application's demanding CPU usage could potentially result in laggy videos, particularly on systems with lower specifications. Performance tests (1 minute of 1080p recording):
-  - Windows 10 64bit VMWare VM (4-cores): averaged 10-11 FPS.
-  - Windows 11 64bit PC (8-cores): maintained stable 30 FPS.
+- Recording is limited to 30 FPS.
+- Application's demanding CPU usage may result in laggy videos, particularly on systems with lower specifications. Performance tests for a 1-minute 1080p recording:
+  - Windows 10 64-bit VMWare VM (4-cores) averaged 10-11 FPS.
+  - Windows 11 64-bit PC (8-cores): maintained stable 30 FPS.
 
 ## Installation
 
