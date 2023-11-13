@@ -122,25 +122,8 @@ class VideoUtils:
         writer.close()
 
     @staticmethod
-    def merge_video_with_audio(
-        video_path, 
-        audio_path,
-        output_path, 
-        logger=None
-    ):
-        video_clip = VideoFileClip(video_path)
-        audio_clip = AudioFileClip(audio_path)
-
-        # Make sure the video and audio are the same length
-        video_duration = int(video_clip.duration)
-        audio_duration = int(audio_clip.duration)
-        duration = min(video_duration, audio_duration)
-        trimmed_video = video_clip.subclip(0, duration)
-        trimmed_audio = audio_clip.subclip(0, duration)
-
-        final_clip = trimmed_video.set_audio(trimmed_audio)
-        final_clip.write_videofile(
-            output_path, 
-            preset="ultrafast", 
-            logger=logger
-        )
+    def merge_video_with_audio(video_path, audio_path, output_path, logger=None):
+        with VideoFileClip(video_path) as v_clip, AudioFileClip(audio_path) as a_clip:
+            v_clip = v_clip.speedx(final_duration=a_clip.duration)
+            final_clip = v_clip.set_audio(a_clip)
+            final_clip.write_videofile(output_path, preset="ultrafast", logger=logger)
