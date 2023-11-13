@@ -3,24 +3,31 @@
 </p>
 
 # 🎥 ClipIt - Screen Capture App
-ClipIt is a user-friendly application designed to simplify the process of recording short videos. You can effortlessly start recording a custom area of your screen and ClipIt will generate a video file as soon as you stop. At that point the file is ready to be shared. If you're not satisfied with the result you also have the option to trim the length, crop the resolution, or adjust the volume of the video using the built-in editor.
+ClipIt is a user-friendly application aimed at simplifying the creation of short video clips. It initiates recording when an area is selected and automatically generates an .mp4 file upon completion. Additionally, the built-in editor allows for trimming the video's length, cropping its resolution, and adjusting the volume.
 
 ## Features
 - Easy to use GUI.
 - Record or screenshot a custom area of the screen.
 - Record speaker audio along with the video.
 - Edit video length, resolution and volume using the built-in editor.
-- Configure custom hotkeys for quick recording or screenshot.
-- Access the application via the system tray.
+- Hotkey support for quick recording or screenshotting.
+- Access the application via the system tray if needed.
 
 <p align="center">
-  <img src="https://i.imgur.com/05mJa53.jpg" alt="GUI-Interfaces">
+  <img src="https://i.imgur.com/TYtNIB4.jpg" alt="GUI-Interfaces">
 </p>
 
 ## Video Recording Demo
 <p align="center">
   <img src="https://i.imgur.com/dPVCuxm.gif" alt="Video-Recording-Demo-GIF">
 </p>
+
+## Additional Information
+- One minute of recording at 1080p resolution generates a file between 15-30 MB in size.
+- Recording is limited to 30 FPS.
+- Application's demanding CPU usage may result in laggy videos, particularly on systems with lower specifications. Performance tests for a 1-minute 1080p recording:
+  - Windows 10 64-bit VMWare VM (4-cores) averaged 10-11 FPS.
+  - Windows 11 64-bit PC (8-cores): maintained stable 30 FPS.
 
 ## Installation
 
