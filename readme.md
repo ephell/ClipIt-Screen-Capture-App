@@ -3,7 +3,7 @@
 </p>
 
 # 🎥 ClipIt - Screen Capture App
-ClipIt is an application that simplifies the creation of short video clips. Recording is initiated when an area is selected, and an .mp4 file is generated upon completion. Additionally, the built-in editor allows for trimming the video's length, cropping its resolution, and adjusting the volume.
+ClipIt is an application that simplifies the creation of short video clips. Recording is initiated when an area is selected and an option to generate an .mp4 file is given upon stopping. Additionally, the built-in editor allows for trimming the video's length, cropping its resolution, and adjusting the volume.
 
 ## Features
 - Easy to use GUI.
@@ -14,7 +14,7 @@ ClipIt is an application that simplifies the creation of short video clips. Reco
 - Accessible via system tray.
 
 <p align="center">
-  <img src="https://i.imgur.com/TYtNIB4.jpg" alt="GUI-Interfaces">
+  <img src="https://i.imgur.com/3aNBzin.jpg" alt="GUI-Interfaces">
 </p>
 
 ## Video Recording Demo
