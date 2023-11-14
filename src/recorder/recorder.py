@@ -73,8 +73,6 @@ class Recorder(QObject, threading.Thread):
         )
         self.recording_started_checker.start()
 
-        self.__clean_up_temp_directory()
-
         for recorder in self.__get_recorders():
             recorder.start()
 
@@ -106,7 +104,7 @@ class Recorder(QObject, threading.Thread):
         for recorder in self.__get_recorders():
             recorder.join()
 
-        # self.__clean_up_temp_directory()
+        self.__clean_up_temp_directory()
 
     def __initialize_video_recorder(self):
         self.video_recorder_stop_event = mp.Event()
@@ -183,7 +181,13 @@ class Recorder(QObject, threading.Thread):
                 path = getattr(Settings.get_temp_file_paths(), attribute)
                 if not os.path.isdir(path):
                     if os.path.exists(path):
-                        os.remove(path)
+                        try:
+                            os.remove(path)
+                        except PermissionError:
+                            print(
+                                f"PermissionError when trying to delete: {path} | "
+                                f"File is probably in use by another process."
+                            )
 
 
 class _RecordingStartedChecker(threading.Thread):
