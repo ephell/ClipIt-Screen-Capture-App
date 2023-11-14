@@ -1,3 +1,5 @@
+![GitHub last commit (by committer)](https://img.shields.io/github/last-commit/ephell/ClipIt-Screen-Capture-App)
+
 <p align="center">
     <img src="https://i.imgur.com/9eWc6ZZ.jpg" alt="ClipIt-Banner">
 </p>
