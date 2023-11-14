@@ -36,7 +36,6 @@ class LoopbackRecorder(mp.Process):
         is_silence_playing.wait()
         self.__record_loopback(is_recording_finished)
         silence_player.join()
-        print("Finished recording loopback audio!")
         
     def __record_loopback(self, is_recording_finished):
         with pyaudio.PyAudio() as p:
@@ -65,18 +64,12 @@ class LoopbackRecorder(mp.Process):
                     )
 
                 print("Started recording loopback audio ... ")
-                start_time = perf_counter()
                 while not self.stop_event.is_set():
                     data = stream.read(
                         num_frames=stream.get_read_available(), 
                         exception_on_overflow=False
                     )
                     output_file.writeframes(data)
-
-            print(
-                f"Stopped recording loopback audio at: {perf_counter()}, " \
-                f"Duration: {perf_counter() - start_time}"
-            )
 
             output_file.close()
             # Letting the silence player thread know that it can stop.
@@ -96,8 +89,11 @@ class _SilencePlayer(mp.Process):
     for the whole duration. This would also make it very hard to 
     properly sync the audio with the video.
 
-    """
+    Note: This behavior is probably related to the system's sound card.
+    I have noticed that on a VMWare 64-bit Windows 10 VM the sound is
+    recorded normally even without the __SilencePlayer.
 
+    """
     def __init__(self, is_silence_playing, is_recording_finished):
         super().__init__()
         self.is_silence_playing = is_silence_playing
