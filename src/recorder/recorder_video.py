@@ -35,7 +35,7 @@ class VideoRecorder(mp.Process):
         self.reencoded_filename = Settings.get_temp_file_paths().REENCODED_VIDEO_FILE
         self.macro_block_size = 2
         self.quality = 5 # 10 is max (pretty large file size)
-        self.__fps_limit = 30
+        self.fps_limit = 30
 
     def run(self):
         fps_counts = self.__capture_and_save_frames()
@@ -59,7 +59,7 @@ class VideoRecorder(mp.Process):
 
             frame_writer = imageio.get_writer(
                 self.captured_filename,
-                fps=self.__fps_limit,
+                fps=self.fps_limit,
                 quality=self.quality,
                 macro_block_size=self.macro_block_size
             )
@@ -95,9 +95,13 @@ class VideoRecorder(mp.Process):
 
                 # Limiting the fps
                 frame_capture_time = perf_counter() - frame_start_time
-                sleep_time = (1.0 / self.__fps_limit) - frame_capture_time
+                sleep_time = (1.0 / self.fps_limit) - frame_capture_time
                 if sleep_time > 0:
                     sleep(sleep_time)
+
+            # Appending the fps count of the last second
+            if fps > 0:
+                fps_counts.append(fps)
 
             frame_writer.close()
             print("Finished recording video!")
@@ -109,22 +113,26 @@ class VideoRecorder(mp.Process):
         input_video_reader = imageio.get_reader(self.captured_filename)
         output_video_writer = imageio.get_writer(
             self.reencoded_filename,
-            fps=self.__fps_limit,
+            fps=self.fps_limit,
             quality=self.quality,
             macro_block_size=self.macro_block_size
         )
 
         frame_batches_written = 0
         frame_batches_total = len(fps_counts)
-        for _, frame_count in enumerate(fps_counts):
-            frames = self.__extract_frames(frame_count, input_video_reader)
-            extended_frame_batch = self.__extend_frame_batch(frames, self.__fps_limit)
-            for _, frame_data in extended_frame_batch.items():
+        for i, frame_count in enumerate(fps_counts):
+            extracted_frames = self.__extract_frames(frame_count, input_video_reader)
+            if i != frame_batches_total - 1:
+                frame_batch = self.__extend_to_fps_limit(extracted_frames)
+            else:
+                frame_batch = extracted_frames
+
+            for _, frame_data in frame_batch.items():
                 frame_data = self.__remove_alpha_channel(frame_data)
                 frame_data = self.__flip_from_BGRA_to_RGB(frame_data)
                 output_video_writer.append_data(frame_data)
-
             frame_batches_written += 1
+            
             if self.reencoding_progress_queue is not None:
                 progress = (frame_batches_written / frame_batches_total) * 100
                 self.reencoding_progress_queue.put(progress)
@@ -142,21 +150,16 @@ class VideoRecorder(mp.Process):
             frames.update({frame_index: frame_data})
         return frames
     
-    def __extend_frame_batch(self, frames: dict[int, np.ndarray], extend_to_fps):
+    def __extend_to_fps_limit(self, frames: dict[int, np.ndarray]):
         """
-        Extend a dictionary of frames to match the specified fps.
-        
-        It fills the gaps between the frames by duplicating where
-        needed. In the case where `extend_to_fps` is smaller than
-        the amount of frames, some middle frames will be skipped in
-        the resulting dictionary.
+        Extend the number of frames to the fps limit by duplicating
+        where necessary.
         """
-        extended_batch = {}
-        frames_per_source_frame = extend_to_fps / len(frames)
-        for i in range(extend_to_fps):
-            src_frame = int(i / frames_per_source_frame)
-            extended_batch[i] = frames[src_frame]
-        return extended_batch
+        extended_frames = {}
+        frames_per_source_frame = self.fps_limit / len(frames)
+        for i in range(self.fps_limit):
+            extended_frames[i] = frames[int(i / frames_per_source_frame)]
+        return extended_frames
 
     def __remove_alpha_channel(self, frame: np.ndarray):
         return frame[:, :, :3]
