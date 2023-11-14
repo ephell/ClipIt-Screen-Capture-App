@@ -77,7 +77,13 @@ class VideoUtils:
                     path = getattr(Settings.get_temp_file_paths(), attribute)
                     if not os.path.isdir(path):
                         if os.path.exists(path):
-                            os.remove(path)
+                            try:
+                                os.remove(path)
+                            except PermissionError:
+                                print(
+                                    f"PermissionError when trying to delete: {path} | "
+                                    f"File is probably in use by another process."
+                                )
 
     @staticmethod
     def is_crop_area_full_frame(crop_area: tuple, frame: np.ndarray):
